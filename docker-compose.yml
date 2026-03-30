@@ -1,0 +1,48 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: practicaprofesional-backend
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # - ConnectionStrings__Default=Server=db;Database=practicadb;User Id=sa;Password=YourPassword123!;
+    networks:
+      - app-network
+    # depends_on:
+    #   - db
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: practicaprofesional-frontend
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  # db:
+  #   image: postgres:16-alpine
+  #   container_name: practicaprofesional-db
+  #   environment:
+  #     POSTGRES_DB: practicadb
+  #     POSTGRES_USER: sa
+  #     POSTGRES_PASSWORD: YourPassword123!
+  #   ports:
+  #     - "5432:5432"
+  #   volumes:
+  #     - db-data:/var/lib/postgresql/data
+  #   networks:
+  #     - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+# volumes:
+#   db-data:
