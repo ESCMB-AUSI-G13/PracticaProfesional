@@ -1,0 +1,28 @@
+<div class="container">
+  <header>
+    <h1>Lista de Tareas</h1>
+    <span class="badge" *ngIf="!loading">{{ pending }} pendiente(s)</span>
+  </header>
+
+  <div class="add-form">
+    <input
+      type="text"
+      [(ngModel)]="newTitle"
+      placeholder="Nueva tarea..."
+      (keydown.enter)="addTodo()"
+    />
+    <button (click)="addTodo()" [disabled]="!newTitle.trim()">Agregar</button>
+  </div>
+
+  <div *ngIf="loading" class="status">Cargando...</div>
+  <div *ngIf="error" class="status error">{{ error }}</div>
+
+  <ul *ngIf="!loading && !error">
+    <li *ngFor="let todo of todos" [class.completed]="todo.completed">
+      <input type="checkbox" [checked]="todo.completed" (change)="toggleTodo(todo)" />
+      <span class="title">{{ todo.title }}</span>
+      <button class="delete" (click)="deleteTodo(todo.id)">✕</button>
+    </li>
+    <li *ngIf="todos.length === 0" class="empty">No hay tareas. ¡Agregá una!</li>
+  </ul>
+</div>

@@ -20,4 +20,4 @@ COPY --from=build /app/publish .
 ENV ASPNETCORE_URLS=http://+:5000
 EXPOSE 5000
 
-ENTRYPOINT ["dotnet", "*.dll"]
+ENTRYPOINT ["dotnet", "PracticaProfesional.dll"]
