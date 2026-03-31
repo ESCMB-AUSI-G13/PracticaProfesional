@@ -8,11 +8,12 @@ services:
       - "5000:5000"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      # - ConnectionStrings__Default=Server=db;Database=practicadb;User Id=sa;Password=YourPassword123!;
+      - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PracticaProfesionalDB;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;
+    depends_on:
+      sqlserver:
+        condition: service_healthy
     networks:
       - app-network
-    # depends_on:
-    #   - db
 
   frontend:
     build:
@@ -26,23 +27,29 @@ services:
     networks:
       - app-network
 
-  # db:
-  #   image: postgres:16-alpine
-  #   container_name: practicaprofesional-db
-  #   environment:
-  #     POSTGRES_DB: practicadb
-  #     POSTGRES_USER: sa
-  #     POSTGRES_PASSWORD: YourPassword123!
-  #   ports:
-  #     - "5432:5432"
-  #   volumes:
-  #     - db-data:/var/lib/postgresql/data
-  #   networks:
-  #     - app-network
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: practicaprofesional-sqlserver
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong!Passw0rd
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'YourStrong!Passw0rd' -Q 'SELECT 1' -No -C || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - app-network
 
 networks:
   app-network:
     driver: bridge
 
-# volumes:
-#   db-data:
+volumes:
+  sqlserver-data:

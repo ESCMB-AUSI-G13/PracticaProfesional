@@ -1,0 +1,78 @@
+<div class="login-container">
+  <div class="login-card">
+    <div class="login-header">
+      <h1>Sistema Académico</h1>
+      <p>Instituto Superior del Profesorado</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+      @if (error()) {
+        <div class="alert alert-error" role="alert">
+          {{ error() }}
+        </div>
+      }
+
+      <div class="form-group">
+        <label for="email">Correo institucional</label>
+        <input
+          id="email"
+          type="email"
+          formControlName="email"
+          placeholder="usuario@institucion.edu.ar"
+          autocomplete="email"
+          [class.input-error]="emailControl.invalid && emailControl.touched"
+        />
+        @if (emailControl.invalid && emailControl.touched) {
+          @if (emailControl.errors?.['required']) {
+            <span class="error-msg">El email es obligatorio.</span>
+          } @else if (emailControl.errors?.['email']) {
+            <span class="error-msg">Ingresá un email válido.</span>
+          }
+        }
+      </div>
+
+      <div class="form-group">
+        <label for="password">Contraseña</label>
+        <div class="input-wrapper">
+          <input
+            id="password"
+            [type]="mostrarPassword() ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="••••••••"
+            autocomplete="current-password"
+            [class.input-error]="passwordControl.invalid && passwordControl.touched"
+          />
+          <button
+            type="button"
+            class="btn-toggle-password"
+            (click)="togglePassword()"
+            [attr.aria-label]="mostrarPassword() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+          >
+            {{ mostrarPassword() ? 'Ocultar' : 'Mostrar' }}
+          </button>
+        </div>
+        @if (passwordControl.invalid && passwordControl.touched) {
+          @if (passwordControl.errors?.['required']) {
+            <span class="error-msg">La contraseña es obligatoria.</span>
+          } @else if (passwordControl.errors?.['minlength']) {
+            <span class="error-msg">Debe tener al menos 6 caracteres.</span>
+          }
+        }
+      </div>
+
+      <button
+        type="submit"
+        class="btn-submit"
+        [disabled]="form.invalid || cargando()"
+      >
+        @if (cargando()) {
+          <span class="spinner"></span> Ingresando...
+        } @else {
+          Ingresar
+        }
+      </button>
+
+    </form>
+  </div>
+</div>
