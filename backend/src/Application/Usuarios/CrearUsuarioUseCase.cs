@@ -1,0 +1,36 @@
+using PracticaProfesional.Application.Interfaces;
+using PracticaProfesional.Application.Usuarios.DTOs;
+using PracticaProfesional.Domain.Entities;
+using PracticaProfesional.Domain.Enums;
+
+namespace PracticaProfesional.Application.Usuarios;
+
+public class CrearUsuarioUseCase(IUsuarioRepository usuarioRepository)
+{
+    public async Task<UsuarioDto> EjecutarAsync(CrearUsuarioDto dto, CancellationToken cancellationToken = default)
+    {
+        if (!Enum.TryParse<Rol>(dto.Rol, ignoreCase: true, out var rol))
+            throw new ArgumentException($"Rol inválido: {dto.Rol}");
+
+        if (await usuarioRepository.ExistePorDniAsync(dto.DNI, cancellationToken))
+            throw new InvalidOperationException("Ya existe un usuario con ese DNI.");
+
+        if (await usuarioRepository.ExistePorLegajoAsync(dto.Legajo, cancellationToken))
+            throw new InvalidOperationException("Ya existe un usuario con ese legajo.");
+
+        if (await usuarioRepository.ExistePorEmailAsync(dto.Email, cancellationToken))
+            throw new InvalidOperationException("Ya existe un usuario con ese email.");
+
+        var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
+
+        var usuario = Usuario.Crear(dto.DNI, dto.Legajo, dto.Email, dto.Nombre, dto.Apellido, passwordHash, rol);
+
+        await usuarioRepository.AgregarAsync(usuario, cancellationToken);
+
+        return ToDto(usuario);
+    }
+
+    internal static UsuarioDto ToDto(Usuario u) => new(
+        u.Id, u.DNI, u.Legajo, u.Email, u.Nombre, u.Apellido, u.Rol.ToString(), u.Activo, u.FechaCreacion
+    );
+}

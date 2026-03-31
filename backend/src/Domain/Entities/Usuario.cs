@@ -52,4 +52,18 @@ public class Usuario
         => BCrypt.Net.BCrypt.Verify(passwordPlana, PasswordHash);
 
     public void Desactivar() => Activo = false;
+
+    public void Reactivar() => Activo = true;
+
+    public void Modificar(string nombre, string apellido, string email, Rol rol)
+    {
+        if (string.IsNullOrWhiteSpace(nombre)) throw new ArgumentException("El nombre es obligatorio.");
+        if (string.IsNullOrWhiteSpace(apellido)) throw new ArgumentException("El apellido es obligatorio.");
+        if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("El email es obligatorio.");
+
+        Nombre = nombre;
+        Apellido = apellido;
+        Email = email.ToLowerInvariant();
+        Rol = rol;
+    }
 }

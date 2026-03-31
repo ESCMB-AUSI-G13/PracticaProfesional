@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PracticaProfesional.Application.Auth;
 using PracticaProfesional.Application.Interfaces;
+using PracticaProfesional.Application.Usuarios;
 using PracticaProfesional.Domain.Entities;
 using PracticaProfesional.Domain.Enums;
 using PracticaProfesional.Infrastructure.Auth;
@@ -23,6 +24,10 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 
 // ── Use Cases ──────────────────────────────────────────────────────────────────
 builder.Services.AddScoped<LoginUseCase>();
+builder.Services.AddScoped<CrearUsuarioUseCase>();
+builder.Services.AddScoped<ListarUsuariosUseCase>();
+builder.Services.AddScoped<ModificarUsuarioUseCase>();
+builder.Services.AddScoped<DesactivarUsuarioUseCase>();
 
 // ── Autenticación JWT ──────────────────────────────────────────────────────────
 var jwtSettings = builder.Configuration.GetSection("Jwt");
