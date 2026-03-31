@@ -201,3 +201,12 @@ cd frontend && ng serve
 | Frontend | http://localhost:4200 |
 | Backend API | http://localhost:5000 |
 | Base de datos | según motor elegido |
+
+## Protocolo Automatizado de Git (Comandos)
+Cuando el usuario pida "Subir cambios" o "Guardar progreso", ejecutar esta secuencia:
+1. **Status:** `git status` para identificar archivos modificados en /backend, /frontend o /docs.
+2. **Rama:** Si estamos en 'main', crear rama nueva: `git checkout -b feature/[nombre-breve]`. Si ya estamos en una feature, seguir ahí.
+3. **Stage:** `git add .` (asegurar que no se suban archivos de /bin o /obj de C#).
+4. **Commit:** `git commit -m "feat: [descripción clara de los cambios en español]"`
+5. **Push:** `git push origin [nombre-de-la-rama-actual]`
+6. **Finalizar:** Avisar al usuario: "Cambios subidos. Revisar en GitHub Desktop para el Pull Request".
