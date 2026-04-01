@@ -1,6 +1,9 @@
 <div class="page">
   <header class="page-header">
-    <h1>Gestión de Usuarios</h1>
+    <div class="header-left">
+      <button class="btn-back" (click)="irAlDashboard()">← Dashboard</button>
+      <h1>Gestión de Usuarios</h1>
+    </div>
     <div class="header-actions">
       <button class="btn btn-primary" (click)="irACrear()">+ Nuevo usuario</button>
       <button class="btn btn-secondary" (click)="logout()">Cerrar sesión</button>
@@ -51,6 +54,8 @@
               <button class="btn btn-secondary btn-sm" (click)="irAEditar(u.id)">Editar</button>
               @if (u.activo) {
                 <button class="btn btn-danger btn-sm" (click)="desactivar(u.id)">Desactivar</button>
+              } @else {
+                <button class="btn btn-success btn-sm" (click)="reactivar(u.id)">Reactivar</button>
               }
             </td>
           </tr>

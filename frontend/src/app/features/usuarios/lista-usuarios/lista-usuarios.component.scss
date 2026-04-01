@@ -10,8 +10,25 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 1.5rem;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 
   h1 { margin: 0; font-size: 1.5rem; }
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: #3498db;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+
+  &:hover { text-decoration: underline; }
 }
 
 .header-actions {
@@ -76,7 +93,8 @@
 
   &.btn-primary { background: #3498db; color: white; }
   &.btn-secondary { background: #6c757d; color: white; }
-  &.btn-danger { background: #e74c3c; color: white; }
+  &.btn-danger   { background: #e74c3c; color: white; }
+  &.btn-success  { background: #27ae60; color: white; }
   &.btn-sm { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
 
   &:hover { opacity: 0.9; }

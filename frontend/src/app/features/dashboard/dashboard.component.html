@@ -4,6 +4,16 @@
     <div class="topbar-user">
       <span>{{ authService.usuario()?.nombreCompleto }}</span>
       <span class="badge-rol">{{ authService.usuario()?.rol }}</span>
+
+      @if (authService.vistasDisponibles().length > 0 && !authService.enModoVista()) {
+        <select class="select-vista" (change)="activarVista($event)" title="Ver como otro rol">
+          <option value="">Ver como...</option>
+          @for (r of authService.vistasDisponibles(); track r) {
+            <option [value]="r">{{ r }}</option>
+          }
+        </select>
+      }
+
       <button class="btn-logout" (click)="authService.logout()">Cerrar sesión</button>
     </div>
   </header>

@@ -55,4 +55,8 @@ export class UsuariosService {
   desactivar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
+
+  reactivar(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${id}/reactivar`, {});
+  }
 }

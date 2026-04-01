@@ -1,0 +1,15 @@
+@if (authService.enModoVista()) {
+  <div class="banner" role="alert">
+    <span class="banner-icon">👁</span>
+    <span class="banner-texto">
+      Estás viendo la plataforma como
+      <strong>{{ authService.rolVista() }}</strong>
+      — tu rol real es
+      <strong>{{ authService.rol() }}</strong>.
+      Las acciones que realices usan tus permisos originales.
+    </span>
+    <button class="btn-restaurar" (click)="authService.restaurarRol()">
+      Volver a mi rol
+    </button>
+  </div>
+}

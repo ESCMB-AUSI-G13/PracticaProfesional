@@ -33,6 +33,18 @@
   font-size: 0.8rem;
 }
 
+.select-vista {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 0.3rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  option { color: #333; background: white; }
+}
+
 .btn-logout {
   background: rgba(255,255,255,0.15);
   border: 1px solid rgba(255,255,255,0.3);

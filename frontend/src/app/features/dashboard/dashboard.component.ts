@@ -28,9 +28,15 @@ const MODULOS: Modulo[] = [
 export class DashboardComponent {
   authService = inject(AuthService);
 
+  // Filtra módulos por rolVista (no por rol real)
   modulosVisibles = computed(() => {
-    const rol = this.authService.rol();
+    const rol = this.authService.rolVista();
     if (!rol) return [];
     return MODULOS.filter(m => m.roles.includes(rol));
   });
+
+  activarVista(event: Event): void {
+    const rol = (event.target as HTMLSelectElement).value;
+    if (rol) this.authService.activarVista(rol);
+  }
 }

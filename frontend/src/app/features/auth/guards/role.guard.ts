@@ -11,8 +11,10 @@ export function roleGuard(...rolesPermitidos: string[]): CanActivateFn {
       return router.createUrlTree(['/login']);
     }
 
-    const rolUsuario = authService.rol();
-    if (rolUsuario && rolesPermitidos.includes(rolUsuario)) {
+    // Usa el rol real para acceso a rutas (no el rolVista)
+    // El modo vista solo afecta la UI, no los permisos de API
+    const rolReal = authService.rol();
+    if (rolReal && rolesPermitidos.includes(rolReal)) {
       return true;
     }
 

@@ -51,11 +51,22 @@ export class ListaUsuariosComponent implements OnInit {
 
   desactivar(id: number): void {
     if (!confirm('¿Desactivar este usuario?')) return;
-
     this.usuariosService.desactivar(id).subscribe({
       next: () => this.cargarUsuarios(),
       error: () => this.error.set('Error al desactivar el usuario.')
     });
+  }
+
+  reactivar(id: number): void {
+    if (!confirm('¿Reactivar este usuario?')) return;
+    this.usuariosService.reactivar(id).subscribe({
+      next: () => this.cargarUsuarios(),
+      error: () => this.error.set('Error al reactivar el usuario.')
+    });
+  }
+
+  irAlDashboard(): void {
+    this.router.navigate(['/dashboard']);
   }
 
   irACrear(): void {

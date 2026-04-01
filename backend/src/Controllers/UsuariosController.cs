@@ -12,7 +12,8 @@ public class UsuariosController(
     CrearUsuarioUseCase crearUsuario,
     ListarUsuariosUseCase listarUsuarios,
     ModificarUsuarioUseCase modificarUsuario,
-    DesactivarUsuarioUseCase desactivarUsuario) : ControllerBase
+    DesactivarUsuarioUseCase desactivarUsuario,
+    ReactivarUsuarioUseCase reactivarUsuario) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<UsuarioDto>), StatusCodes.Status200OK)]
@@ -48,6 +49,15 @@ public class UsuariosController(
     public async Task<IActionResult> Desactivar(int id, CancellationToken cancellationToken)
     {
         await desactivarUsuario.EjecutarAsync(id, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPatch("{id:int}/reactivar")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Reactivar(int id, CancellationToken cancellationToken)
+    {
+        await reactivarUsuario.EjecutarAsync(id, cancellationToken);
         return NoContent();
     }
 }

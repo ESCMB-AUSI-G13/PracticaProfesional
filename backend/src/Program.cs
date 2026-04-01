@@ -2,6 +2,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using PracticaProfesional.Application.Auditoria;
 using PracticaProfesional.Application.Auth;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Usuarios;
@@ -10,6 +11,7 @@ using PracticaProfesional.Domain.Enums;
 using PracticaProfesional.Infrastructure.Auth;
 using PracticaProfesional.Infrastructure.Persistence;
 using PracticaProfesional.Infrastructure.Middleware;
+using PracticaProfesional.Infrastructure.Persistence.Repositories;
 using PracticaProfesional.Infrastructure.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,15 +22,18 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // ── Repositorios e interfaces ──────────────────────────────────────────────────
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IAuditoriaRepository, AuditoriaRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 // ── Use Cases ──────────────────────────────────────────────────────────────────
 builder.Services.AddScoped<LoginUseCase>();
 builder.Services.AddScoped<RegistroUseCase>();
+builder.Services.AddScoped<RegistrarCambioRolUseCase>();
 builder.Services.AddScoped<CrearUsuarioUseCase>();
 builder.Services.AddScoped<ListarUsuariosUseCase>();
 builder.Services.AddScoped<ModificarUsuarioUseCase>();
 builder.Services.AddScoped<DesactivarUsuarioUseCase>();
+builder.Services.AddScoped<ReactivarUsuarioUseCase>();
 
 // ── Autenticación JWT ──────────────────────────────────────────────────────────
 var jwtSettings = builder.Configuration.GetSection("Jwt");

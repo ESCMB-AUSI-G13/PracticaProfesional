@@ -6,10 +6,21 @@ namespace PracticaProfesional.Infrastructure.Persistence;
 public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
     public DbSet<Usuario> Usuarios => Set<Usuario>();
+    public DbSet<AuditoriaCambioRol> AuditoriaCambiosRol => Set<AuditoriaCambioRol>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<AuditoriaCambioRol>(entity =>
+        {
+            entity.HasKey(a => a.Id);
+            entity.Property(a => a.RolOriginal).IsRequired().HasMaxLength(50);
+            entity.Property(a => a.RolVista).IsRequired().HasMaxLength(50);
+            entity.Property(a => a.Accion).IsRequired().HasMaxLength(20);
+            entity.Property(a => a.Timestamp).IsRequired();
+            entity.HasOne<Usuario>().WithMany().HasForeignKey(a => a.UsuarioId).OnDelete(DeleteBehavior.Restrict);
+        });
 
         modelBuilder.Entity<Usuario>(entity =>
         {
