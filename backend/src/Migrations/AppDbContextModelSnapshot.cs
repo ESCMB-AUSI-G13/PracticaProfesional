@@ -40,6 +40,55 @@ namespace PracticaProfesional.Migrations
                     b.ToTable("AuditoriaCambiosRol");
                 });
 
+            modelBuilder.Entity("PracticaProfesional.Domain.Entities.Docente", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("UsuarioId").HasColumnType("int");
+                    b.Property<string>("Telefono").IsRequired().HasMaxLength(20).HasColumnType("nvarchar(20)");
+                    b.Property<string>("Categoria").IsRequired().HasMaxLength(100).HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+                    b.HasIndex("UsuarioId").IsUnique();
+                    b.ToTable("Docentes");
+                });
+
+            modelBuilder.Entity("PracticaProfesional.Domain.Entities.Preceptor", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("UsuarioId").HasColumnType("int");
+                    b.Property<string>("Telefono").IsRequired().HasMaxLength(20).HasColumnType("nvarchar(20)");
+                    b.Property<string>("Turno").IsRequired().HasMaxLength(50).HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+                    b.HasIndex("UsuarioId").IsUnique();
+                    b.ToTable("Preceptores");
+                });
+
+            modelBuilder.Entity("PracticaProfesional.Domain.Entities.Estudiante", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("UsuarioId").HasColumnType("int");
+                    b.Property<int>("Anio").HasColumnType("int");
+                    b.Property<string>("Condicion").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<DateTime>("FechaDeIngreso").HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+                    b.HasIndex("UsuarioId").IsUnique();
+                    b.ToTable("Estudiantes");
+                });
+
             modelBuilder.Entity("PracticaProfesional.Domain.Entities.Usuario", b =>
                 {
                     b.Property<int>("Id")
@@ -97,6 +146,7 @@ namespace PracticaProfesional.Migrations
 
                     b.ToTable("Usuarios");
                 });
+
             modelBuilder.Entity("PracticaProfesional.Domain.Entities.AuditoriaCambioRol", b =>
                 {
                     b.HasOne("PracticaProfesional.Domain.Entities.Usuario", null)
@@ -104,6 +154,36 @@ namespace PracticaProfesional.Migrations
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("PracticaProfesional.Domain.Entities.Docente", b =>
+                {
+                    b.HasOne("PracticaProfesional.Domain.Entities.Usuario", "Usuario")
+                        .WithOne()
+                        .HasForeignKey("PracticaProfesional.Domain.Entities.Docente", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("PracticaProfesional.Domain.Entities.Preceptor", b =>
+                {
+                    b.HasOne("PracticaProfesional.Domain.Entities.Usuario", "Usuario")
+                        .WithOne()
+                        .HasForeignKey("PracticaProfesional.Domain.Entities.Preceptor", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("PracticaProfesional.Domain.Entities.Estudiante", b =>
+                {
+                    b.HasOne("PracticaProfesional.Domain.Entities.Usuario", "Usuario")
+                        .WithOne()
+                        .HasForeignKey("PracticaProfesional.Domain.Entities.Estudiante", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                    b.Navigation("Usuario");
                 });
 #pragma warning restore 612, 618
         }

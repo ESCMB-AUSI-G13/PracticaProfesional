@@ -43,6 +43,66 @@ export const routes: Routes = [
       import('./features/usuarios/editar-usuario/editar-usuario.component').then(m => m.EditarUsuarioComponent)
   },
 
+  // Módulo de gestión de docentes — solo Dirección
+  {
+    path: 'docentes',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/docentes/lista-docentes/lista-docentes.component').then(m => m.ListaDocentesComponent)
+  },
+  {
+    path: 'docentes/nuevo',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/docentes/crear-docente/crear-docente.component').then(m => m.CrearDocenteComponent)
+  },
+  {
+    path: 'docentes/:id/editar',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/docentes/editar-docente/editar-docente.component').then(m => m.EditarDocenteComponent)
+  },
+
+  // Módulo de gestión de preceptores — solo Dirección
+  {
+    path: 'preceptores',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/preceptores/lista-preceptores/lista-preceptores.component').then(m => m.ListaPreceptoresComponent)
+  },
+  {
+    path: 'preceptores/nuevo',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/preceptores/crear-preceptor/crear-preceptor.component').then(m => m.CrearPreceptorComponent)
+  },
+  {
+    path: 'preceptores/:id/editar',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/preceptores/editar-preceptor/editar-preceptor.component').then(m => m.EditarPreceptorComponent)
+  },
+
+  // Módulo de gestión de estudiantes — solo Dirección
+  {
+    path: 'estudiantes',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/estudiantes/lista-estudiantes/lista-estudiantes.component').then(m => m.ListaEstudiantesComponent)
+  },
+  {
+    path: 'estudiantes/nuevo',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/estudiantes/crear-estudiante/crear-estudiante.component').then(m => m.CrearEstudianteComponent)
+  },
+  {
+    path: 'estudiantes/:id/editar',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/estudiantes/editar-estudiante/editar-estudiante.component').then(m => m.EditarEstudianteComponent)
+  },
+
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
 ];

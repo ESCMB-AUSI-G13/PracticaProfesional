@@ -1,6 +1,9 @@
 <div class="dashboard">
   <header class="topbar">
-    <span class="topbar-title">Sistema Académico</span>
+    <div class="topbar-brand">
+      <img src="assets/images/logo_instituto.png" alt="Logo Instituto" class="topbar-logo" />
+      <span class="topbar-title">Sistema Académico</span>
+    </div>
     <div class="topbar-user">
       <span>{{ authService.usuario()?.nombreCompleto }}</span>
       <span class="badge-rol">{{ authService.usuario()?.rol }}</span>

@@ -1,0 +1,75 @@
+<div class="page">
+  <header class="page-header">
+    <button class="btn-back" (click)="volver()">← Volver</button>
+    <h1>Nuevo Preceptor</h1>
+  </header>
+
+  @if (error()) {
+    <p class="error-msg">{{ error() }}</p>
+  }
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-card">
+    <div class="form-row">
+      <div class="form-group">
+        <label>DNI *</label>
+        <input formControlName="dni" type="text" placeholder="12345678" />
+        @if (form.get('dni')?.invalid && form.get('dni')?.touched) {
+          <span class="field-error">DNI inválido (7-8 dígitos)</span>
+        }
+      </div>
+      <div class="form-group">
+        <label>Legajo *</label>
+        <input formControlName="legajo" type="text" />
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Nombre *</label>
+        <input formControlName="nombre" type="text" />
+      </div>
+      <div class="form-group">
+        <label>Apellido *</label>
+        <input formControlName="apellido" type="text" />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Email institucional *</label>
+      <input formControlName="email" type="email" />
+      @if (form.get('email')?.invalid && form.get('email')?.touched) {
+        <span class="field-error">Email inválido</span>
+      }
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Teléfono *</label>
+        <input formControlName="telefono" type="text" />
+      </div>
+      <div class="form-group">
+        <label>Turno *</label>
+        <select formControlName="turno">
+          @for (turno of turnos; track turno) {
+            <option [value]="turno">{{ turno }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Contraseña inicial *</label>
+      <input formControlName="password" type="password" />
+      @if (form.get('password')?.invalid && form.get('password')?.touched) {
+        <span class="field-error">Mínimo 8 caracteres</span>
+      }
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary" (click)="volver()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="form.invalid || cargando()">
+        {{ cargando() ? 'Guardando...' : 'Guardar preceptor' }}
+      </button>
+    </div>
+  </form>
+</div>

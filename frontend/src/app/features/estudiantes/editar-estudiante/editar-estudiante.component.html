@@ -1,0 +1,61 @@
+<div class="page">
+  <header class="page-header">
+    <button class="btn-back" (click)="volver()">← Volver</button>
+    <h1>Editar Estudiante</h1>
+  </header>
+
+  @if (cargandoDatos()) {
+    <p class="estado">Cargando datos...</p>
+  } @else {
+    @if (error()) {
+      <p class="error-msg">{{ error() }}</p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="form-card">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input formControlName="nombre" type="text" />
+        </div>
+        <div class="form-group">
+          <label>Apellido *</label>
+          <input formControlName="apellido" type="text" />
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Email institucional *</label>
+        <input formControlName="email" type="email" />
+        @if (form.get('email')?.invalid && form.get('email')?.touched) {
+          <span class="field-error">Email inválido</span>
+        }
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label>Año cursando *</label>
+          <select formControlName="anio">
+            @for (anio of anios; track anio) {
+              <option [value]="anio">{{ anio }}° año</option>
+            }
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Condición *</label>
+          <select formControlName="condicion">
+            @for (cond of condiciones; track cond) {
+              <option [value]="cond">{{ cond }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="volver()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="form.invalid || cargando()">
+          {{ cargando() ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

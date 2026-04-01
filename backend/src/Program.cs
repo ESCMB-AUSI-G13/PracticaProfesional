@@ -4,14 +4,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PracticaProfesional.Application.Auditoria;
 using PracticaProfesional.Application.Auth;
+using PracticaProfesional.Application.Docentes;
+using PracticaProfesional.Application.Estudiantes;
 using PracticaProfesional.Application.Interfaces;
+using PracticaProfesional.Application.Preceptores;
 using PracticaProfesional.Application.Usuarios;
 using PracticaProfesional.Domain.Entities;
 using PracticaProfesional.Domain.Enums;
 using PracticaProfesional.Infrastructure.Auth;
 using PracticaProfesional.Infrastructure.Persistence;
 using PracticaProfesional.Infrastructure.Middleware;
-using PracticaProfesional.Infrastructure.Persistence.Repositories;
 using PracticaProfesional.Infrastructure.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -23,6 +25,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // ── Repositorios e interfaces ──────────────────────────────────────────────────
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IAuditoriaRepository, AuditoriaRepository>();
+builder.Services.AddScoped<IDocenteRepository, DocenteRepository>();
+builder.Services.AddScoped<IPreceptorRepository, PreceptorRepository>();
+builder.Services.AddScoped<IEstudianteRepository, EstudianteRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 // ── Use Cases ──────────────────────────────────────────────────────────────────
@@ -34,6 +39,27 @@ builder.Services.AddScoped<ListarUsuariosUseCase>();
 builder.Services.AddScoped<ModificarUsuarioUseCase>();
 builder.Services.AddScoped<DesactivarUsuarioUseCase>();
 builder.Services.AddScoped<ReactivarUsuarioUseCase>();
+
+// Docentes
+builder.Services.AddScoped<CrearDocenteUseCase>();
+builder.Services.AddScoped<ListarDocentesUseCase>();
+builder.Services.AddScoped<ModificarDocenteUseCase>();
+builder.Services.AddScoped<DesactivarDocenteUseCase>();
+builder.Services.AddScoped<ReactivarDocenteUseCase>();
+
+// Preceptores
+builder.Services.AddScoped<CrearPreceptorUseCase>();
+builder.Services.AddScoped<ListarPreceptoresUseCase>();
+builder.Services.AddScoped<ModificarPreceptorUseCase>();
+builder.Services.AddScoped<DesactivarPreceptorUseCase>();
+builder.Services.AddScoped<ReactivarPreceptorUseCase>();
+
+// Estudiantes
+builder.Services.AddScoped<CrearEstudianteUseCase>();
+builder.Services.AddScoped<ListarEstudiantesUseCase>();
+builder.Services.AddScoped<ModificarEstudianteUseCase>();
+builder.Services.AddScoped<DesactivarEstudianteUseCase>();
+builder.Services.AddScoped<ReactivarEstudianteUseCase>();
 
 // ── Autenticación JWT ──────────────────────────────────────────────────────────
 var jwtSettings = builder.Configuration.GetSection("Jwt");

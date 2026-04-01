@@ -12,8 +12,26 @@ interface Modulo {
 const MODULOS: Modulo[] = [
   {
     titulo: 'Gestión de Usuarios',
-    descripcion: 'Alta, baja y modificación de docentes, preceptores y estudiantes.',
+    descripcion: 'Alta, baja y modificación de todos los usuarios del sistema.',
     ruta: '/usuarios',
+    roles: ['Direccion']
+  },
+  {
+    titulo: 'Gestión de Docentes',
+    descripcion: 'Alta, baja y modificación de docentes. Categoría y datos de contacto.',
+    ruta: '/docentes',
+    roles: ['Direccion']
+  },
+  {
+    titulo: 'Gestión de Preceptores',
+    descripcion: 'Alta, baja y modificación de preceptores. Turno y datos de contacto.',
+    ruta: '/preceptores',
+    roles: ['Direccion']
+  },
+  {
+    titulo: 'Gestión de Estudiantes',
+    descripcion: 'Alta, baja y modificación de estudiantes. Año, condición y fecha de ingreso.',
+    ruta: '/estudiantes',
     roles: ['Direccion']
   }
 ];

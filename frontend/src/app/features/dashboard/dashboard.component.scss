@@ -14,6 +14,17 @@
   justify-content: space-between;
 }
 
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.topbar-logo {
+  height: 36px;
+  width: auto;
+}
+
 .topbar-title {
   font-size: 1.1rem;
   font-weight: 600;

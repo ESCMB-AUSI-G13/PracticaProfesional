@@ -1,0 +1,61 @@
+<div class="page">
+  <header class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="irAlDashboard()">← Dashboard</button>
+      <h1>Gestión de Estudiantes</h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="irACrear()">+ Nuevo estudiante</button>
+    </div>
+  </header>
+
+  @if (cargando()) {
+    <p class="estado">Cargando...</p>
+  } @else if (error()) {
+    <p class="estado error">{{ error() }}</p>
+  } @else if (estudiantes().length === 0) {
+    <p class="estado">No hay estudiantes registrados.</p>
+  } @else {
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Legajo</th>
+          <th>DNI</th>
+          <th>Nombre</th>
+          <th>Email</th>
+          <th>Año</th>
+          <th>Condición</th>
+          <th>Ingreso</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (e of estudiantes(); track e.usuarioId) {
+          <tr [class.inactivo]="!e.activo">
+            <td>{{ e.legajo }}</td>
+            <td>{{ e.dni }}</td>
+            <td>{{ e.apellido }}, {{ e.nombre }}</td>
+            <td>{{ e.email }}</td>
+            <td>{{ e.anio }}°</td>
+            <td>{{ e.condicion }}</td>
+            <td>{{ e.fechaDeIngreso | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <span [class]="e.activo ? 'badge activo' : 'badge inactivo'">
+                {{ e.activo ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td class="acciones">
+              <button class="btn btn-secondary btn-sm" (click)="irAEditar(e.usuarioId)">Editar</button>
+              @if (e.activo) {
+                <button class="btn btn-danger btn-sm" (click)="desactivar(e.usuarioId)">Desactivar</button>
+              } @else {
+                <button class="btn btn-success btn-sm" (click)="reactivar(e.usuarioId)">Reactivar</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
