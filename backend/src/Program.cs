@@ -24,6 +24,7 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 
 // ── Use Cases ──────────────────────────────────────────────────────────────────
 builder.Services.AddScoped<LoginUseCase>();
+builder.Services.AddScoped<RegistroUseCase>();
 builder.Services.AddScoped<CrearUsuarioUseCase>();
 builder.Services.AddScoped<ListarUsuariosUseCase>();
 builder.Services.AddScoped<ModificarUsuarioUseCase>();

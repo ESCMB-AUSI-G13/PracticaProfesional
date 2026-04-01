@@ -1,0 +1,98 @@
+.dashboard {
+  min-height: 100vh;
+  background: #f4f6f9;
+  font-family: sans-serif;
+}
+
+.topbar {
+  background: #1a237e;
+  color: white;
+  padding: 0 2rem;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.topbar-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.topbar-user {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.badge-rol {
+  background: rgba(255,255,255,0.2);
+  padding: 0.2rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+}
+
+.btn-logout {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: white;
+  padding: 0.3rem 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+
+  &:hover { background: rgba(255,255,255,0.25); }
+}
+
+.content {
+  padding: 2rem;
+  max-width: 1100px;
+  margin: 0 auto;
+
+  h2 {
+    margin: 0 0 1.5rem;
+    color: #333;
+    font-size: 1.2rem;
+  }
+}
+
+.modulos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.25rem;
+}
+
+.modulo-card {
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  padding: 1.5rem;
+  text-decoration: none;
+  color: inherit;
+  border-left: 4px solid #1a237e;
+  transition: box-shadow 0.15s, transform 0.15s;
+
+  &:hover {
+    box-shadow: 0 4px 14px rgba(0,0,0,0.14);
+    transform: translateY(-2px);
+  }
+
+  h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    color: #1a237e;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.4;
+  }
+}
+
+.sin-modulos {
+  color: #888;
+  font-size: 0.95rem;
+}

@@ -1,0 +1,27 @@
+<div class="dashboard">
+  <header class="topbar">
+    <span class="topbar-title">Sistema Académico</span>
+    <div class="topbar-user">
+      <span>{{ authService.usuario()?.nombreCompleto }}</span>
+      <span class="badge-rol">{{ authService.usuario()?.rol }}</span>
+      <button class="btn-logout" (click)="authService.logout()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main class="content">
+    <h2>Módulos disponibles</h2>
+
+    @if (modulosVisibles().length === 0) {
+      <p class="sin-modulos">No hay módulos disponibles para tu rol.</p>
+    } @else {
+      <div class="modulos-grid">
+        @for (modulo of modulosVisibles(); track modulo.ruta) {
+          <a class="modulo-card" [routerLink]="modulo.ruta">
+            <h3>{{ modulo.titulo }}</h3>
+            <p>{{ modulo.descripcion }}</p>
+          </a>
+        }
+      </div>
+    }
+  </main>
+</div>

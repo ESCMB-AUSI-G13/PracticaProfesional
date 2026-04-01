@@ -48,6 +48,7 @@
               </span>
             </td>
             <td class="acciones">
+              <button class="btn btn-secondary btn-sm" (click)="irAEditar(u.id)">Editar</button>
               @if (u.activo) {
                 <button class="btn btn-danger btn-sm" (click)="desactivar(u.id)">Desactivar</button>
               }

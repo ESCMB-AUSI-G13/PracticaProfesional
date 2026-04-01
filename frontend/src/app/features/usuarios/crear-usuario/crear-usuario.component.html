@@ -1,0 +1,81 @@
+<div class="page">
+  <div class="card">
+    <div class="card-header">
+      <button class="btn-back" (click)="volver()">← Volver</button>
+      <h1>Nuevo usuario</h1>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="nombre">Nombre *</label>
+          <input id="nombre" type="text" formControlName="nombre" placeholder="Ej: Juan">
+          @if (form.get('nombre')?.invalid && form.get('nombre')?.touched) {
+            <span class="error-msg">El nombre es obligatorio.</span>
+          }
+        </div>
+        <div class="form-group">
+          <label for="apellido">Apellido *</label>
+          <input id="apellido" type="text" formControlName="apellido" placeholder="Ej: García">
+          @if (form.get('apellido')?.invalid && form.get('apellido')?.touched) {
+            <span class="error-msg">El apellido es obligatorio.</span>
+          }
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dni">DNI *</label>
+          <input id="dni" type="text" formControlName="dni" placeholder="Ej: 12345678">
+          @if (form.get('dni')?.invalid && form.get('dni')?.touched) {
+            <span class="error-msg">Ingresá un DNI válido (7 u 8 dígitos).</span>
+          }
+        </div>
+        <div class="form-group">
+          <label for="legajo">Legajo *</label>
+          <input id="legajo" type="text" formControlName="legajo" placeholder="Ej: EST-2024-001">
+          @if (form.get('legajo')?.invalid && form.get('legajo')?.touched) {
+            <span class="error-msg">El legajo es obligatorio.</span>
+          }
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email institucional *</label>
+        <input id="email" type="email" formControlName="email" placeholder="usuario@institucion.edu.ar">
+        @if (form.get('email')?.invalid && form.get('email')?.touched) {
+          <span class="error-msg">Ingresá un email válido.</span>
+        }
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="password">Contraseña inicial *</label>
+          <input id="password" type="password" formControlName="password" placeholder="Mínimo 8 caracteres">
+          @if (form.get('password')?.invalid && form.get('password')?.touched) {
+            <span class="error-msg">La contraseña debe tener al menos 8 caracteres.</span>
+          }
+        </div>
+        <div class="form-group">
+          <label for="rol">Rol *</label>
+          <select id="rol" formControlName="rol">
+            @for (rol of roles; track rol) {
+              <option [value]="rol">{{ rol }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      @if (error()) {
+        <p class="alert-error">{{ error() }}</p>
+      }
+
+      <div class="form-actions">
+        <button type="button" class="btn btn-secondary" (click)="volver()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" [disabled]="form.invalid || cargando()">
+          {{ cargando() ? 'Guardando...' : 'Crear usuario' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

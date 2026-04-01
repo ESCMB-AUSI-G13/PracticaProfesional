@@ -62,6 +62,10 @@ export class ListaUsuariosComponent implements OnInit {
     this.router.navigate(['/usuarios/nuevo']);
   }
 
+  irAEditar(id: number): void {
+    this.router.navigate(['/usuarios', id, 'editar']);
+  }
+
   logout(): void {
     this.authService.logout();
   }
