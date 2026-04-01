@@ -38,8 +38,10 @@ export class UsuariosService {
   constructor(private http: HttpClient) {}
 
   listar(rol?: string): Observable<Usuario[]> {
-    const params = rol ? { rol } : {};
-    return this.http.get<Usuario[]>(this.apiUrl, { params });
+    if (rol) {
+      return this.http.get<Usuario[]>(this.apiUrl, { params: { rol } });
+    }
+    return this.http.get<Usuario[]>(this.apiUrl);
   }
 
   crear(dto: CrearUsuarioRequest): Observable<Usuario> {
