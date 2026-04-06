@@ -108,6 +108,14 @@ export class AuthService {
     this.router.navigate(['/login']);
   }
 
+  solicitarRestablecimiento(email: string): Observable<{ mensaje: string; enlace?: string }> {
+    return this.http.post<{ mensaje: string; enlace?: string }>(`${this.apiUrl}/olvide-password`, { email });
+  }
+
+  restablecerPassword(token: string, nuevaPassword: string, confirmarPassword: string): Observable<void> {
+    return this.http.post<void>(`${this.apiUrl}/reset-password`, { token, nuevaPassword, confirmarPassword });
+  }
+
   obtenerToken(): string | null {
     return localStorage.getItem(TOKEN_KEY);
   }

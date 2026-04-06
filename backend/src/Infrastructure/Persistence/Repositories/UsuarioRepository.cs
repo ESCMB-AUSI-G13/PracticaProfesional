@@ -34,6 +34,10 @@ public class UsuarioRepository(AppDbContext context) : IUsuarioRepository
     public async Task<bool> ExistePorEmailExcluyendoIdAsync(string email, int idExcluir, CancellationToken cancellationToken = default)
         => await context.Usuarios.AnyAsync(u => u.Email == email.ToLowerInvariant() && u.Id != idExcluir, cancellationToken);
 
+    public async Task<Usuario?> ObtenerPorTokenResetAsync(string token, CancellationToken cancellationToken = default)
+        => await context.Usuarios
+            .FirstOrDefaultAsync(u => u.PasswordResetToken == token, cancellationToken);
+
     public async Task AgregarAsync(Usuario usuario, CancellationToken cancellationToken = default)
     {
         await context.Usuarios.AddAsync(usuario, cancellationToken);

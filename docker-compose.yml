@@ -7,7 +7,7 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_ENVIRONMENT=Production
       - ConnectionStrings__DefaultConnection=Server=sqlserver,1433;Database=PracticaProfesionalDB;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;
     depends_on:
       sqlserver:

@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(grep -r \"Historial\\\\|Inscripcion\\\\|Materia\\\\|Calificacion\\\\|Examen\" 'd:\\\\facum\\\\GITHUB TESIS\\\\PracticaProfesional\\\\backend\\\\src' --include=*.cs)",
-      "Bash(grep -r \"estudiante\\\\|alumno\\\\|student\" 'd:\\\\facum\\\\GITHUB TESIS\\\\PracticaProfesional\\\\frontend\\\\src' --include=*.ts --include=*.html -i)"
+      "Bash(grep -r \"estudiante\\\\|alumno\\\\|student\" 'd:\\\\facum\\\\GITHUB TESIS\\\\PracticaProfesional\\\\frontend\\\\src' --include=*.ts --include=*.html -i)",
+      "Bash(xargs grep:*)"
     ]
   }
 }

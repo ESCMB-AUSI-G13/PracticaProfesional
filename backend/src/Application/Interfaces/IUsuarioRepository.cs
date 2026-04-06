@@ -12,6 +12,7 @@ public interface IUsuarioRepository
     Task<bool> ExistePorLegajoAsync(string legajo, CancellationToken cancellationToken = default);
     Task<bool> ExistePorEmailAsync(string email, CancellationToken cancellationToken = default);
     Task<bool> ExistePorEmailExcluyendoIdAsync(string email, int idExcluir, CancellationToken cancellationToken = default);
+    Task<Usuario?> ObtenerPorTokenResetAsync(string token, CancellationToken cancellationToken = default);
     Task AgregarAsync(Usuario usuario, CancellationToken cancellationToken = default);
     Task GuardarCambiosAsync(CancellationToken cancellationToken = default);
 }

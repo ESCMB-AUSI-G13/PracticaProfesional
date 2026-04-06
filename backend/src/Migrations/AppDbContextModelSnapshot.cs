@@ -134,6 +134,13 @@ namespace PracticaProfesional.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("PasswordResetToken")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTime?>("PasswordResetTokenExpiry")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Rol")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");

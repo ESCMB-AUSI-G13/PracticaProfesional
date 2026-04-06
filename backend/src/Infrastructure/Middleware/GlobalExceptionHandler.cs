@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using PracticaProfesional.Domain.Exceptions;
 
 namespace PracticaProfesional.Infrastructure.Middleware;
 
@@ -12,6 +13,7 @@ public class GlobalExceptionHandler : IExceptionHandler
     {
         var (statusCode, title) = exception switch
         {
+            BusinessException bex => (bex.StatusCode, "Error de negocio"),
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "No autorizado"),
             ArgumentException => (StatusCodes.Status400BadRequest, "Solicitud inválida"),
             KeyNotFoundException => (StatusCodes.Status404NotFound, "Recurso no encontrado"),

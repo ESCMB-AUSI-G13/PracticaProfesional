@@ -15,6 +15,10 @@ public class Usuario
     public bool Activo { get; private set; }
     public DateTime FechaCreacion { get; private set; }
 
+    // Reset de contraseña
+    public string? PasswordResetToken { get; private set; }
+    public DateTime? PasswordResetTokenExpiry { get; private set; }
+
     // Constructor para EF Core
     private Usuario() { }
 
@@ -54,6 +58,23 @@ public class Usuario
     public void Desactivar() => Activo = false;
 
     public void Reactivar() => Activo = true;
+
+    public void GenerarTokenReset()
+    {
+        PasswordResetToken = Convert.ToHexString(System.Security.Cryptography.RandomNumberGenerator.GetBytes(32));
+        PasswordResetTokenExpiry = DateTime.UtcNow.AddHours(1);
+    }
+
+    public bool EsTokenResetValido(string token)
+        => PasswordResetToken == token && PasswordResetTokenExpiry > DateTime.UtcNow;
+
+    public void RestablecerPassword(string nuevoPasswordHash)
+    {
+        if (string.IsNullOrWhiteSpace(nuevoPasswordHash)) throw new ArgumentException("La contraseña es obligatoria.");
+        PasswordHash = nuevoPasswordHash;
+        PasswordResetToken = null;
+        PasswordResetTokenExpiry = null;
+    }
 
     public void Modificar(string nombre, string apellido, string email, Rol rol)
     {
