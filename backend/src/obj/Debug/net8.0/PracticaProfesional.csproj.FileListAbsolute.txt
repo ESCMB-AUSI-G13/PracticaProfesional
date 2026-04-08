@@ -130,3 +130,4 @@ D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\obj\Debug\n
 D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\obj\Debug\net8.0\PracticaProfesional.pdb
 D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\obj\Debug\net8.0\PracticaProfesional.genruntimeconfig.cache
 D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\obj\Debug\net8.0\ref\PracticaProfesional.dll
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\appsettings.Development.example.json

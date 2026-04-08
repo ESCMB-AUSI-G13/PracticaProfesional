@@ -1,0 +1,27 @@
+# Secretos locales — NUNCA subir al repositorio
+backend/src/appsettings.Development.json
+backend/src/appsettings.Production.json
+
+# Build outputs
+backend/src/bin/
+backend/src/obj/
+backend/src/**/bin/
+backend/src/**/obj/
+
+# .NET user secrets
+**/secrets.json
+
+# Visual Studio / Rider
+.vs/
+*.user
+*.suo
+
+# Logs
+*.log
+
+# Environment
+.env
+.env.local
+
+# Node / Angular (el frontend tiene su propio .gitignore)
+node_modules/

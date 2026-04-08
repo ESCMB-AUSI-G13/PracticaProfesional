@@ -1,80 +1,111 @@
-## Comandos frecuentes
+# Sistema Académico Integral
+**Instituto Superior del Profesorado en Ciencias Económicas y Jurídicas "Dr. José A. Ortiz y Herrera"**
+
+---
+
+## Requisitos
+
+- [.NET 8 SDK](https://dotnet.microsoft.com/download)
+- [Node.js + Angular CLI](https://angular.io/cli)
+- Acceso a la base de datos Azure SQL (pedirle la password a Pablo)
+
+---
+
+## Configuración inicial (primera vez)
+
+### 1. Clonar el repositorio
 
 ```bash
-# Levantar todo con Docker
-docker-compose up --build
+git clone <url-del-repo>
+cd PracticaProfesional
+```
 
-# Solo backend
+### 2. Configurar los secretos del backend
+
+Copiar el archivo de ejemplo y completarlo con la password real:
+
+```bash
+cp backend/src/appsettings.Development.example.json backend/src/appsettings.Development.json
+```
+
+Abrir `backend/src/appsettings.Development.json` y reemplazar `INGRESA_LA_PASSWORD_AQUI` con la password de Azure SQL.
+
+### 3. Levantar el backend
+
+```bash
 cd backend && dotnet run
+```
 
-# Solo frontend
+En el primer arranque, EF Core crea todas las tablas automáticamente en Azure y genera el usuario administrador inicial.
+
+### 4. Levantar el frontend
+
+```bash
 cd frontend && ng serve
 ```
 
-## Puertos por defecto
+---
 
-| Servicio | Puerto |
+## Puertos
+
+| Servicio | URL |
 |---|---|
 | Frontend | http://localhost:4200 |
-| Backend API | http://localhost:5000 |
-| SQL Server | localhost:1433 |
+| Backend API | http://localhost:5201 |
 
-## Usuarios
-Email: admin@institucion.edu.ar  
-Contraseña: Admin1234!  
-Rol: Direccion
+---
 
-## Conexión visual a la base de datos
-
-Con los contenedores corriendo, conectarse desde cualquier cliente SQL:
+## Usuario administrador (seed inicial)
 
 | Campo | Valor |
 |---|---|
-| Server | `localhost,1433` |
-| User | `sa` |
-| Password | `YourStrong!Passw0rd` |
-| Database | `PracticaProfesionalDB` |
+| Email | `admin@institucion.edu.ar` |
+| Contraseña | `Admin1234!` |
+| Rol | Dirección |
 
-Clientes:
-- **DBeaver**
-- **Extensión SQL Server (mssql)** en VS Code
+---
 
-## Consultar la base de datos desde consola
+## Base de datos
 
-Con los contenedores corriendo (`docker-compose up`), conectarse al SQL Server:
+La base de datos está en **Azure SQL**. Para conectarse desde un cliente visual (DBeaver, VS Code mssql):
 
-```bash
-# Abrir una terminal dentro del contenedor de SQL Server
-docker exec -it practicaprofesional-sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -P "YourStrong!Passw0rd" -No -C
-```
+| Campo | Valor |
+|---|---|
+| Server | `escmb-data-server.database.windows.net,1433` |
+| Database | `escmb-db` |
+| User | `admin-db` |
+| Password | *(pedirle a Pablo)* |
+| Encrypt | `True` |
 
-Una vez dentro del prompt `1>`, ejecutar consultas:
+---
 
-```sql
--- Seleccionar la base de datos
-USE PracticaProfesionalDB;
-GO
-
--- Ver todos los usuarios
-SELECT Id, DNI, Legajo, Email, Nombre, Apellido, Rol, Activo, FechaCreacion
-FROM Usuarios;
-GO
-
--- Ver solo usuarios activos
-SELECT Id, Legajo, Email, Nombre, Apellido, Rol
-FROM Usuarios
-WHERE Activo = 1;
-GO
-
--- Salir
-EXIT
-```
-
-O en un solo comando sin entrar al prompt interactivo:
+## Comandos frecuentes
 
 ```bash
-docker exec -it practicaprofesional-sqlserver /opt/mssql-tools18/bin/sqlcmd \
-  -S localhost -U sa -P "YourStrong!Passw0rd" -No -C \
-  -Q "USE PracticaProfesionalDB; SELECT Id, Legajo, Email, Nombre, Apellido, Rol, Activo FROM Usuarios;"
+# Backend
+cd backend && dotnet run
+
+# Frontend
+cd frontend && ng serve
+
+# Crear una nueva migración (después de cambiar el modelo)
+cd backend/src && dotnet ef migrations add NombreDeLaMigracion
+
+# Aplicar migraciones manualmente
+cd backend/src && dotnet ef database update
+```
+
+---
+
+## Estructura del proyecto
+
+```
+PracticaProfesional/
+├── backend/
+│   └── src/
+│       ├── Template-API/       # Controllers (HTTP)
+│       ├── Application/        # Casos de uso, DTOs, interfaces
+│       ├── Domain/             # Entidades, Value Objects
+│       └── Infrastructure/     # EF Core, SQL Server, servicios externos
+└── frontend/                   # Angular
 ```
