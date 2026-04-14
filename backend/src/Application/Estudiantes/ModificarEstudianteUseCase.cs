@@ -20,13 +20,14 @@ public class ModificarEstudianteUseCase(
         if (await usuarioRepository.ExistePorEmailExcluyendoIdAsync(dto.Email, usuarioId, cancellationToken))
             throw new InvalidOperationException("Ya existe un usuario con ese email.");
 
-        if (!Enum.TryParse<CondicionEstudiante>(dto.Condicion, ignoreCase: true, out var condicion))
+        if (!Enum.TryParse<CondicionEstudiante>(dto.Condicion, ignoreCase: true, out var condicionDestino))
             throw new ArgumentException($"Condición inválida: {dto.Condicion}");
 
         var anterior = new { usuario.Email, usuario.Nombre, usuario.Apellido, estudiante.Anio, Condicion = estudiante.Condicion.ToString() };
 
         usuario.Modificar(dto.Nombre, dto.Apellido, dto.Email, usuario.Rol);
-        estudiante.Modificar(dto.Anio, condicion);
+        estudiante.Modificar(dto.Anio);
+        AplicarTransicion(estudiante, condicionDestino);
 
         await usuarioRepository.GuardarCambiosAsync(cancellationToken);
 
@@ -36,5 +37,22 @@ public class ModificarEstudianteUseCase(
             cancellationToken);
 
         return CrearEstudianteUseCase.ToDto(estudiante, usuario);
+    }
+
+    private static void AplicarTransicion(Domain.Entities.Estudiante estudiante, CondicionEstudiante destino)
+    {
+        switch (destino)
+        {
+            case CondicionEstudiante.Libre:       estudiante.PerderRegularidad();   break;
+            case CondicionEstudiante.Promocional: estudiante.ObtenerPromocion();    break;
+            case CondicionEstudiante.Regular:
+                if (estudiante.Condicion == CondicionEstudiante.Desertor)
+                    estudiante.Reinscribir();
+                else
+                    estudiante.RecuperarRegularidad();
+                break;
+            case CondicionEstudiante.Egresado:    estudiante.Egresar();             break;
+            case CondicionEstudiante.Desertor:    estudiante.Desertar();            break;
+        }
     }
 }
