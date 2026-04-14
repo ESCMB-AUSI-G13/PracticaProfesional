@@ -62,7 +62,7 @@ CREATE TABLE Materias (
     Id     INT IDENTITY(1,1) PRIMARY KEY,
     Codigo NVARCHAR(20)  NOT NULL,
     Nombre NVARCHAR(200) NOT NULL,
-    Plan   NVARCHAR(20)  NOT NULL,
+    [Plan] NVARCHAR(20)  NOT NULL,
     CONSTRAINT UQ_Materias_Codigo UNIQUE (Codigo)
 );
 
