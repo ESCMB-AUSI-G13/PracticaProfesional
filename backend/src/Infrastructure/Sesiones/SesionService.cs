@@ -9,7 +9,7 @@ namespace PracticaProfesional.Infrastructure.Sesiones;
 /// </summary>
 public class SesionService : ISesionService
 {
-    private static readonly TimeSpan TiempoInactividad = TimeSpan.FromSeconds(60);
+    private static readonly TimeSpan TiempoInactividad = TimeSpan.FromSeconds(45);
 
     private readonly ConcurrentDictionary<int, DateTime> _sesiones = new();
 
