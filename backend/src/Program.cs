@@ -11,6 +11,7 @@ using PracticaProfesional.Application.Preceptores;
 using PracticaProfesional.Application.Usuarios;
 using PracticaProfesional.Domain.Entities;
 using PracticaProfesional.Domain.Enums;
+using PracticaProfesional.Infrastructure.Auditoria;
 using PracticaProfesional.Infrastructure.Auth;
 using PracticaProfesional.Infrastructure.Email;
 using PracticaProfesional.Infrastructure.Persistence;
@@ -24,8 +25,11 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // ── Repositorios e interfaces ──────────────────────────────────────────────────
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IAuditoriaRepository, AuditoriaRepository>();
+builder.Services.AddScoped<IAuditoriaLogRepository, AuditoriaLogRepository>();
+builder.Services.AddScoped<IAuditoriaService, AuditoriaService>();
 builder.Services.AddScoped<IDocenteRepository, DocenteRepository>();
 builder.Services.AddScoped<IPreceptorRepository, PreceptorRepository>();
 builder.Services.AddScoped<IEstudianteRepository, EstudianteRepository>();
@@ -39,6 +43,7 @@ builder.Services.AddScoped<RegistroUseCase>();
 builder.Services.AddScoped<SolicitarRestablecimientoUseCase>();
 builder.Services.AddScoped<RestablecerPasswordUseCase>();
 builder.Services.AddScoped<RegistrarCambioRolUseCase>();
+builder.Services.AddScoped<ListarAuditoriaLogsUseCase>();
 builder.Services.AddScoped<CrearUsuarioUseCase>();
 builder.Services.AddScoped<ListarUsuariosUseCase>();
 builder.Services.AddScoped<ModificarUsuarioUseCase>();

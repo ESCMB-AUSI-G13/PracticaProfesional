@@ -1,0 +1,180 @@
+.page {
+  padding: 2rem;
+  font-family: sans-serif;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+
+  h1 { margin: 0; font-size: 1.5rem; }
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: #3498db;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+  &:hover { text-decoration: underline; }
+}
+
+// ── Filtros ──────────────────────────────────────────────────────────────────
+.filtros-panel {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.filtros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.filtro-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  label { font-size: 0.8rem; font-weight: 600; color: #555; }
+
+  input, select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    &:focus { outline: none; border-color: #3498db; }
+  }
+}
+
+.filtros-acciones {
+  display: flex;
+  gap: 0.5rem;
+}
+
+// ── Info ──────────────────────────────────────────────────────────────────────
+.info-resultado {
+  font-size: 0.85rem;
+  color: #666;
+  margin-bottom: 0.75rem;
+}
+
+// ── Tabla ─────────────────────────────────────────────────────────────────────
+.tabla-wrapper {
+  overflow-x: auto;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+
+  th, td {
+    padding: 0.5rem 0.65rem;
+    border: 1px solid #e0e0e0;
+    vertical-align: top;
+  }
+
+  th {
+    background: #f0f4f8;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  tr:hover td { background: #fafbfc; }
+}
+
+.col-fecha  { white-space: nowrap; min-width: 130px; }
+.col-id     { text-align: center; }
+.col-email  { font-size: 0.8rem; }
+.col-json   { min-width: 200px; max-width: 320px; }
+
+// ── Badges ────────────────────────────────────────────────────────────────────
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+
+  &-crear      { background: #d4edda; color: #155724; }
+  &-modificar  { background: #fff3cd; color: #856404; }
+  &-desactivar { background: #f8d7da; color: #721c24; }
+  &-reactivar  { background: #cce5ff; color: #004085; }
+}
+
+.badge-entidad {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  background: #e8eaf6;
+  color: #3f51b5;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+// ── JSON ──────────────────────────────────────────────────────────────────────
+.json-block {
+  margin: 0;
+  padding: 0.4rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: 'Courier New', monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 140px;
+  overflow-y: auto;
+
+  &.anterior { background: #fff8f8; border-left: 3px solid #e74c3c; }
+  &.nuevo    { background: #f0fff4; border-left: 3px solid #27ae60; }
+}
+
+.vacio { color: #aaa; }
+
+// ── Paginación ────────────────────────────────────────────────────────────────
+.paginacion {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+// ── Estados ───────────────────────────────────────────────────────────────────
+.estado {
+  padding: 1rem;
+  color: #555;
+  &.error { color: #c0392b; }
+}
+
+// ── Botones ───────────────────────────────────────────────────────────────────
+.btn {
+  padding: 0.45rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+
+  &.btn-primary   { background: #3498db; color: white; }
+  &.btn-secondary { background: #6c757d; color: white; }
+  &.btn-sm        { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+  &:hover:not(:disabled) { opacity: 0.9; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}

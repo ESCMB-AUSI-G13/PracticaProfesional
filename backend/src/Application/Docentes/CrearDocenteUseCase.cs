@@ -7,7 +7,8 @@ namespace PracticaProfesional.Application.Docentes;
 
 public class CrearDocenteUseCase(
     IUsuarioRepository usuarioRepository,
-    IDocenteRepository docenteRepository)
+    IDocenteRepository docenteRepository,
+    IAuditoriaService auditoria)
 {
     public async Task<DocenteDto> EjecutarAsync(CrearDocenteDto dto, CancellationToken cancellationToken = default)
     {
@@ -27,6 +28,11 @@ public class CrearDocenteUseCase(
 
         var docente = Docente.Crear(usuario.Id, dto.Telefono, dto.Categoria);
         await docenteRepository.AgregarAsync(docente, cancellationToken);
+
+        await auditoria.RegistrarAsync("Docente", docente.Id.ToString(), "CREAR",
+            valorAnterior: null,
+            valorNuevo: new { usuario.DNI, usuario.Legajo, usuario.Email, usuario.Nombre, usuario.Apellido, docente.Telefono, docente.Categoria },
+            cancellationToken);
 
         return ToDto(docente, usuario);
     }

@@ -2,7 +2,9 @@ using PracticaProfesional.Application.Interfaces;
 
 namespace PracticaProfesional.Application.Usuarios;
 
-public class ReactivarUsuarioUseCase(IUsuarioRepository usuarioRepository)
+public class ReactivarUsuarioUseCase(
+    IUsuarioRepository usuarioRepository,
+    IAuditoriaService auditoria)
 {
     public async Task EjecutarAsync(int id, CancellationToken cancellationToken = default)
     {
@@ -11,5 +13,10 @@ public class ReactivarUsuarioUseCase(IUsuarioRepository usuarioRepository)
 
         usuario.Reactivar();
         await usuarioRepository.GuardarCambiosAsync(cancellationToken);
+
+        await auditoria.RegistrarAsync("Usuario", id.ToString(), "REACTIVAR",
+            valorAnterior: new { Activo = false, usuario.Email, usuario.Nombre, usuario.Apellido },
+            valorNuevo:    new { Activo = true,  usuario.Email, usuario.Nombre, usuario.Apellido },
+            cancellationToken);
     }
 }

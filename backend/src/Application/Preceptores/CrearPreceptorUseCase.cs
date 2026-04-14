@@ -7,7 +7,8 @@ namespace PracticaProfesional.Application.Preceptores;
 
 public class CrearPreceptorUseCase(
     IUsuarioRepository usuarioRepository,
-    IPreceptorRepository preceptorRepository)
+    IPreceptorRepository preceptorRepository,
+    IAuditoriaService auditoria)
 {
     public async Task<PreceptorDto> EjecutarAsync(CrearPreceptorDto dto, CancellationToken cancellationToken = default)
     {
@@ -27,6 +28,11 @@ public class CrearPreceptorUseCase(
 
         var preceptor = Preceptor.Crear(usuario.Id, dto.Telefono, dto.Turno);
         await preceptorRepository.AgregarAsync(preceptor, cancellationToken);
+
+        await auditoria.RegistrarAsync("Preceptor", preceptor.Id.ToString(), "CREAR",
+            valorAnterior: null,
+            valorNuevo: new { usuario.DNI, usuario.Legajo, usuario.Email, usuario.Nombre, usuario.Apellido, preceptor.Telefono, preceptor.Turno },
+            cancellationToken);
 
         return ToDto(preceptor, usuario);
     }

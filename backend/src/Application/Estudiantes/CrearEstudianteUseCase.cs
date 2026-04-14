@@ -7,7 +7,8 @@ namespace PracticaProfesional.Application.Estudiantes;
 
 public class CrearEstudianteUseCase(
     IUsuarioRepository usuarioRepository,
-    IEstudianteRepository estudianteRepository)
+    IEstudianteRepository estudianteRepository,
+    IAuditoriaService auditoria)
 {
     public async Task<EstudianteDto> EjecutarAsync(CrearEstudianteDto dto, CancellationToken cancellationToken = default)
     {
@@ -27,6 +28,11 @@ public class CrearEstudianteUseCase(
 
         var estudiante = Estudiante.Crear(usuario.Id, dto.Anio, dto.FechaDeIngreso);
         await estudianteRepository.AgregarAsync(estudiante, cancellationToken);
+
+        await auditoria.RegistrarAsync("Estudiante", estudiante.Id.ToString(), "CREAR",
+            valorAnterior: null,
+            valorNuevo: new { usuario.DNI, usuario.Legajo, usuario.Email, usuario.Nombre, usuario.Apellido, estudiante.Anio, Condicion = estudiante.Condicion.ToString(), estudiante.FechaDeIngreso },
+            cancellationToken);
 
         return ToDto(estudiante, usuario);
     }

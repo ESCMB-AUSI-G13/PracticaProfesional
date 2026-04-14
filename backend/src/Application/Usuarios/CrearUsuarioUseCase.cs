@@ -5,7 +5,9 @@ using PracticaProfesional.Domain.Enums;
 
 namespace PracticaProfesional.Application.Usuarios;
 
-public class CrearUsuarioUseCase(IUsuarioRepository usuarioRepository)
+public class CrearUsuarioUseCase(
+    IUsuarioRepository usuarioRepository,
+    IAuditoriaService auditoria)
 {
     public async Task<UsuarioDto> EjecutarAsync(CrearUsuarioDto dto, CancellationToken cancellationToken = default)
     {
@@ -26,6 +28,11 @@ public class CrearUsuarioUseCase(IUsuarioRepository usuarioRepository)
         var usuario = Usuario.Crear(dto.DNI, dto.Legajo, dto.Email, dto.Nombre, dto.Apellido, passwordHash, rol);
 
         await usuarioRepository.AgregarAsync(usuario, cancellationToken);
+
+        await auditoria.RegistrarAsync("Usuario", usuario.Id.ToString(), "CREAR",
+            valorAnterior: null,
+            valorNuevo: new { usuario.DNI, usuario.Legajo, usuario.Email, usuario.Nombre, usuario.Apellido, Rol = usuario.Rol.ToString() },
+            cancellationToken);
 
         return ToDto(usuario);
     }

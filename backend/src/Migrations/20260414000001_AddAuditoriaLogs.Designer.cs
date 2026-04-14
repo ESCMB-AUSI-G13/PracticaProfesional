@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using PracticaProfesional.Infrastructure.Persistence;
 
@@ -11,9 +12,11 @@ using PracticaProfesional.Infrastructure.Persistence;
 namespace PracticaProfesional.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260414000001_AddAuditoriaLogs")]
+    partial class AddAuditoriaLogs
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,17 +46,13 @@ namespace PracticaProfesional.Migrations
 
             modelBuilder.Entity("PracticaProfesional.Domain.Entities.AuditoriaCambioRol", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<string>("Accion").IsRequired().HasMaxLength(20).HasColumnType("nvarchar(20)");
                     b.Property<string>("RolOriginal").IsRequired().HasMaxLength(50).HasColumnType("nvarchar(50)");
                     b.Property<string>("RolVista").IsRequired().HasMaxLength(50).HasColumnType("nvarchar(50)");
                     b.Property<DateTime>("Timestamp").HasColumnType("datetime2");
                     b.Property<int>("UsuarioId").HasColumnType("int");
-
                     b.HasKey("Id");
                     b.HasIndex("UsuarioId");
                     b.ToTable("AuditoriaCambiosRol");
@@ -61,15 +60,11 @@ namespace PracticaProfesional.Migrations
 
             modelBuilder.Entity("PracticaProfesional.Domain.Entities.Docente", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<int>("UsuarioId").HasColumnType("int");
                     b.Property<string>("Telefono").IsRequired().HasMaxLength(20).HasColumnType("nvarchar(20)");
                     b.Property<string>("Categoria").IsRequired().HasMaxLength(100).HasColumnType("nvarchar(100)");
-
                     b.HasKey("Id");
                     b.HasIndex("UsuarioId").IsUnique();
                     b.ToTable("Docentes");
@@ -77,15 +72,11 @@ namespace PracticaProfesional.Migrations
 
             modelBuilder.Entity("PracticaProfesional.Domain.Entities.Preceptor", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<int>("UsuarioId").HasColumnType("int");
                     b.Property<string>("Telefono").IsRequired().HasMaxLength(20).HasColumnType("nvarchar(20)");
                     b.Property<string>("Turno").IsRequired().HasMaxLength(50).HasColumnType("nvarchar(50)");
-
                     b.HasKey("Id");
                     b.HasIndex("UsuarioId").IsUnique();
                     b.ToTable("Preceptores");
@@ -93,16 +84,12 @@ namespace PracticaProfesional.Migrations
 
             modelBuilder.Entity("PracticaProfesional.Domain.Entities.Estudiante", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
                     b.Property<int>("UsuarioId").HasColumnType("int");
                     b.Property<int>("Anio").HasColumnType("int");
                     b.Property<string>("Condicion").IsRequired().HasColumnType("nvarchar(max)");
                     b.Property<DateTime>("FechaDeIngreso").HasColumnType("datetime2");
-
                     b.HasKey("Id");
                     b.HasIndex("UsuarioId").IsUnique();
                     b.ToTable("Estudiantes");
@@ -110,105 +97,53 @@ namespace PracticaProfesional.Migrations
 
             modelBuilder.Entity("PracticaProfesional.Domain.Entities.Usuario", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Apellido")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<bool>("Activo")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<string>("DNI")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<DateTime>("FechaCreacion")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Legajo")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<string>("Nombre")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("PasswordResetToken")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
-
-                    b.Property<DateTime?>("PasswordResetTokenExpiry")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Rol")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
+                    b.Property<string>("Apellido").IsRequired().HasMaxLength(100).HasColumnType("nvarchar(100)");
+                    b.Property<bool>("Activo").ValueGeneratedOnAdd().HasColumnType("bit").HasDefaultValue(true);
+                    b.Property<string>("DNI").IsRequired().HasMaxLength(10).HasColumnType("nvarchar(10)");
+                    b.Property<string>("Email").IsRequired().HasMaxLength(150).HasColumnType("nvarchar(150)");
+                    b.Property<DateTime>("FechaCreacion").HasColumnType("datetime2");
+                    b.Property<string>("Legajo").IsRequired().HasMaxLength(20).HasColumnType("nvarchar(20)");
+                    b.Property<string>("Nombre").IsRequired().HasMaxLength(100).HasColumnType("nvarchar(100)");
+                    b.Property<string>("PasswordHash").IsRequired().HasColumnType("nvarchar(max)");
+                    b.Property<string>("PasswordResetToken").HasMaxLength(64).HasColumnType("nvarchar(64)");
+                    b.Property<DateTime?>("PasswordResetTokenExpiry").HasColumnType("datetime2");
+                    b.Property<string>("Rol").IsRequired().HasColumnType("nvarchar(max)");
                     b.HasKey("Id");
-
                     b.HasIndex("DNI").IsUnique();
                     b.HasIndex("Email").IsUnique();
                     b.HasIndex("Legajo").IsUnique();
-
                     b.ToTable("Usuarios");
                 });
 
             modelBuilder.Entity("PracticaProfesional.Domain.Entities.AuditoriaCambioRol", b =>
                 {
                     b.HasOne("PracticaProfesional.Domain.Entities.Usuario", null)
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .WithMany().HasForeignKey("UsuarioId").OnDelete(DeleteBehavior.Restrict).IsRequired();
                 });
 
             modelBuilder.Entity("PracticaProfesional.Domain.Entities.Docente", b =>
                 {
                     b.HasOne("PracticaProfesional.Domain.Entities.Usuario", "Usuario")
-                        .WithOne()
-                        .HasForeignKey("PracticaProfesional.Domain.Entities.Docente", "UsuarioId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .WithOne().HasForeignKey("PracticaProfesional.Domain.Entities.Docente", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict).IsRequired();
                     b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("PracticaProfesional.Domain.Entities.Preceptor", b =>
                 {
                     b.HasOne("PracticaProfesional.Domain.Entities.Usuario", "Usuario")
-                        .WithOne()
-                        .HasForeignKey("PracticaProfesional.Domain.Entities.Preceptor", "UsuarioId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .WithOne().HasForeignKey("PracticaProfesional.Domain.Entities.Preceptor", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict).IsRequired();
                     b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("PracticaProfesional.Domain.Entities.Estudiante", b =>
                 {
                     b.HasOne("PracticaProfesional.Domain.Entities.Usuario", "Usuario")
-                        .WithOne()
-                        .HasForeignKey("PracticaProfesional.Domain.Entities.Estudiante", "UsuarioId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .WithOne().HasForeignKey("PracticaProfesional.Domain.Entities.Estudiante", "UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict).IsRequired();
                     b.Navigation("Usuario");
                 });
 #pragma warning restore 612, 618

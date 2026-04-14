@@ -33,6 +33,12 @@ const MODULOS: Modulo[] = [
     descripcion: 'Alta, baja y modificación de estudiantes. Año, condición y fecha de ingreso.',
     ruta: '/estudiantes',
     roles: ['Direccion']
+  },
+  {
+    titulo: 'Auditoría de Cambios',
+    descripcion: 'Historial completo de modificaciones sobre datos críticos. Trazabilidad por entidad, acción y ejecutor.',
+    ruta: '/auditoria',
+    roles: ['Direccion']
   }
 ];
 

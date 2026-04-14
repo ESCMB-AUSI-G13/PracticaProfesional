@@ -113,6 +113,14 @@ export const routes: Routes = [
       import('./features/estudiantes/editar-estudiante/editar-estudiante.component').then(m => m.EditarEstudianteComponent)
   },
 
+  // Auditoría — solo Dirección
+  {
+    path: 'auditoria',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/auditoria/panel-auditoria/panel-auditoria.component').then(m => m.PanelAuditoriaComponent)
+  },
+
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
 ];

@@ -1,0 +1,126 @@
+<div class="page">
+  <header class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="irAlDashboard()">← Dashboard</button>
+      <h1>Auditoría de Cambios</h1>
+    </div>
+  </header>
+
+  <!-- Filtros -->
+  <div class="filtros-panel">
+    <div class="filtros-grid">
+      <div class="filtro-item">
+        <label>Entidad</label>
+        <select [(ngModel)]="filtros.entidadTipo">
+          @for (t of tiposEntidad; track t) {
+            <option [value]="t">{{ t || 'Todas' }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filtro-item">
+        <label>Acción</label>
+        <select [(ngModel)]="filtros.accion">
+          @for (a of acciones; track a) {
+            <option [value]="a">{{ a || 'Todas' }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filtro-item">
+        <label>Email del ejecutor</label>
+        <input type="text" [(ngModel)]="filtros.ejecutorEmail" placeholder="email@..." />
+      </div>
+
+      <div class="filtro-item">
+        <label>Desde</label>
+        <input type="datetime-local" [(ngModel)]="filtros.fechaDesde" />
+      </div>
+
+      <div class="filtro-item">
+        <label>Hasta</label>
+        <input type="datetime-local" [(ngModel)]="filtros.fechaHasta" />
+      </div>
+    </div>
+
+    <div class="filtros-acciones">
+      <button class="btn btn-primary" (click)="aplicarFiltros()">Buscar</button>
+      <button class="btn btn-secondary" (click)="limpiarFiltros()">Limpiar</button>
+    </div>
+  </div>
+
+  <!-- Estado -->
+  @if (cargando()) {
+    <p class="estado">Cargando registros...</p>
+  } @else if (error()) {
+    <p class="estado error">{{ error() }}</p>
+  } @else if (!resultado() || resultado()!.totalRegistros === 0) {
+    <p class="estado">No hay registros de auditoría para los filtros seleccionados.</p>
+  } @else {
+    <div class="info-resultado">
+      Mostrando {{ resultado()!.items.length }} de {{ resultado()!.totalRegistros }} registros
+      (Página {{ resultado()!.pagina }} / {{ resultado()!.totalPaginas }})
+    </div>
+
+    <div class="tabla-wrapper">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Fecha / Hora</th>
+            <th>Entidad</th>
+            <th>ID</th>
+            <th>Acción</th>
+            <th>Ejecutor</th>
+            <th>Valor anterior</th>
+            <th>Valor nuevo</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of resultado()!.items; track log.id) {
+            <tr>
+              <td class="col-fecha">{{ formatearFecha(log.timestamp) }}</td>
+              <td><span class="badge-entidad">{{ log.entidadTipo }}</span></td>
+              <td class="col-id">{{ log.entidadId }}</td>
+              <td><span class="badge" [ngClass]="badgeAccion(log.accion)">{{ log.accion }}</span></td>
+              <td class="col-email">{{ log.ejecutorEmail }}</td>
+              <td class="col-json">
+                @if (log.valorAnterior) {
+                  <pre class="json-block anterior">{{ parsearJson(log.valorAnterior) }}</pre>
+                } @else {
+                  <span class="vacio">—</span>
+                }
+              </td>
+              <td class="col-json">
+                @if (log.valorNuevo) {
+                  <pre class="json-block nuevo">{{ parsearJson(log.valorNuevo) }}</pre>
+                } @else {
+                  <span class="vacio">—</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    @if (resultado()!.totalPaginas > 1) {
+      <div class="paginacion">
+        <button class="btn btn-sm btn-secondary"
+          [disabled]="filtros.pagina === 1"
+          (click)="irAPagina(filtros.pagina! - 1)">← Anterior</button>
+
+        @for (p of paginas; track p) {
+          <button class="btn btn-sm"
+            [class.btn-primary]="p === filtros.pagina"
+            [class.btn-secondary]="p !== filtros.pagina"
+            (click)="irAPagina(p)">{{ p }}</button>
+        }
+
+        <button class="btn btn-sm btn-secondary"
+          [disabled]="filtros.pagina === resultado()!.totalPaginas"
+          (click)="irAPagina(filtros.pagina! + 1)">Siguiente →</button>
+      </div>
+    }
+  }
+</div>

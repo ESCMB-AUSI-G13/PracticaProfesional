@@ -3,7 +3,9 @@
     "allow": [
       "Bash(grep -r \"Historial\\\\|Inscripcion\\\\|Materia\\\\|Calificacion\\\\|Examen\" 'd:\\\\facum\\\\GITHUB TESIS\\\\PracticaProfesional\\\\backend\\\\src' --include=*.cs)",
       "Bash(grep -r \"estudiante\\\\|alumno\\\\|student\" 'd:\\\\facum\\\\GITHUB TESIS\\\\PracticaProfesional\\\\frontend\\\\src' --include=*.ts --include=*.html -i)",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(docker-compose build:*)",
+      "Bash(docker-compose up:*)"
     ]
   }
 }

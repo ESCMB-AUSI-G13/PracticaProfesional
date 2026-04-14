@@ -3,7 +3,9 @@ using PracticaProfesional.Domain.Enums;
 
 namespace PracticaProfesional.Application.Docentes;
 
-public class ReactivarDocenteUseCase(IUsuarioRepository usuarioRepository)
+public class ReactivarDocenteUseCase(
+    IUsuarioRepository usuarioRepository,
+    IAuditoriaService auditoria)
 {
     public async Task EjecutarAsync(int usuarioId, CancellationToken cancellationToken = default)
     {
@@ -15,5 +17,10 @@ public class ReactivarDocenteUseCase(IUsuarioRepository usuarioRepository)
 
         usuario.Reactivar();
         await usuarioRepository.GuardarCambiosAsync(cancellationToken);
+
+        await auditoria.RegistrarAsync("Docente", usuarioId.ToString(), "REACTIVAR",
+            valorAnterior: new { Activo = false, usuario.Email, usuario.Nombre, usuario.Apellido },
+            valorNuevo:    new { Activo = true,  usuario.Email, usuario.Nombre, usuario.Apellido },
+            cancellationToken);
     }
 }

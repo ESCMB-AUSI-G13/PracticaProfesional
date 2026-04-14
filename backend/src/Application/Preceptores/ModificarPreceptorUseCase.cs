@@ -5,7 +5,8 @@ namespace PracticaProfesional.Application.Preceptores;
 
 public class ModificarPreceptorUseCase(
     IUsuarioRepository usuarioRepository,
-    IPreceptorRepository preceptorRepository)
+    IPreceptorRepository preceptorRepository,
+    IAuditoriaService auditoria)
 {
     public async Task<PreceptorDto> EjecutarAsync(int usuarioId, ModificarPreceptorDto dto, CancellationToken cancellationToken = default)
     {
@@ -18,10 +19,17 @@ public class ModificarPreceptorUseCase(
         if (await usuarioRepository.ExistePorEmailExcluyendoIdAsync(dto.Email, usuarioId, cancellationToken))
             throw new InvalidOperationException("Ya existe un usuario con ese email.");
 
+        var anterior = new { usuario.Email, usuario.Nombre, usuario.Apellido, preceptor.Telefono, preceptor.Turno };
+
         usuario.Modificar(dto.Nombre, dto.Apellido, dto.Email, usuario.Rol);
         preceptor.Modificar(dto.Telefono, dto.Turno);
 
         await usuarioRepository.GuardarCambiosAsync(cancellationToken);
+
+        await auditoria.RegistrarAsync("Preceptor", preceptor.Id.ToString(), "MODIFICAR",
+            valorAnterior: anterior,
+            valorNuevo: new { usuario.Email, usuario.Nombre, usuario.Apellido, preceptor.Telefono, preceptor.Turno },
+            cancellationToken);
 
         return CrearPreceptorUseCase.ToDto(preceptor, usuario);
     }

@@ -9,7 +9,9 @@ namespace PracticaProfesional.Controllers;
 [ApiController]
 [Route("api/auditoria")]
 [Authorize]
-public class AuditoriaController(RegistrarCambioRolUseCase registrarCambioRol) : ControllerBase
+public class AuditoriaController(
+    RegistrarCambioRolUseCase registrarCambioRol,
+    ListarAuditoriaLogsUseCase listarLogs) : ControllerBase
 {
     [HttpPost("cambio-rol")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -24,5 +26,31 @@ public class AuditoriaController(RegistrarCambioRolUseCase registrarCambioRol) :
 
         await registrarCambioRol.EjecutarAsync(usuarioId, dto, cancellationToken);
         return NoContent();
+    }
+
+    /// <summary>
+    /// Devuelve el historial de auditoría con filtros y paginación.
+    /// Solo accesible por Direccion.
+    /// </summary>
+    [HttpGet("logs")]
+    [Authorize(Roles = "Direccion")]
+    [ProducesResponseType(typeof(PaginadoDto<AuditoriaLogDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ObtenerLogs(
+        [FromQuery] string? entidadTipo,
+        [FromQuery] string? accion,
+        [FromQuery] string? ejecutorEmail,
+        [FromQuery] DateTime? fechaDesde,
+        [FromQuery] DateTime? fechaHasta,
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanoPagina = 50,
+        CancellationToken cancellationToken = default)
+    {
+        var filtro = new AuditoriaLogFiltroDto(
+            entidadTipo, accion, ejecutorEmail,
+            fechaDesde, fechaHasta,
+            pagina, tamanoPagina);
+
+        var resultado = await listarLogs.EjecutarAsync(filtro, cancellationToken);
+        return Ok(resultado);
     }
 }
