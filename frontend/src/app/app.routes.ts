@@ -113,6 +113,15 @@ export const routes: Routes = [
       import('./features/estudiantes/editar-estudiante/editar-estudiante.component').then(m => m.EditarEstudianteComponent)
   },
 
+  // Logs de seguridad — solo Dirección
+  {
+    path: 'logs-seguridad',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/logs-seguridad/panel-logs-seguridad/panel-logs-seguridad.component')
+        .then(m => m.PanelLogsSeguridadComponent)
+  },
+
   // Auditoría — solo Dirección
   {
     path: 'auditoria',

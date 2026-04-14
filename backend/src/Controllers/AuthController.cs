@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using PracticaProfesional.Application.Auth;
 using PracticaProfesional.Application.Auth.DTOs;
+using PracticaProfesional.Application.Interfaces;
 
 namespace PracticaProfesional.Controllers;
 
@@ -10,18 +11,32 @@ public class AuthController(
     LoginUseCase loginUseCase,
     RegistroUseCase registroUseCase,
     SolicitarRestablecimientoUseCase solicitarRestablecimientoUseCase,
-    RestablecerPasswordUseCase restablecerPasswordUseCase) : ControllerBase
+    RestablecerPasswordUseCase restablecerPasswordUseCase,
+    ILogSeguridadService logSeguridad) : ControllerBase
 {
     [HttpPost("login")]
     [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Login(
         [FromBody] LoginRequestDto request,
         CancellationToken cancellationToken)
     {
-        var resultado = await loginUseCase.EjecutarAsync(request, cancellationToken);
-        return Ok(resultado);
+        try
+        {
+            var resultado = await loginUseCase.EjecutarAsync(request, cancellationToken);
+
+            await logSeguridad.RegistrarAsync(request.Email, exitoso: true,
+                cancellationToken: cancellationToken);
+
+            return Ok(resultado);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            await logSeguridad.RegistrarAsync(request.Email, exitoso: false,
+                motivoFallo: ex.Message, cancellationToken: cancellationToken);
+
+            return Unauthorized(new { detail = ex.Message });
+        }
     }
 
     [HttpPost("registro")]
@@ -44,7 +59,6 @@ public class AuthController(
     {
         var resultado = await solicitarRestablecimientoUseCase.EjecutarAsync(request, cancellationToken);
 
-        // En desarrollo se devuelve el enlace directo (sin necesitar SMTP)
         if (resultado.EnlaceDevMode is not null)
             return Ok(new { mensaje = "Modo desarrollo: usá el enlace a continuación.", enlace = resultado.EnlaceDevMode });
 

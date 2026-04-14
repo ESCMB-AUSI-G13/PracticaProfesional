@@ -1,0 +1,112 @@
+<div class="page">
+  <header class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="irAlDashboard()">← Dashboard</button>
+      <h1>Logs de Seguridad</h1>
+    </div>
+  </header>
+
+  <!-- Filtros -->
+  <div class="filtros-panel">
+    <div class="filtros-grid">
+      <div class="filtro-item">
+        <label>Email</label>
+        <input type="text" [(ngModel)]="filtros.email" placeholder="usuario@..." />
+      </div>
+
+      <div class="filtro-item">
+        <label>Resultado</label>
+        <select [(ngModel)]="filtros.soloFallidos">
+          <option [ngValue]="null">Todos</option>
+          <option [ngValue]="false">Solo exitosos</option>
+          <option [ngValue]="true">Solo fallidos</option>
+        </select>
+      </div>
+
+      <div class="filtro-item">
+        <label>Desde</label>
+        <input type="datetime-local" [(ngModel)]="filtros.fechaDesde" />
+      </div>
+
+      <div class="filtro-item">
+        <label>Hasta</label>
+        <input type="datetime-local" [(ngModel)]="filtros.fechaHasta" />
+      </div>
+    </div>
+
+    <div class="filtros-acciones">
+      <button class="btn btn-primary" (click)="aplicarFiltros()">Buscar</button>
+      <button class="btn btn-secondary" (click)="limpiarFiltros()">Limpiar</button>
+    </div>
+  </div>
+
+  <!-- Estado -->
+  @if (cargando()) {
+    <p class="estado">Cargando registros...</p>
+  } @else if (error()) {
+    <p class="estado error">{{ error() }}</p>
+  } @else if (!resultado() || resultado()!.totalRegistros === 0) {
+    <p class="estado">No hay logs para los filtros seleccionados.</p>
+  } @else {
+    <!-- Resumen de la página actual -->
+    <div class="resumen-bar">
+      <span class="chip chip-total">{{ resultado()!.totalRegistros }} registros</span>
+      <span class="chip chip-ok">{{ totalExitosos }} exitosos en esta página</span>
+      <span class="chip chip-fail">{{ totalFallidos }} fallidos en esta página</span>
+      <span class="info-pag">Página {{ resultado()!.pagina }} / {{ resultado()!.totalPaginas }}</span>
+    </div>
+
+    <div class="tabla-wrapper">
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Fecha / Hora</th>
+            <th>Email intentado</th>
+            <th>Resultado</th>
+            <th>Motivo del fallo</th>
+            <th>IP origen</th>
+            <th>User-Agent</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (log of resultado()!.items; track log.id) {
+            <tr [class.fila-fallo]="!log.exitoso">
+              <td class="col-fecha">{{ formatearFecha(log.timestamp) }}</td>
+              <td class="col-email">{{ log.email }}</td>
+              <td class="col-resultado">
+                @if (log.exitoso) {
+                  <span class="badge badge-ok">Exitoso</span>
+                } @else {
+                  <span class="badge badge-fail">Fallido</span>
+                }
+              </td>
+              <td class="col-motivo">{{ log.motivoFallo ?? '—' }}</td>
+              <td class="col-ip">{{ log.ipOrigen }}</td>
+              <td class="col-ua" [title]="log.userAgent">{{ acortarUserAgent(log.userAgent) }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Paginación -->
+    @if (resultado()!.totalPaginas > 1) {
+      <div class="paginacion">
+        <button class="btn btn-sm btn-secondary"
+          [disabled]="filtros.pagina === 1"
+          (click)="irAPagina(filtros.pagina! - 1)">← Anterior</button>
+
+        @for (p of paginas; track p) {
+          <button class="btn btn-sm"
+            [class.btn-primary]="p === filtros.pagina"
+            [class.btn-secondary]="p !== filtros.pagina"
+            (click)="irAPagina(p)">{{ p }}</button>
+        }
+
+        <button class="btn btn-sm btn-secondary"
+          [disabled]="filtros.pagina === resultado()!.totalPaginas"
+          (click)="irAPagina(filtros.pagina! + 1)">Siguiente →</button>
+      </div>
+    }
+  }
+</div>

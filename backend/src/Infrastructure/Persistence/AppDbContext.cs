@@ -9,6 +9,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Usuario> Usuarios => Set<Usuario>();
     public DbSet<AuditoriaCambioRol> AuditoriaCambiosRol => Set<AuditoriaCambioRol>();
     public DbSet<AuditoriaLog> AuditoriaLogs => Set<AuditoriaLog>();
+    public DbSet<LogSeguridad> LogsSeguridad => Set<LogSeguridad>();
     public DbSet<Docente> Docentes => Set<Docente>();
     public DbSet<Preceptor> Preceptores => Set<Preceptor>();
     public DbSet<Estudiante> Estudiantes => Set<Estudiante>();
@@ -16,6 +17,20 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<LogSeguridad>(entity =>
+        {
+            entity.HasKey(l => l.Id);
+            entity.Property(l => l.Email).IsRequired().HasMaxLength(150);
+            entity.Property(l => l.Exitoso).IsRequired();
+            entity.Property(l => l.MotivoFallo).IsRequired(false).HasMaxLength(200);
+            entity.Property(l => l.IpOrigen).IsRequired().HasMaxLength(45);
+            entity.Property(l => l.UserAgent).IsRequired().HasMaxLength(500);
+            entity.Property(l => l.Timestamp).IsRequired();
+            entity.HasIndex(l => l.Email);
+            entity.HasIndex(l => l.Exitoso);
+            entity.HasIndex(l => l.Timestamp);
+        });
 
         modelBuilder.Entity<AuditoriaLog>(entity =>
         {

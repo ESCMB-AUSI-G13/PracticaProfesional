@@ -1,0 +1,155 @@
+.page {
+  padding: 2rem;
+  font-family: sans-serif;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  h1 { margin: 0; font-size: 1.5rem; }
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.btn-back {
+  background: none;
+  border: none;
+  color: #3498db;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0;
+  &:hover { text-decoration: underline; }
+}
+
+// ── Filtros ───────────────────────────────────────────────────────────────────
+.filtros-panel {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.filtros-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.filtro-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+
+  label { font-size: 0.8rem; font-weight: 600; color: #555; }
+
+  input, select {
+    padding: 0.4rem 0.6rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    &:focus { outline: none; border-color: #3498db; }
+  }
+}
+
+.filtros-acciones { display: flex; gap: 0.5rem; }
+
+// ── Resumen ───────────────────────────────────────────────────────────────────
+.resumen-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.chip {
+  padding: 0.2rem 0.7rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+
+  &-total { background: #e8eaf6; color: #3f51b5; }
+  &-ok    { background: #d4edda; color: #155724; }
+  &-fail  { background: #f8d7da; color: #721c24; }
+}
+
+.info-pag { font-size: 0.82rem; color: #888; margin-left: auto; }
+
+// ── Tabla ─────────────────────────────────────────────────────────────────────
+.tabla-wrapper { overflow-x: auto; }
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+
+  th, td {
+    padding: 0.55rem 0.7rem;
+    border: 1px solid #e0e0e0;
+    vertical-align: middle;
+  }
+
+  th { background: #f0f4f8; font-weight: 600; white-space: nowrap; }
+
+  tr.fila-fallo td { background: #fff8f8; }
+  tr:not(.fila-fallo):hover td { background: #fafbfc; }
+}
+
+.col-fecha    { white-space: nowrap; min-width: 125px; }
+.col-email    { min-width: 180px; }
+.col-resultado { text-align: center; }
+.col-motivo   { min-width: 160px; color: #c0392b; font-size: 0.82rem; }
+.col-ip       { font-family: monospace; font-size: 0.82rem; }
+.col-ua       { max-width: 260px; font-size: 0.78rem; color: #666; }
+
+// ── Badges ────────────────────────────────────────────────────────────────────
+.badge {
+  display: inline-block;
+  padding: 0.18rem 0.6rem;
+  border-radius: 10px;
+  font-size: 0.75rem;
+  font-weight: 700;
+
+  &-ok   { background: #d4edda; color: #155724; }
+  &-fail { background: #f8d7da; color: #721c24; }
+}
+
+// ── Paginación ────────────────────────────────────────────────────────────────
+.paginacion {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+// ── Estados ───────────────────────────────────────────────────────────────────
+.estado {
+  padding: 1rem;
+  color: #555;
+  &.error { color: #c0392b; }
+}
+
+// ── Botones ───────────────────────────────────────────────────────────────────
+.btn {
+  padding: 0.45rem 1rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+
+  &.btn-primary   { background: #3498db; color: white; }
+  &.btn-secondary { background: #6c757d; color: white; }
+  &.btn-sm        { padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+  &:hover:not(:disabled) { opacity: 0.9; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}

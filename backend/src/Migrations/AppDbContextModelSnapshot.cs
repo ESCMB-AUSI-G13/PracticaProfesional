@@ -22,6 +22,23 @@ namespace PracticaProfesional.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("PracticaProfesional.Domain.Entities.LogSeguridad", b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.Property<string>("Email").IsRequired().HasMaxLength(150).HasColumnType("nvarchar(150)");
+                    b.Property<bool>("Exitoso").HasColumnType("bit");
+                    b.Property<string>("MotivoFallo").HasMaxLength(200).HasColumnType("nvarchar(200)");
+                    b.Property<string>("IpOrigen").IsRequired().HasMaxLength(45).HasColumnType("nvarchar(45)");
+                    b.Property<string>("UserAgent").IsRequired().HasMaxLength(500).HasColumnType("nvarchar(500)");
+                    b.Property<DateTime>("Timestamp").HasColumnType("datetime2");
+                    b.HasKey("Id");
+                    b.HasIndex("Email");
+                    b.HasIndex("Exitoso");
+                    b.HasIndex("Timestamp");
+                    b.ToTable("LogsSeguridad");
+                });
+
             modelBuilder.Entity("PracticaProfesional.Domain.Entities.AuditoriaLog", b =>
                 {
                     b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("int");

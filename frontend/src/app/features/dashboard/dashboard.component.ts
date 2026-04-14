@@ -39,6 +39,12 @@ const MODULOS: Modulo[] = [
     descripcion: 'Historial completo de modificaciones sobre datos críticos. Trazabilidad por entidad, acción y ejecutor.',
     ruta: '/auditoria',
     roles: ['Direccion']
+  },
+  {
+    titulo: 'Logs de Seguridad',
+    descripcion: 'Registro de intentos de inicio de sesión exitosos y fallidos. Detecta accesos no autorizados con IP y User-Agent.',
+    ruta: '/logs-seguridad',
+    roles: ['Direccion']
   }
 ];
 
