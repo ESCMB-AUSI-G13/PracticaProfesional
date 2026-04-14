@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
+import { SesionService } from '../../sesiones/sesion.service';
 
 export interface LoginRequest {
   email: string;
@@ -54,7 +55,11 @@ export class AuthService {
     return r ? (VISTAS_PERMITIDAS[r] ?? []) : [];
   });
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private sesionService: SesionService
+  ) {}
 
   login(credenciales: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credenciales).pipe(
@@ -65,6 +70,8 @@ export class AuthService {
         // Limpia cualquier modo vista de sesión anterior
         sessionStorage.removeItem(ROL_VISTA_KEY);
         this._rolVista.set(null);
+        // Registra presencia en el servidor
+        this.sesionService.iniciarHeartbeat();
       })
     );
   }
@@ -100,6 +107,8 @@ export class AuthService {
 
   logout(): void {
     if (this.enModoVista()) this.restaurarRol();
+    // Notifica al backend que el usuario se desconectó
+    this.sesionService.detenerHeartbeat();
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(USER_KEY);
     sessionStorage.removeItem(ROL_VISTA_KEY);
