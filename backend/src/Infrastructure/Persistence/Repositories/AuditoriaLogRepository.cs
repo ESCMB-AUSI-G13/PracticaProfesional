@@ -44,4 +44,13 @@ public class AuditoriaLogRepository(AppDbContext context) : IAuditoriaLogReposit
 
         return (items, total);
     }
+
+    public async Task<IEnumerable<AuditoriaLog>> ObtenerPorEntidadAsync(
+        string entidadTipo,
+        string entidadId,
+        CancellationToken cancellationToken = default)
+        => await context.AuditoriaLogs
+            .Where(l => l.EntidadTipo == entidadTipo && l.EntidadId == entidadId)
+            .OrderByDescending(l => l.Timestamp)
+            .ToListAsync(cancellationToken);
 }

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using PracticaProfesional.Application.Auditoria;
 using PracticaProfesional.Application.Auth;
+using PracticaProfesional.Application.Calificaciones;
 using PracticaProfesional.Application.LogsSeguridad;
 using PracticaProfesional.Application.Docentes;
 using PracticaProfesional.Application.Estudiantes;
@@ -86,6 +87,13 @@ builder.Services.AddScoped<ReactivarPreceptorUseCase>();
 
 // Inscripciones
 builder.Services.AddScoped<InscribirseEnMateriaUseCase>();
+builder.Services.AddScoped<IInscripcionExamenRepository, InscripcionExamenRepository>();
+
+// Calificaciones
+builder.Services.AddScoped<CargarNotaExamenUseCase>();
+builder.Services.AddScoped<ListarInscripcionesExamenUseCase>();
+builder.Services.AddScoped<RectificarNotaExamenUseCase>();
+builder.Services.AddScoped<ObtenerHistorialNotasUseCase>();
 
 // Estado Académico
 builder.Services.AddScoped<ActualizarEstadoAcademicoUseCase>();

@@ -47,6 +47,12 @@ const MODULOS: Modulo[] = [
     roles: ['Direccion']
   },
   {
+    titulo: 'Carga de Calificaciones',
+    descripcion: 'Registrá las notas de parciales, recuperatorios y exámenes finales de tus alumnos.',
+    ruta: '/calificaciones/carga-notas',
+    roles: ['Docente']
+  },
+  {
     titulo: 'Reporte de Inasistencias',
     descripcion: 'Listado detallado de ausencias con filtros por curso, materia y rango de fechas. Incluye justificaciones.',
     ruta: '/reportes/inasistencias',

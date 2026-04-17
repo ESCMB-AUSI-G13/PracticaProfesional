@@ -130,6 +130,15 @@ export const routes: Routes = [
       import('./features/auditoria/panel-auditoria/panel-auditoria.component').then(m => m.PanelAuditoriaComponent)
   },
 
+  // Módulo de calificaciones — solo Docente
+  {
+    path: 'calificaciones/carga-notas',
+    canActivate: [roleGuard('Docente')],
+    loadComponent: () =>
+      import('./features/calificaciones/carga-notas/carga-notas.component')
+        .then(m => m.CargaNotasComponent)
+  },
+
   // Reportes operativos (RR-08, RR-09) — Preceptor y Dirección
   {
     path: 'reportes/inasistencias',

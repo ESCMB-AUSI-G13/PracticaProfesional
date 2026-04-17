@@ -1,0 +1,114 @@
+.page { padding: 2rem; font-family: sans-serif; max-width: 1200px; margin: 0 auto; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.header-left { display: flex; align-items: center; gap: 0.75rem; h1 { margin: 0; font-size: 1.5rem; } }
+.btn-back { background: none; border: none; color: #3498db; cursor: pointer; font-size: 0.9rem; padding: 0; &:hover { text-decoration: underline; } }
+
+// Panel de búsqueda
+.filtros-panel {
+  background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1.25rem; margin-bottom: 1.5rem;
+  h2 { margin: 0 0 1rem; font-size: 1rem; color: #444; }
+}
+.filtros-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.campo {
+  display: flex; flex-direction: column; gap: 0.3rem;
+  label { font-size: 0.85rem; font-weight: 600; color: #555; }
+  input[type="number"], input[type="text"] { padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
+}
+.campo-motivo { flex: 2; input { width: 100%; } }
+.req { color: #e74c3c; }
+.filtros-acciones { display: flex; gap: 0.75rem; }
+
+// Encabezado del acta
+.acta-header {
+  display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;
+  background: #eaf4fb; border: 1px solid #b3d9f0; border-radius: 6px; padding: 0.9rem 1.25rem; margin-bottom: 1.25rem;
+}
+.acta-info { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.9rem; span { color: #2c3e50; } }
+.resumen-pills { display: flex; gap: 0.5rem; }
+.pill {
+  padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600;
+  &.pill-pendiente { background: #fff3cd; color: #856404; }
+  &.pill-calificado { background: #d4edda; color: #155724; }
+}
+
+// Tabla del acta
+.tabla-wrapper { overflow-x: auto; margin-bottom: 1.5rem; }
+.tabla {
+  width: 100%; border-collapse: collapse; font-size: 0.9rem;
+  th, td { padding: 0.6rem 0.75rem; border: 1px solid #e0e0e0; text-align: left; vertical-align: middle; }
+  th { background: #f5f5f5; font-weight: 600; }
+}
+.fila-aprobada    { background: #f6fffb; }
+.fila-desaprobada { background: #fff8f8; }
+.fila-pendiente   { background: #fffef5; }
+
+// Nota
+.celda-nota { text-align: center; }
+.nota-valor { font-weight: 700; font-size: 1rem; &.aprobado { color: #27ae60; } &.desaprobado { color: #e74c3c; } }
+.sin-nota { color: #aaa; }
+
+// Badges de estado
+.badge {
+  display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.78rem; font-weight: 600;
+  &.badge-activa      { background: #fff3cd; color: #856404; }
+  &.badge-aprobada    { background: #d4edda; color: #155724; }
+  &.badge-desaprobada { background: #f8d7da; color: #721c24; }
+  &.badge-baja        { background: #e2e3e5; color: #383d41; }
+}
+
+// Celda de acciones
+.celda-accion { min-width: 220px; }
+.input-nota-wrapper { display: flex; gap: 0.4rem; align-items: center; }
+.input-nota {
+  width: 75px; padding: 0.35rem 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem;
+  &:focus { outline: 2px solid #3498db; border-color: transparent; }
+}
+.acciones-calificado { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+.error-fila { margin: 0.25rem 0 0; font-size: 0.78rem; color: #c0392b; }
+.guardado-ok  { font-size: 0.82rem; color: #27ae60; font-weight: 600; margin-left: 0.4rem; }
+.ya-calificado { font-size: 0.82rem; color: #999; font-style: italic; }
+
+// Fila de rectificación expandible
+.fila-rectificacion td { padding: 0; border-top: none; }
+.panel-rectificacion {
+  background: #fffbf0; border-left: 4px solid #f39c12; padding: 1rem 1.25rem; margin: 0;
+}
+.panel-titulo { display: block; font-weight: 600; font-size: 0.9rem; color: #856404; margin-bottom: 0.75rem; }
+.rectifica-campos { display: flex; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.75rem; align-items: flex-end; }
+.rectifica-acciones { display: flex; gap: 0.5rem; }
+
+// Panel historial
+.historial-panel {
+  background: #fff; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1.25rem; margin-top: 0.5rem;
+}
+.historial-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;
+  h2 { margin: 0; font-size: 1rem; color: #2c3e50; }
+}
+.btn-cerrar { background: none; border: 1px solid #ccc; border-radius: 4px; padding: 0.2rem 0.6rem; cursor: pointer; font-size: 0.85rem; color: #666; &:hover { background: #f5f5f5; } }
+
+.tabla-historial { font-size: 0.85rem; }
+.celda-fecha  { white-space: nowrap; color: #555; }
+.celda-json   { font-family: monospace; font-size: 0.8rem; color: #444; max-width: 280px; word-break: break-word; }
+.celda-ejecutor { font-size: 0.82rem; color: #666; }
+
+.badge-accion {
+  display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.78rem; font-weight: 600;
+  &.accion-carga     { background: #d4edda; color: #155724; }
+  &.accion-rectifica { background: #fff3cd; color: #856404; }
+}
+
+// Estados globales
+.estado { padding: 1rem; color: #555; &.error { color: #c0392b; } }
+
+// Botones
+.btn {
+  padding: 0.4rem 0.85rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem;
+  &.btn-primary   { background: #3498db; color: white; }
+  &.btn-secondary { background: #6c757d; color: white; }
+  &.btn-guardar   { background: #2ecc71; color: white; &:hover:not(:disabled) { background: #27ae60; } }
+  &.btn-rectificar { background: #f39c12; color: white; &.activo { background: #e67e22; } }
+  &.btn-historial  { background: #8e44ad; color: white; &.activo { background: #6c3483; } }
+  &:hover:not(:disabled) { opacity: 0.9; }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
