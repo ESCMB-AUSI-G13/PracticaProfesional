@@ -44,4 +44,31 @@ public class HistorialAcademicoRepository(AppDbContext context) : IHistorialAcad
                 h.NotaFinal != null &&
                 h.NotaFinal >= 4,
             cancellationToken);
+
+    public async Task<decimal?> ObtenerNotaFinalEnCursoAsync(
+        int estudianteId,
+        int materiaId,
+        int cursoId,
+        CancellationToken cancellationToken = default)
+        => await context.HistorialAcademico
+            .Where(h =>
+                h.EstudianteId == estudianteId &&
+                h.MateriaId    == materiaId &&
+                h.CursoId      == cursoId)
+            .Select(h => h.NotaFinal)
+            .FirstOrDefaultAsync(cancellationToken);
+
+    public async Task<int> ContarAprobadosEnPlanAsync(
+        int estudianteId,
+        string plan,
+        CancellationToken cancellationToken = default)
+        => await context.HistorialAcademico
+            .Where(h =>
+                h.EstudianteId == estudianteId &&
+                h.NotaFinal != null &&
+                h.NotaFinal >= 4 &&
+                h.Materia.Plan == plan)
+            .Select(h => h.MateriaId)
+            .Distinct()
+            .CountAsync(cancellationToken);
 }

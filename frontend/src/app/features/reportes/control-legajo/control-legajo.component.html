@@ -1,0 +1,133 @@
+<div class="page">
+  <header class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="irAlDashboard()">← Dashboard</button>
+      <h1>Control Individual por Legajo</h1>
+    </div>
+  </header>
+
+  <!-- Buscador -->
+  <section class="buscador">
+    <input
+      type="text"
+      [ngModel]="legajoBusqueda()"
+      (ngModelChange)="legajoBusqueda.set($event)"
+      placeholder="Ingresá el legajo del estudiante (ej: EST-2024-001)"
+      class="input-legajo"
+      (keyup.enter)="buscar()"
+    />
+    <button class="btn btn-primary" (click)="buscar()" [disabled]="cargando() || !legajoBusqueda().trim()">
+      {{ cargando() ? 'Buscando...' : 'Buscar' }}
+    </button>
+    @if (resultado()) {
+      <button class="btn btn-secondary" (click)="limpiar()">Nueva búsqueda</button>
+    }
+  </section>
+
+  <!-- Error -->
+  @if (error()) {
+    <p class="estado error">{{ error() }}</p>
+  }
+
+  <!-- Resultado -->
+  @if (resultado(); as r) {
+
+    <!-- Perfil del estudiante -->
+    <section class="perfil-card">
+      <div class="perfil-datos">
+        <div class="dato">
+          <span class="dato-label">Alumno</span>
+          <span class="dato-valor nombre">{{ r.nombreCompleto }}</span>
+        </div>
+        <div class="dato">
+          <span class="dato-label">Legajo</span>
+          <span class="dato-valor">{{ r.legajo }}</span>
+        </div>
+        <div class="dato">
+          <span class="dato-label">Condición académica</span>
+          <span class="dato-valor">
+            <span [class]="'badge condicion-' + r.condicionAcademica.toLowerCase()">
+              {{ r.condicionAcademica }}
+            </span>
+          </span>
+        </div>
+        <div class="dato">
+          <span class="dato-label">Año</span>
+          <span class="dato-valor">{{ r.anio }}°</span>
+        </div>
+        <div class="dato">
+          <span class="dato-label">Fecha de ingreso</span>
+          <span class="dato-valor">{{ r.fechaDeIngreso | date:'dd/MM/yyyy' }}</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Métricas globales -->
+    <section class="metricas">
+      <div class="metrica">
+        <span class="metrica-valor">{{ r.totalClasesGlobal }}</span>
+        <span class="metrica-label">Total clases</span>
+      </div>
+      <div class="metrica">
+        <span class="metrica-valor">{{ r.porcentajePresenciaGlobal | number:'1.1-1' }}%</span>
+        <span class="metrica-label">Presencia global</span>
+      </div>
+      <div class="metrica" [class.alerta]="r.materiasEnRiesgo > 0">
+        <span class="metrica-valor">{{ r.materiasEnRiesgo }}</span>
+        <span class="metrica-label">Materias en riesgo</span>
+      </div>
+      <div class="metrica" [class.critico]="r.materiasConRegularidadPerdida > 0">
+        <span class="metrica-valor">{{ r.materiasConRegularidadPerdida }}</span>
+        <span class="metrica-label">Regularidad perdida</span>
+      </div>
+    </section>
+
+    <!-- Tabla por materia -->
+    @if (r.asistenciasPorMateria.length === 0) {
+      <p class="estado">Sin registros de asistencia para este estudiante.</p>
+    } @else {
+      <h2 class="seccion-titulo">Detalle por materia</h2>
+      <div class="tabla-wrapper">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Materia</th>
+              <th>Curso</th>
+              <th>Total</th>
+              <th>Presentes</th>
+              <th>Aust. justif.</th>
+              <th>Aust. injust.</th>
+              <th>% Presencia</th>
+              <th>% Ausencias</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (m of r.asistenciasPorMateria; track m.materiaId + m.curso) {
+              <tr [class.fila-riesgo]="m.enRiesgoRegularidad" [class.fila-critica]="m.perdioRegularidad">
+                <td>{{ m.materia }}</td>
+                <td>{{ m.curso }}</td>
+                <td class="centrado">{{ m.totalClases }}</td>
+                <td class="centrado">{{ m.presentes }}</td>
+                <td class="centrado">{{ m.ausentesJustificados }}</td>
+                <td class="centrado">{{ m.ausentesInjustificados }}</td>
+                <td class="centrado">{{ m.porcentajePresencia | number:'1.1-1' }}%</td>
+                <td class="centrado">{{ m.porcentajeAusencias | number:'1.1-1' }}%</td>
+                <td>
+                  @if (m.perdioRegularidad) {
+                    <span class="badge badge-critico">Regularidad perdida</span>
+                  } @else if (m.enRiesgoRegularidad) {
+                    <span class="badge badge-riesgo">En riesgo</span>
+                  } @else {
+                    <span class="badge badge-ok">Regular</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="generado-en">Reporte generado: {{ r.generadoEn | date:'dd/MM/yyyy HH:mm' }}</p>
+    }
+  }
+</div>

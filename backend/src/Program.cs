@@ -7,7 +7,9 @@ using PracticaProfesional.Application.Auth;
 using PracticaProfesional.Application.LogsSeguridad;
 using PracticaProfesional.Application.Docentes;
 using PracticaProfesional.Application.Estudiantes;
+using PracticaProfesional.Application.EstadoAcademico;
 using PracticaProfesional.Application.Inscripciones;
+using PracticaProfesional.Application.Reportes;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Preceptores;
 using PracticaProfesional.Application.Usuarios;
@@ -49,6 +51,8 @@ builder.Services.AddScoped<IEstudianteRepository, EstudianteRepository>();
 builder.Services.AddScoped<ICorrelativiadadRepository, CorrelativiadadRepository>();
 builder.Services.AddScoped<IHistorialAcademicoRepository, HistorialAcademicoRepository>();
 builder.Services.AddScoped<IInscripcionMateriaRepository, InscripcionMateriaRepository>();
+builder.Services.AddScoped<IAsistenciaRepository, AsistenciaRepository>();
+builder.Services.AddScoped<IMateriaRepository, MateriaRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 // ── Use Cases ──────────────────────────────────────────────────────────────────
@@ -82,6 +86,13 @@ builder.Services.AddScoped<ReactivarPreceptorUseCase>();
 
 // Inscripciones
 builder.Services.AddScoped<InscribirseEnMateriaUseCase>();
+
+// Estado Académico
+builder.Services.AddScoped<ActualizarEstadoAcademicoUseCase>();
+
+// Reportes Operativos (RR-08, RR-09)
+builder.Services.AddScoped<ReporteInasistenciasUseCase>();
+builder.Services.AddScoped<ControlIndividualPorLegajoUseCase>();
 
 // Estudiantes
 builder.Services.AddScoped<CrearEstudianteUseCase>();

@@ -23,6 +23,11 @@ public class EstudianteRepository(AppDbContext context) : IEstudianteRepository
             .ThenBy(e => e.Usuario.Nombre)
             .ToListAsync(cancellationToken);
 
+    public async Task<Estudiante?> ObtenerPorLegajoAsync(string legajo, CancellationToken cancellationToken = default)
+        => await context.Estudiantes
+            .Include(e => e.Usuario)
+            .FirstOrDefaultAsync(e => e.Usuario.Legajo == legajo, cancellationToken);
+
     public async Task AgregarAsync(Estudiante estudiante, CancellationToken cancellationToken = default)
     {
         await context.Estudiantes.AddAsync(estudiante, cancellationToken);

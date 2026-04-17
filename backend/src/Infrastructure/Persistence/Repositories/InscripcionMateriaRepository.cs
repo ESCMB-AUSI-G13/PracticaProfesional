@@ -18,6 +18,15 @@ public class InscripcionMateriaRepository(AppDbContext context) : IInscripcionMa
                 i.Estado == EstadoInscripcion.Activa,
             cancellationToken);
 
+    public async Task<bool> TieneAlgunaInscripcionActivaAsync(
+        int estudianteId,
+        CancellationToken cancellationToken = default)
+        => await context.InscripcionesMateria
+            .AnyAsync(i =>
+                i.EstudianteId == estudianteId &&
+                i.Estado == EstadoInscripcion.Activa,
+            cancellationToken);
+
     public async Task<InscripcionMateria?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default)
         => await context.InscripcionesMateria
             .Include(i => i.Materia)

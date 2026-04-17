@@ -130,6 +130,22 @@ export const routes: Routes = [
       import('./features/auditoria/panel-auditoria/panel-auditoria.component').then(m => m.PanelAuditoriaComponent)
   },
 
+  // Reportes operativos (RR-08, RR-09) — Preceptor y Dirección
+  {
+    path: 'reportes/inasistencias',
+    canActivate: [roleGuard('Preceptor', 'Direccion')],
+    loadComponent: () =>
+      import('./features/reportes/panel-inasistencias/panel-inasistencias.component')
+        .then(m => m.PanelInasistenciasComponent)
+  },
+  {
+    path: 'reportes/control-legajo',
+    canActivate: [roleGuard('Preceptor', 'Direccion')],
+    loadComponent: () =>
+      import('./features/reportes/control-legajo/control-legajo.component')
+        .then(m => m.ControlLegajoComponent)
+  },
+
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
 ];

@@ -5,7 +5,19 @@
       "Bash(grep -r \"estudiante\\\\|alumno\\\\|student\" 'd:\\\\facum\\\\GITHUB TESIS\\\\PracticaProfesional\\\\frontend\\\\src' --include=*.ts --include=*.html -i)",
       "Bash(xargs grep:*)",
       "Bash(docker-compose build:*)",
-      "Bash(docker-compose up:*)"
+      "Bash(docker-compose up:*)",
+      "Bash(dotnet build *)",
+      "Bash(cmd /c \"cd /d \\\\\"d:\\\\Git Facultad\\\\PracticaProfesional\\\\backend\\\\\" && dotnet build --no-restore 2>&1\")",
+      "Bash(dotnet.exe build *)",
+      "Bash(where dotnet *)",
+      "Bash(powershell -Command \"Get-Command dotnet -ErrorAction SilentlyContinue | Select-Object -ExpandProperty Source\")",
+      "Bash(powershell.exe -Command '& { $env:PATH = $env:PATH + '\\\\'';C:/Program Files/dotnet'\\\\''; dotnet build '\\\\''d:/Git Facultad/PracticaProfesional/backend'\\\\'' --no-restore 2>&1 }')",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Users/**)",
+      "Bash(npx ng *)",
+      "Bash(powershell.exe -Command \"Get-Command node,npm,npx 2>&1 | Select-Object Name, Source\")",
+      "Bash(powershell.exe -Command ' *)",
+      "Bash(powershell.exe -Command 'where.exe node 2>&1; where.exe npm 2>&1; $env:PATH -split '\\\\'';'\\\\'' | Where-Object { $_ -match '\\\\''node|npm'\\\\'' }')"
     ]
   }
 }

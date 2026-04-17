@@ -45,6 +45,18 @@ const MODULOS: Modulo[] = [
     descripcion: 'Registro de intentos de inicio de sesión exitosos y fallidos. Detecta accesos no autorizados con IP y User-Agent.',
     ruta: '/logs-seguridad',
     roles: ['Direccion']
+  },
+  {
+    titulo: 'Reporte de Inasistencias',
+    descripcion: 'Listado detallado de ausencias con filtros por curso, materia y rango de fechas. Incluye justificaciones.',
+    ruta: '/reportes/inasistencias',
+    roles: ['Preceptor', 'Direccion']
+  },
+  {
+    titulo: 'Control por Legajo',
+    descripcion: 'Ficha individual de asistencia por legajo: porcentajes, alertas de riesgo y estado de regularidad por materia.',
+    ruta: '/reportes/control-legajo',
+    roles: ['Preceptor', 'Direccion']
   }
 ];
 

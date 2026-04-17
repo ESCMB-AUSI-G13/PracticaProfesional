@@ -1,0 +1,135 @@
+<div class="page">
+  <header class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="irAlDashboard()">← Dashboard</button>
+      <h1>Reporte de Inasistencias</h1>
+    </div>
+  </header>
+
+  <!-- Filtros -->
+  <section class="filtros-panel">
+    <h2>Filtros</h2>
+    <div class="filtros-grid">
+      <div class="campo">
+        <label>ID de Curso</label>
+        <input
+          type="number"
+          [ngModel]="cursoId()"
+          (ngModelChange)="cursoId.set($event || null)"
+          placeholder="Ej: 3"
+          min="1"
+        />
+      </div>
+
+      <div class="campo">
+        <label>ID de Materia</label>
+        <input
+          type="number"
+          [ngModel]="materiaId()"
+          (ngModelChange)="materiaId.set($event || null)"
+          placeholder="Ej: 12"
+          min="1"
+        />
+      </div>
+
+      <div class="campo">
+        <label>Fecha desde</label>
+        <input
+          type="date"
+          [ngModel]="fechaDesde()"
+          (ngModelChange)="fechaDesde.set($event)"
+        />
+      </div>
+
+      <div class="campo">
+        <label>Fecha hasta</label>
+        <input
+          type="date"
+          [ngModel]="fechaHasta()"
+          (ngModelChange)="fechaHasta.set($event)"
+        />
+      </div>
+
+      <div class="campo campo-check">
+        <label>
+          <input
+            type="checkbox"
+            [ngModel]="soloAusencias()"
+            (ngModelChange)="soloAusencias.set($event)"
+          />
+          Solo ausencias
+        </label>
+      </div>
+    </div>
+
+    <div class="filtros-acciones">
+      <button class="btn btn-primary" (click)="buscar()" [disabled]="cargando()">
+        {{ cargando() ? 'Generando...' : 'Generar reporte' }}
+      </button>
+      <button class="btn btn-secondary" (click)="limpiar()">Limpiar</button>
+    </div>
+  </section>
+
+  <!-- Estado de carga / error -->
+  @if (cargando()) {
+    <p class="estado">Generando reporte...</p>
+  } @else if (error()) {
+    <p class="estado error">{{ error() }}</p>
+  } @else if (buscado() && reporte()) {
+
+    <!-- Resumen -->
+    <section class="resumen-cards">
+      <div class="card">
+        <span class="card-valor">{{ reporte()!.totalRegistros }}</span>
+        <span class="card-label">Total registros</span>
+      </div>
+      <div class="card card-ausente">
+        <span class="card-valor">{{ reporte()!.totalAusentes }}</span>
+        <span class="card-label">Ausentes injustificados</span>
+      </div>
+      <div class="card card-justificado">
+        <span class="card-valor">{{ reporte()!.totalAusentesJustificados }}</span>
+        <span class="card-label">Ausentes justificados</span>
+      </div>
+    </section>
+
+    <!-- Tabla de registros -->
+    @if (reporte()!.registros.length === 0) {
+      <p class="estado">No se encontraron registros con los filtros aplicados.</p>
+    } @else {
+      <div class="tabla-wrapper">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Legajo</th>
+              <th>Alumno</th>
+              <th>Materia</th>
+              <th>Curso</th>
+              <th>Fecha</th>
+              <th>Tipo</th>
+              <th>Motivo</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (r of reporte()!.registros; track r.estudianteId + r.fecha + r.materia) {
+              <tr>
+                <td>{{ r.legajo }}</td>
+                <td>{{ r.nombreCompleto }}</td>
+                <td>{{ r.materia }}</td>
+                <td>{{ r.curso }}</td>
+                <td>{{ r.fecha | date:'dd/MM/yyyy' }}</td>
+                <td>
+                  <span [class]="r.tipoAsistencia === 'Ausente' ? 'badge ausente' : 'badge justificado'">
+                    {{ r.tipoAsistencia === 'Ausente' ? 'Injustificado' : 'Justificado' }}
+                  </span>
+                </td>
+                <td class="motivo">{{ r.motivo ?? '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="generado-en">Reporte generado: {{ reporte()!.generadoEn | date:'dd/MM/yyyy HH:mm' }}</p>
+    }
+  }
+</div>
