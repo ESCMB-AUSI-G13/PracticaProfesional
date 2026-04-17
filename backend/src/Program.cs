@@ -7,6 +7,7 @@ using PracticaProfesional.Application.Auth;
 using PracticaProfesional.Application.LogsSeguridad;
 using PracticaProfesional.Application.Docentes;
 using PracticaProfesional.Application.Estudiantes;
+using PracticaProfesional.Application.Inscripciones;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Preceptores;
 using PracticaProfesional.Application.Usuarios;
@@ -25,7 +26,12 @@ var builder = WebApplication.CreateBuilder(args);
 
 // ── Base de datos ──────────────────────────────────────────────────────────────
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null)));
 
 // ── Repositorios e interfaces ──────────────────────────────────────────────────
 builder.Services.AddHttpContextAccessor();
@@ -40,6 +46,9 @@ builder.Services.AddScoped<ListarLogsLoginUseCase>();
 builder.Services.AddScoped<IDocenteRepository, DocenteRepository>();
 builder.Services.AddScoped<IPreceptorRepository, PreceptorRepository>();
 builder.Services.AddScoped<IEstudianteRepository, EstudianteRepository>();
+builder.Services.AddScoped<ICorrelativiadadRepository, CorrelativiadadRepository>();
+builder.Services.AddScoped<IHistorialAcademicoRepository, HistorialAcademicoRepository>();
+builder.Services.AddScoped<IInscripcionMateriaRepository, InscripcionMateriaRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 // ── Use Cases ──────────────────────────────────────────────────────────────────
@@ -70,6 +79,9 @@ builder.Services.AddScoped<ListarPreceptoresUseCase>();
 builder.Services.AddScoped<ModificarPreceptorUseCase>();
 builder.Services.AddScoped<DesactivarPreceptorUseCase>();
 builder.Services.AddScoped<ReactivarPreceptorUseCase>();
+
+// Inscripciones
+builder.Services.AddScoped<InscribirseEnMateriaUseCase>();
 
 // Estudiantes
 builder.Services.AddScoped<CrearEstudianteUseCase>();
@@ -122,22 +134,30 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate();
-
-    if (!db.Usuarios.Any())
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
     {
-        var admin = Usuario.Crear(
-            dni: "00000000",
-            legajo: "ADMIN-001",
-            email: "admin@institucion.edu.ar",
-            nombre: "Administrador",
-            apellido: "Sistema",
-            passwordHash: BCrypt.Net.BCrypt.HashPassword("Admin1234!"),
-            rol: Rol.Direccion
-        );
-        db.Usuarios.Add(admin);
-        db.SaveChanges();
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.Migrate();
+
+        if (!db.Usuarios.Any())
+        {
+            var admin = Usuario.Crear(
+                dni: "00000000",
+                legajo: "ADMIN-001",
+                email: "admin@institucion.edu.ar",
+                nombre: "Administrador",
+                apellido: "Sistema",
+                passwordHash: BCrypt.Net.BCrypt.HashPassword("Admin1234!"),
+                rol: Rol.Direccion
+            );
+            db.Usuarios.Add(admin);
+            db.SaveChanges();
+        }
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error al aplicar migraciones o seed. La aplicación continuará sin migración automática.");
     }
 }
 

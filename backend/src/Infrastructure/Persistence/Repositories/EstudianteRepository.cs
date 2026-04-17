@@ -6,6 +6,11 @@ namespace PracticaProfesional.Infrastructure.Persistence.Repositories;
 
 public class EstudianteRepository(AppDbContext context) : IEstudianteRepository
 {
+    public async Task<Estudiante?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default)
+        => await context.Estudiantes
+            .Include(e => e.Usuario)
+            .FirstOrDefaultAsync(e => e.Id == id, cancellationToken);
+
     public async Task<Estudiante?> ObtenerPorUsuarioIdAsync(int usuarioId, CancellationToken cancellationToken = default)
         => await context.Estudiantes
             .Include(e => e.Usuario)
