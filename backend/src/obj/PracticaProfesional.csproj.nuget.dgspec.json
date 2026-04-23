@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\facum\\GITHUB TESIS\\PracticaProfesional\\backend\\src\\PracticaProfesional.csproj": {}
+    "D:\\Documents\\3A\\PRACTICA PROFESIONAL\\PracticaProfesional\\backend\\src\\PracticaProfesional.csproj": {}
   },
   "projects": {
-    "D:\\facum\\GITHUB TESIS\\PracticaProfesional\\backend\\src\\PracticaProfesional.csproj": {
+    "D:\\Documents\\3A\\PRACTICA PROFESIONAL\\PracticaProfesional\\backend\\src\\PracticaProfesional.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\facum\\GITHUB TESIS\\PracticaProfesional\\backend\\src\\PracticaProfesional.csproj",
+        "projectUniqueName": "D:\\Documents\\3A\\PRACTICA PROFESIONAL\\PracticaProfesional\\backend\\src\\PracticaProfesional.csproj",
         "projectName": "PracticaProfesional",
-        "projectPath": "D:\\facum\\GITHUB TESIS\\PracticaProfesional\\backend\\src\\PracticaProfesional.csproj",
-        "packagesPath": "C:\\Users\\facum\\.nuget\\packages\\",
-        "outputPath": "D:\\facum\\GITHUB TESIS\\PracticaProfesional\\backend\\src\\obj\\",
+        "projectPath": "D:\\Documents\\3A\\PRACTICA PROFESIONAL\\PracticaProfesional\\backend\\src\\PracticaProfesional.csproj",
+        "packagesPath": "C:\\Users\\carra\\.nuget\\packages\\",
+        "outputPath": "D:\\Documents\\3A\\PRACTICA PROFESIONAL\\PracticaProfesional\\backend\\src\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\facum\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\carra\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,6 +26,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -43,7 +44,8 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        }
+        },
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
@@ -85,7 +87,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.420/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

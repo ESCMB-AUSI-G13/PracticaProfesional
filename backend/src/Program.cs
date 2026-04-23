@@ -11,6 +11,7 @@ using PracticaProfesional.Application.Estudiantes;
 using PracticaProfesional.Application.EstadoAcademico;
 using PracticaProfesional.Application.Inscripciones;
 using PracticaProfesional.Application.Reportes;
+using PracticaProfesional.Infrastructure.Persistence.Repositories;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Preceptores;
 using PracticaProfesional.Application.Usuarios;
@@ -23,7 +24,6 @@ using PracticaProfesional.Infrastructure.Sesiones;
 using PracticaProfesional.Infrastructure.Email;
 using PracticaProfesional.Infrastructure.Persistence;
 using PracticaProfesional.Infrastructure.Middleware;
-using PracticaProfesional.Infrastructure.Persistence.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -101,6 +101,12 @@ builder.Services.AddScoped<ActualizarEstadoAcademicoUseCase>();
 // Reportes Operativos (RR-08, RR-09)
 builder.Services.AddScoped<ReporteInasistenciasUseCase>();
 builder.Services.AddScoped<ControlIndividualPorLegajoUseCase>();
+
+// Reportes Rendimiento Consolidado (RR-05, RR-06, RR-07)
+builder.Services.AddScoped<IRendimientoConsolidadoRepository, RendimientoConsolidadoRepository>();
+builder.Services.AddScoped<ComparativoComisionesUseCase>();
+builder.Services.AddScoped<EvolucionNotasUseCase>();
+builder.Services.AddScoped<PromediosCatedraUseCase>();
 
 // Estudiantes
 builder.Services.AddScoped<CrearEstudianteUseCase>();

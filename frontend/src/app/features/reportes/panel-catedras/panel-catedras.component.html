@@ -1,0 +1,94 @@
+<div class="page">
+  <header class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="irAlDashboard()">← Dashboard</button>
+      <h1>Promedios por Cátedra <span class="badge-rr">RR-07</span></h1>
+    </div>
+  </header>
+
+  <section class="filtros-panel">
+    <h2>Filtros</h2>
+    <div class="filtros-grid">
+      <div class="campo">
+        <label>Año académico</label>
+        <input type="number" [ngModel]="anio()" (ngModelChange)="anio.set($event || null)" placeholder="Ej: 2025" min="2000" />
+      </div>
+      <div class="campo">
+        <label>ID de Curso</label>
+        <input type="number" [ngModel]="cursoId()" (ngModelChange)="cursoId.set($event || null)" placeholder="Ej: 2" min="1" />
+      </div>
+    </div>
+    <div class="filtros-acciones">
+      <button class="btn btn-primary" (click)="buscar()" [disabled]="cargando()">
+        {{ cargando() ? 'Generando...' : 'Generar reporte' }}
+      </button>
+      <button class="btn btn-secondary" (click)="limpiar()">Limpiar</button>
+    </div>
+  </section>
+
+  @if (cargando()) {
+    <p class="estado">Generando reporte...</p>
+  } @else if (error()) {
+    <p class="estado error">{{ error() }}</p>
+  } @else if (buscado() && reporte()) {
+
+    <section class="resumen-cards">
+      <div class="card">
+        <span class="card-valor">{{ reporte()!.catedras.length }}</span>
+        <span class="card-label">Cátedras</span>
+      </div>
+      <div class="card card-promedio">
+        <span class="card-valor">{{ promedioGlobal() !== null ? (promedioGlobal()! | number:'1.2-2') : '—' }}</span>
+        <span class="card-label">Promedio global</span>
+      </div>
+      <div class="card card-aprobado">
+        <span class="card-valor">{{ pctAprobacionGlobal() | number:'1.1-1' }}%</span>
+        <span class="card-label">% Aprobación global</span>
+      </div>
+    </section>
+
+    @if (reporte()!.catedras.length === 0) {
+      <p class="estado">No hay datos para los filtros aplicados.</p>
+    } @else {
+      <div class="tabla-wrapper">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Materia</th>
+              <th>Docente</th>
+              <th>Comisión</th>
+              <th>Año</th>
+              <th>Estudiantes</th>
+              <th>Evaluados</th>
+              <th>Aprobados</th>
+              <th>Desaprobados</th>
+              <th>Promedio</th>
+              <th>% Aprobación</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of reporte()!.catedras; track c.espacioCurricularId) {
+              <tr>
+                <td><strong>{{ c.materiaNombre }}</strong></td>
+                <td>{{ c.docenteNombreCompleto }}</td>
+                <td>{{ c.comision }}</td>
+                <td>{{ c.cursoAnio }}</td>
+                <td>{{ c.totalEstudiantes }}</td>
+                <td>{{ c.totalConNota }}</td>
+                <td><span class="badge aprobado">{{ c.aprobados }}</span></td>
+                <td><span class="badge desaprobado">{{ c.desaprobados }}</span></td>
+                <td>{{ c.promedioGeneral !== null ? (c.promedioGeneral | number:'1.2-2') : '—' }}</td>
+                <td>
+                  <span [class]="c.porcentajeAprobacion >= 60 ? 'pct pct-ok' : 'pct pct-riesgo'">
+                    {{ c.porcentajeAprobacion | number:'1.1-1' }}%
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="generado-en">Reporte generado: {{ reporte()!.generadoEn | date:'dd/MM/yyyy HH:mm' }}</p>
+    }
+  }
+</div>

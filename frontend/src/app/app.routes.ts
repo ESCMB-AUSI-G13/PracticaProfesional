@@ -155,6 +155,29 @@ export const routes: Routes = [
         .then(m => m.ControlLegajoComponent)
   },
 
+  // Reportes de rendimiento consolidado (RR-05, RR-06, RR-07) — Dirección y Docente
+  {
+    path: 'reportes/comisiones',
+    canActivate: [roleGuard('Direccion', 'Docente')],
+    loadComponent: () =>
+      import('./features/reportes/panel-comisiones/panel-comisiones.component')
+        .then(m => m.PanelComisionesComponent)
+  },
+  {
+    path: 'reportes/evolucion',
+    canActivate: [roleGuard('Direccion', 'Docente')],
+    loadComponent: () =>
+      import('./features/reportes/panel-evolucion/panel-evolucion.component')
+        .then(m => m.PanelEvolucionComponent)
+  },
+  {
+    path: 'reportes/catedras',
+    canActivate: [roleGuard('Direccion', 'Docente')],
+    loadComponent: () =>
+      import('./features/reportes/panel-catedras/panel-catedras.component')
+        .then(m => m.PanelCatedrasComponent)
+  },
+
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
   { path: '**', redirectTo: 'login' }
 ];

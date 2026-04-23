@@ -65,6 +65,66 @@ export interface ControlLegajo {
   generadoEn:                        string;
 }
 
+// ── Modelos RR-05 ────────────────────────────────────────────────────────────
+
+export interface FilaComparativoComision {
+  cursoAnio:            number;
+  comision:             string;
+  totalInscriptos:      number;
+  totalConNota:         number;
+  aprobados:            number;
+  desaprobados:         number;
+  promedioGeneral:      number | null;
+  porcentajeAprobacion: number;
+}
+
+export interface ReporteComparativoComisiones {
+  generadoEn:    string;
+  materiaNombre: string | null;
+  anioFiltro:    number | null;
+  comisiones:    FilaComparativoComision[];
+}
+
+// ── Modelos RR-06 ────────────────────────────────────────────────────────────
+
+export interface PuntoEvolucionNota {
+  periodo:              string;
+  totalEvaluados:       number;
+  aprobados:            number;
+  desaprobados:         number;
+  promedioGeneral:      number | null;
+  porcentajeAprobacion: number;
+}
+
+export interface ReporteEvolucionNotas {
+  generadoEn:    string;
+  materiaNombre: string | null;
+  anioFiltro:    number | null;
+  evolucion:     PuntoEvolucionNota[];
+}
+
+// ── Modelos RR-07 ────────────────────────────────────────────────────────────
+
+export interface FilaPromedioCatedra {
+  espacioCurricularId:   number;
+  materiaNombre:         string;
+  docenteNombreCompleto: string;
+  comision:              string;
+  cursoAnio:             number;
+  totalEstudiantes:      number;
+  totalConNota:          number;
+  aprobados:             number;
+  desaprobados:          number;
+  promedioGeneral:       number | null;
+  porcentajeAprobacion:  number;
+}
+
+export interface ReportePromediosCatedra {
+  generadoEn: string;
+  anioFiltro: number | null;
+  catedras:   FilaPromedioCatedra[];
+}
+
 // ── Servicio ─────────────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
@@ -81,5 +141,29 @@ export class ReportesService {
   /** RR-09: Control individual de asistencia por legajo. */
   obtenerControlPorLegajo(legajo: string): Observable<ControlLegajo> {
     return this.http.get<ControlLegajo>(`${this.apiUrl}/control-legajo/${encodeURIComponent(legajo)}`);
+  }
+
+  /** RR-05: Comparativo de rendimiento entre comisiones. */
+  obtenerComparativoComisiones(materiaId?: number, anio?: number): Observable<ReporteComparativoComisiones> {
+    const params: Record<string, string> = {};
+    if (materiaId) params['materiaId'] = String(materiaId);
+    if (anio)      params['anio']      = String(anio);
+    return this.http.get<ReporteComparativoComisiones>(`${this.apiUrl}/rendimiento/comisiones`, { params });
+  }
+
+  /** RR-06: Evolución de notas en el tiempo. */
+  obtenerEvolucionNotas(materiaId?: number, anio?: number): Observable<ReporteEvolucionNotas> {
+    const params: Record<string, string> = {};
+    if (materiaId) params['materiaId'] = String(materiaId);
+    if (anio)      params['anio']      = String(anio);
+    return this.http.get<ReporteEvolucionNotas>(`${this.apiUrl}/rendimiento/evolucion`, { params });
+  }
+
+  /** RR-07: Promedios por cátedra. */
+  obtenerPromediosCatedra(anio?: number, cursoId?: number): Observable<ReportePromediosCatedra> {
+    const params: Record<string, string> = {};
+    if (anio)    params['anio']    = String(anio);
+    if (cursoId) params['cursoId'] = String(cursoId);
+    return this.http.get<ReportePromediosCatedra>(`${this.apiUrl}/rendimiento/catedras`, { params });
   }
 }

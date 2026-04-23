@@ -63,6 +63,24 @@ const MODULOS: Modulo[] = [
     descripcion: 'Ficha individual de asistencia por legajo: porcentajes, alertas de riesgo y estado de regularidad por materia.',
     ruta: '/reportes/control-legajo',
     roles: ['Preceptor', 'Direccion']
+  },
+  {
+    titulo: 'Comparativo de Comisiones',
+    descripcion: 'Compará el rendimiento entre comisiones: inscriptos, aprobados, desaprobados y promedio general. (RR-05)',
+    ruta: '/reportes/comisiones',
+    roles: ['Direccion', 'Docente']
+  },
+  {
+    titulo: 'Evolución de Notas',
+    descripcion: 'Seguí cómo evolucionaron los promedios y la tasa de aprobación período a período. (RR-06)',
+    ruta: '/reportes/evolucion',
+    roles: ['Direccion', 'Docente']
+  },
+  {
+    titulo: 'Promedios por Cátedra',
+    descripcion: 'Promedio y % de aprobación por materia, docente y comisión. Detalle completo por cátedra. (RR-07)',
+    ruta: '/reportes/catedras',
+    roles: ['Direccion', 'Docente']
   }
 ];
 

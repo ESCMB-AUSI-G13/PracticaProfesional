@@ -1,0 +1,94 @@
+<div class="page">
+  <header class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="irAlDashboard()">← Dashboard</button>
+      <h1>Comparativo de Comisiones <span class="badge-rr">RR-05</span></h1>
+    </div>
+  </header>
+
+  <section class="filtros-panel">
+    <h2>Filtros</h2>
+    <div class="filtros-grid">
+      <div class="campo">
+        <label>ID de Materia</label>
+        <input type="number" [ngModel]="materiaId()" (ngModelChange)="materiaId.set($event || null)" placeholder="Ej: 3" min="1" />
+      </div>
+      <div class="campo">
+        <label>Año académico</label>
+        <input type="number" [ngModel]="anio()" (ngModelChange)="anio.set($event || null)" placeholder="Ej: 2025" min="2000" />
+      </div>
+    </div>
+    <div class="filtros-acciones">
+      <button class="btn btn-primary" (click)="buscar()" [disabled]="cargando()">
+        {{ cargando() ? 'Generando...' : 'Generar reporte' }}
+      </button>
+      <button class="btn btn-secondary" (click)="limpiar()">Limpiar</button>
+    </div>
+  </section>
+
+  @if (cargando()) {
+    <p class="estado">Generando reporte...</p>
+  } @else if (error()) {
+    <p class="estado error">{{ error() }}</p>
+  } @else if (buscado() && reporte()) {
+
+    @if (reporte()!.materiaNombre) {
+      <p class="subtitulo">Materia: <strong>{{ reporte()!.materiaNombre }}</strong></p>
+    }
+
+    <section class="resumen-cards">
+      <div class="card">
+        <span class="card-valor">{{ reporte()!.comisiones.length }}</span>
+        <span class="card-label">Comisiones</span>
+      </div>
+      <div class="card card-aprobado">
+        <span class="card-valor">{{ pctAprobacionGlobal() | number:'1.1-1' }}%</span>
+        <span class="card-label">% Aprobación global</span>
+      </div>
+      <div class="card card-promedio">
+        <span class="card-valor">{{ promedioGeneral() !== null ? (promedioGeneral()! | number:'1.2-2') : '—' }}</span>
+        <span class="card-label">Promedio general</span>
+      </div>
+    </section>
+
+    @if (reporte()!.comisiones.length === 0) {
+      <p class="estado">No hay datos para los filtros aplicados.</p>
+    } @else {
+      <div class="tabla-wrapper">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Año</th>
+              <th>Comisión</th>
+              <th>Inscriptos</th>
+              <th>Evaluados</th>
+              <th>Aprobados</th>
+              <th>Desaprobados</th>
+              <th>Promedio</th>
+              <th>% Aprobación</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (f of reporte()!.comisiones; track f.comision + f.cursoAnio) {
+              <tr>
+                <td>{{ f.cursoAnio }}</td>
+                <td><strong>{{ f.comision }}</strong></td>
+                <td>{{ f.totalInscriptos }}</td>
+                <td>{{ f.totalConNota }}</td>
+                <td><span class="badge aprobado">{{ f.aprobados }}</span></td>
+                <td><span class="badge desaprobado">{{ f.desaprobados }}</span></td>
+                <td>{{ f.promedioGeneral !== null ? (f.promedioGeneral | number:'1.2-2') : '—' }}</td>
+                <td>
+                  <span [class]="f.porcentajeAprobacion >= 60 ? 'pct pct-ok' : 'pct pct-riesgo'">
+                    {{ f.porcentajeAprobacion | number:'1.1-1' }}%
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="generado-en">Reporte generado: {{ reporte()!.generadoEn | date:'dd/MM/yyyy HH:mm' }}</p>
+    }
+  }
+</div>
