@@ -11,6 +11,36 @@ interface Modulo {
 
 const MODULOS: Modulo[] = [
   {
+    titulo: 'Gestión de Materias',
+    descripcion: 'Alta y modificación de materias del plan académico. Código único por materia.',
+    ruta: '/materias',
+    roles: ['Direccion']
+  },
+  {
+    titulo: 'Gestión de Cursos',
+    descripcion: 'Alta, modificación y cierre de cursos por año y comisión. Asignación de preceptor.',
+    ruta: '/cursos',
+    roles: ['Direccion']
+  },
+  {
+    titulo: 'Inscripciones a Materias',
+    descripcion: 'Inscripción de estudiantes a materias con validación automática de correlatividades.',
+    ruta: '/inscripciones-materia',
+    roles: ['Direccion']
+  },
+  {
+    titulo: 'Gestión de Cátedras',
+    descripcion: 'Asignación de materia, docente y curso en una cátedra (espacio curricular).',
+    ruta: '/espacios-curriculares',
+    roles: ['Direccion']
+  },
+  {
+    titulo: 'Gestión de Exámenes',
+    descripcion: 'Creación de exámenes (parciales, finales, recuperatorios) por materia, fecha y tipo.',
+    ruta: '/examenes',
+    roles: ['Direccion', 'Docente']
+  },
+  {
     titulo: 'Gestión de Usuarios',
     descripcion: 'Alta, baja y modificación de todos los usuarios del sistema.',
     ruta: '/usuarios',
@@ -45,6 +75,12 @@ const MODULOS: Modulo[] = [
     descripcion: 'Registro de intentos de inicio de sesión exitosos y fallidos. Detecta accesos no autorizados con IP y User-Agent.',
     ruta: '/logs-seguridad',
     roles: ['Direccion']
+  },
+  {
+    titulo: 'Inscripción a Finales',
+    descripcion: 'Consultá los exámenes finales disponibles para tus materias e inscribite. Las correlatividades se validan automáticamente.',
+    ruta: '/mis-examenes',
+    roles: ['Estudiante']
   },
   {
     titulo: 'Carga de Calificaciones',

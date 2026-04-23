@@ -1,0 +1,55 @@
+<div class="page">
+  <header class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="irAlDashboard()">← Dashboard</button>
+      <h1>Gestión de Cursos</h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="irACrear()">+ Nuevo curso</button>
+    </div>
+  </header>
+
+  @if (cargando()) {
+    <p class="estado">Cargando...</p>
+  } @else if (error()) {
+    <p class="estado error">{{ error() }}</p>
+  } @else if (cursos().length === 0) {
+    <p class="estado">No hay cursos registrados.</p>
+  } @else {
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Año académico</th>
+          <th>Año lectivo</th>
+          <th>Comisión</th>
+          <th>Cupo</th>
+          <th>Estado</th>
+          <th>Preceptor</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (c of cursos(); track c.id) {
+          <tr>
+            <td>{{ c.anio }}</td>
+            <td>{{ c.anioLectivo }}° año</td>
+            <td><strong>{{ c.comision }}</strong></td>
+            <td>{{ c.cupo }}</td>
+            <td>
+              <span [class]="'badge estado-' + c.estado.toLowerCase()">{{ c.estado }}</span>
+            </td>
+            <td>{{ c.preceptorNombre }}</td>
+            <td class="acciones">
+              <button class="btn btn-secondary btn-sm" (click)="irAEditar(c.id)">Editar</button>
+              @if (c.estado === 'Activo') {
+                <button class="btn btn-danger btn-sm" (click)="cerrar(c.id)">Cerrar</button>
+              } @else {
+                <button class="btn btn-success btn-sm" (click)="reactivar(c.id)">Reactivar</button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

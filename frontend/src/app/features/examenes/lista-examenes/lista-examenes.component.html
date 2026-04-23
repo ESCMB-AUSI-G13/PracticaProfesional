@@ -1,0 +1,84 @@
+<div class="page">
+  <header class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="irAlDashboard()">← Dashboard</button>
+      <h1>Exámenes</h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="mostrarForm.set(!mostrarForm())">
+        {{ mostrarForm() ? 'Cancelar' : '+ Nuevo examen' }}
+      </button>
+    </div>
+  </header>
+
+  @if (error()) { <p class="estado error">{{ error() }}</p> }
+
+  @if (mostrarForm()) {
+    <section class="form-inline">
+      <h2>Nuevo examen</h2>
+      <div class="form-grid">
+        <div class="campo">
+          <label>Materia *</label>
+          <select [ngModel]="nuevoMateriaId()" (ngModelChange)="nuevoMateriaId.set($event ? +$event : null)">
+            <option [value]="null">-- Seleccionar --</option>
+            @for (m of materias(); track m.id) {
+              <option [value]="m.id">{{ m.codigo }} — {{ m.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div class="campo">
+          <label>Fecha *</label>
+          <input type="date" [ngModel]="nuevoFecha()" (ngModelChange)="nuevoFecha.set($event)" />
+        </div>
+        <div class="campo">
+          <label>Horario *</label>
+          <input type="time" [ngModel]="nuevoHorario()" (ngModelChange)="nuevoHorario.set($event)" />
+        </div>
+        <div class="campo">
+          <label>Cupo</label>
+          <input type="number" min="1" [ngModel]="nuevoCupo()" (ngModelChange)="nuevoCupo.set(+$event)" />
+        </div>
+        <div class="campo">
+          <label>Tipo de examen *</label>
+          <select [ngModel]="nuevoTipo()" (ngModelChange)="nuevoTipo.set($event)">
+            @for (t of tiposExamen; track t) {
+              <option [value]="t">{{ t }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" (click)="guardar()" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando...' : 'Crear examen' }}
+      </button>
+    </section>
+  }
+
+  @if (cargando()) {
+    <p class="estado">Cargando...</p>
+  } @else if (examenes().length === 0) {
+    <p class="estado">No hay exámenes registrados.</p>
+  } @else {
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Materia</th>
+          <th>Tipo</th>
+          <th>Fecha</th>
+          <th>Horario</th>
+          <th>Cupo</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (ex of examenes(); track ex.id) {
+          <tr>
+            <td>{{ ex.materiaNombre }}</td>
+            <td><span class="badge">{{ ex.tipoExamen }}</span></td>
+            <td>{{ ex.fechaExamen | date:'dd/MM/yyyy' }}</td>
+            <td>{{ ex.horario }}</td>
+            <td>{{ ex.cupo }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

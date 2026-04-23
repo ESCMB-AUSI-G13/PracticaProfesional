@@ -11,6 +11,10 @@ using PracticaProfesional.Application.Estudiantes;
 using PracticaProfesional.Application.EstadoAcademico;
 using PracticaProfesional.Application.Inscripciones;
 using PracticaProfesional.Application.Reportes;
+using PracticaProfesional.Application.Materias;
+using PracticaProfesional.Application.Cursos;
+using PracticaProfesional.Application.EspaciosCurriculares;
+using PracticaProfesional.Application.Examenes;
 using PracticaProfesional.Infrastructure.Persistence.Repositories;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Preceptores;
@@ -86,6 +90,7 @@ builder.Services.AddScoped<DesactivarPreceptorUseCase>();
 builder.Services.AddScoped<ReactivarPreceptorUseCase>();
 
 // Inscripciones
+builder.Services.AddScoped<ListarInscripcionesUseCase>();
 builder.Services.AddScoped<InscribirseEnMateriaUseCase>();
 builder.Services.AddScoped<IInscripcionExamenRepository, InscripcionExamenRepository>();
 
@@ -101,6 +106,32 @@ builder.Services.AddScoped<ActualizarEstadoAcademicoUseCase>();
 // Reportes Operativos (RR-08, RR-09)
 builder.Services.AddScoped<ReporteInasistenciasUseCase>();
 builder.Services.AddScoped<ControlIndividualPorLegajoUseCase>();
+
+// Materias
+builder.Services.AddScoped<CrearMateriaUseCase>();
+builder.Services.AddScoped<ListarMateriasUseCase>();
+builder.Services.AddScoped<ModificarMateriaUseCase>();
+
+// Cursos
+builder.Services.AddScoped<ICursoRepository, CursoRepository>();
+builder.Services.AddScoped<CrearCursoUseCase>();
+builder.Services.AddScoped<ListarCursosUseCase>();
+builder.Services.AddScoped<ModificarCursoUseCase>();
+builder.Services.AddScoped<CerrarCursoUseCase>();
+builder.Services.AddScoped<ReactivarCursoUseCase>();
+
+// EspaciosCurriculares
+builder.Services.AddScoped<IEspacioCurricularRepository, EspacioCurricularRepository>();
+builder.Services.AddScoped<CrearEspacioCurricularUseCase>();
+builder.Services.AddScoped<ListarEspaciosCurricularesUseCase>();
+builder.Services.AddScoped<EliminarEspacioCurricularUseCase>();
+
+// Exámenes
+builder.Services.AddScoped<IExamenRepository, ExamenRepository>();
+builder.Services.AddScoped<CrearExamenUseCase>();
+builder.Services.AddScoped<ListarExamenesUseCase>();
+builder.Services.AddScoped<ListarFinalesDisponiblesUseCase>();
+builder.Services.AddScoped<InscribirseEnExamenUseCase>();
 
 // Reportes Rendimiento Consolidado (RR-05, RR-06, RR-07)
 builder.Services.AddScoped<IRendimientoConsolidadoRepository, RendimientoConsolidadoRepository>();

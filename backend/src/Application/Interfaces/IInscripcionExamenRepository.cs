@@ -10,6 +10,11 @@ public interface IInscripcionExamenRepository
     /// <summary>Retorna todas las inscripciones activas de un examen, ordenadas por apellido.</summary>
     Task<IEnumerable<InscripcionExamen>> ObtenerPorExamenAsync(int examenId, CancellationToken cancellationToken = default);
 
+    Task AgregarAsync(InscripcionExamen inscripcion, CancellationToken cancellationToken = default);
+    Task AgregarRangoAsync(IEnumerable<InscripcionExamen> inscripciones, CancellationToken cancellationToken = default);
+    Task<bool> ExisteAsync(int estudianteId, int examenId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<InscripcionExamen>> ListarPorEstudianteAsync(int estudianteId, CancellationToken cancellationToken = default);
+
     /// <summary>Persiste los cambios tracked por EF Core (notas cargadas, estados actualizados).</summary>
     Task GuardarCambiosAsync(CancellationToken cancellationToken = default);
 }

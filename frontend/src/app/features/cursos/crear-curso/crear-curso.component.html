@@ -1,0 +1,50 @@
+<div class="page">
+  <header class="page-header">
+    <button class="btn-back" (click)="cancelar()">← Cursos</button>
+    <h1>Nuevo Curso</h1>
+  </header>
+
+  <form class="form" (ngSubmit)="guardar()">
+    @if (error()) { <p class="error">{{ error() }}</p> }
+
+    <div class="campo">
+      <label>Año académico *</label>
+      <input type="number" [ngModel]="anio()" (ngModelChange)="anio.set($event)" name="anio" min="2000" max="2100" />
+    </div>
+    <div class="campo">
+      <label>Año lectivo *</label>
+      <select [ngModel]="anioLectivo()" (ngModelChange)="anioLectivo.set(+$event)" name="anioLectivo">
+        <option [value]="1">1° año</option>
+        <option [value]="2">2° año</option>
+        <option [value]="3">3° año</option>
+        <option [value]="4">4° año</option>
+        <option [value]="5">5° año</option>
+        <option [value]="6">6° año</option>
+      </select>
+    </div>
+    <div class="campo">
+      <label>Comisión *</label>
+      <input type="text" [ngModel]="comision()" (ngModelChange)="comision.set($event)" name="comision" placeholder="Ej: A, B, 1A" />
+    </div>
+    <div class="campo">
+      <label>Cupo *</label>
+      <input type="number" [ngModel]="cupo()" (ngModelChange)="cupo.set($event)" name="cupo" min="1" />
+    </div>
+    <div class="campo">
+      <label>Preceptor *</label>
+      <select [ngModel]="preceptorId()" (ngModelChange)="preceptorId.set($event ? +$event : null)" name="preceptorId">
+        <option [value]="null">-- Seleccionar preceptor --</option>
+        @for (p of preceptores(); track p.id) {
+          <option [value]="p.usuarioId">{{ p.apellido }}, {{ p.nombre }} ({{ p.turno }})</option>
+        }
+      </select>
+    </div>
+
+    <div class="acciones">
+      <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando...' : 'Crear curso' }}
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
+    </div>
+  </form>
+</div>

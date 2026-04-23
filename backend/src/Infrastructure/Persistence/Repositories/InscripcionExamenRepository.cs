@@ -29,6 +29,29 @@ public class InscripcionExamenRepository(AppDbContext context) : IInscripcionExa
             .ThenBy(i => i.Estudiante.Usuario.Nombre)
             .ToListAsync(cancellationToken);
 
+    public async Task AgregarAsync(InscripcionExamen inscripcion, CancellationToken cancellationToken = default)
+    {
+        await context.InscripcionesExamen.AddAsync(inscripcion, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task AgregarRangoAsync(IEnumerable<InscripcionExamen> inscripciones, CancellationToken cancellationToken = default)
+    {
+        await context.InscripcionesExamen.AddRangeAsync(inscripciones, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<bool> ExisteAsync(int estudianteId, int examenId, CancellationToken cancellationToken = default)
+        => await context.InscripcionesExamen
+            .AnyAsync(i => i.EstudianteId == estudianteId && i.ExamenId == examenId, cancellationToken);
+
+    public async Task<IEnumerable<InscripcionExamen>> ListarPorEstudianteAsync(int estudianteId, CancellationToken cancellationToken = default)
+        => await context.InscripcionesExamen
+            .Include(i => i.Examen).ThenInclude(e => e.Materia)
+            .Where(i => i.EstudianteId == estudianteId)
+            .OrderByDescending(i => i.Examen.FechaExamen)
+            .ToListAsync(cancellationToken);
+
     public async Task GuardarCambiosAsync(CancellationToken cancellationToken = default)
         => await context.SaveChangesAsync(cancellationToken);
 }

@@ -139,6 +139,78 @@ export const routes: Routes = [
         .then(m => m.CargaNotasComponent)
   },
 
+  // Materias — solo Dirección
+  {
+    path: 'materias',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/materias/lista-materias/lista-materias.component').then(m => m.ListaMateriasComponent)
+  },
+  {
+    path: 'materias/nueva',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/materias/crear-materia/crear-materia.component').then(m => m.CrearMateriaComponent)
+  },
+  {
+    path: 'materias/:id/editar',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/materias/editar-materia/editar-materia.component').then(m => m.EditarMateriaComponent)
+  },
+
+  // Cursos — solo Dirección
+  {
+    path: 'cursos',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/cursos/lista-cursos/lista-cursos.component').then(m => m.ListaCursosComponent)
+  },
+  {
+    path: 'cursos/nuevo',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/cursos/crear-curso/crear-curso.component').then(m => m.CrearCursoComponent)
+  },
+  {
+    path: 'cursos/:id/editar',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/cursos/editar-curso/editar-curso.component').then(m => m.EditarCursoComponent)
+  },
+
+  // Inscripciones a Materias — solo Dirección
+  {
+    path: 'inscripciones-materia',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/inscripciones-materia/lista-inscripciones/lista-inscripciones.component').then(m => m.ListaInscripcionesComponent)
+  },
+
+  // EspaciosCurriculares — solo Dirección
+  {
+    path: 'espacios-curriculares',
+    canActivate: [roleGuard('Direccion')],
+    loadComponent: () =>
+      import('./features/espacios-curriculares/lista-espacios/lista-espacios.component').then(m => m.ListaEspaciosComponent)
+  },
+
+  // Exámenes — Dirección y Docente
+  {
+    path: 'examenes',
+    canActivate: [roleGuard('Direccion', 'Docente')],
+    loadComponent: () =>
+      import('./features/examenes/lista-examenes/lista-examenes.component').then(m => m.ListaExamenesComponent)
+  },
+
+  // Mis Exámenes — solo Estudiante
+  {
+    path: 'mis-examenes',
+    canActivate: [roleGuard('Estudiante')],
+    loadComponent: () =>
+      import('./features/mis-examenes/mis-examenes.component').then(m => m.MisExamenesComponent)
+  },
+
   // Reportes operativos (RR-08, RR-09) — Preceptor y Dirección
   {
     path: 'reportes/inasistencias',

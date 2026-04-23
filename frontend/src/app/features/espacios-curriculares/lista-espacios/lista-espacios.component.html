@@ -1,0 +1,84 @@
+<div class="page">
+  <header class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="irAlDashboard()">← Dashboard</button>
+      <h1>Cátedras (Espacios Curriculares)</h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="mostrarForm.set(!mostrarForm())">
+        {{ mostrarForm() ? 'Cancelar' : '+ Nueva cátedra' }}
+      </button>
+    </div>
+  </header>
+
+  @if (error()) { <p class="estado error">{{ error() }}</p> }
+
+  @if (mostrarForm()) {
+    <section class="form-inline">
+      <h2>Nueva cátedra</h2>
+      <div class="form-grid">
+        <div class="campo">
+          <label>Materia *</label>
+          <select [ngModel]="nuevoMateriaId()" (ngModelChange)="nuevoMateriaId.set($event ? +$event : null)">
+            <option [value]="null">-- Seleccionar --</option>
+            @for (m of materias(); track m.id) {
+              <option [value]="m.id">{{ m.codigo }} — {{ m.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div class="campo">
+          <label>Docente *</label>
+          <select [ngModel]="nuevoDocenteId()" (ngModelChange)="nuevoDocenteId.set($event ? +$event : null)">
+            <option [value]="null">-- Seleccionar --</option>
+            @for (d of docentes(); track d.id) {
+              <option [value]="d.usuarioId">{{ d.apellido }}, {{ d.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div class="campo">
+          <label>Curso *</label>
+          <select [ngModel]="nuevoCursoId()" (ngModelChange)="nuevoCursoId.set($event ? +$event : null)">
+            <option [value]="null">-- Seleccionar --</option>
+            @for (c of cursos(); track c.id) {
+              <option [value]="c.id">{{ c.anio }} — {{ c.comision }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" (click)="guardar()" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando...' : 'Crear cátedra' }}
+      </button>
+    </section>
+  }
+
+  @if (cargando()) {
+    <p class="estado">Cargando...</p>
+  } @else if (espacios().length === 0) {
+    <p class="estado">No hay cátedras registradas.</p>
+  } @else {
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Materia</th>
+          <th>Docente</th>
+          <th>Año</th>
+          <th>Comisión</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (ec of espacios(); track ec.id) {
+          <tr>
+            <td><code>{{ ec.materiaCodigo }}</code> {{ ec.materiaNombre }}</td>
+            <td>{{ ec.docenteNombre }}</td>
+            <td>{{ ec.cursoAnio }}</td>
+            <td>{{ ec.cursoComision }}</td>
+            <td>
+              <button class="btn btn-danger btn-sm" (click)="eliminar(ec.id)">Eliminar</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

@@ -1,18 +1,15 @@
+using PracticaProfesional.Domain.Entities;
+
 namespace PracticaProfesional.Application.Interfaces;
 
-/// <summary>
-/// Repositorio de materias. Proporciona consultas sobre el plan académico.
-/// </summary>
 public interface IMateriaRepository
 {
-    /// <summary>
-    /// Devuelve el identificador del plan académico al que pertenece la materia.
-    /// Retorna <c>null</c> si la materia no existe.
-    /// </summary>
+    Task<IEnumerable<Materia>> ListarAsync(CancellationToken cancellationToken = default);
+    Task<Materia?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default);
+    Task<bool> ExistePorCodigoAsync(string codigo, CancellationToken cancellationToken = default);
+    Task<bool> ExistePorCodigoExcluyendoAsync(string codigo, int excludeId, CancellationToken cancellationToken = default);
+    Task AgregarAsync(Materia materia, CancellationToken cancellationToken = default);
+    Task GuardarCambiosAsync(CancellationToken cancellationToken = default);
     Task<string?> ObtenerPlanAsync(int materiaId, CancellationToken cancellationToken = default);
-
-    /// <summary>
-    /// Devuelve la cantidad total de materias que conforman el plan académico indicado.
-    /// </summary>
     Task<int> ContarPorPlanAsync(string plan, CancellationToken cancellationToken = default);
 }

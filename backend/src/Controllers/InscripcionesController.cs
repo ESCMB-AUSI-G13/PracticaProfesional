@@ -7,19 +7,28 @@ namespace PracticaProfesional.Controllers;
 
 [ApiController]
 [Route("api/inscripciones")]
-[Authorize]
-public class InscripcionesController(InscribirseEnMateriaUseCase inscribirseUseCase) : ControllerBase
+[Authorize(Roles = "Direccion")]
+public class InscripcionesController(
+    ListarInscripcionesUseCase listarUseCase,
+    InscribirseEnMateriaUseCase inscribirseUseCase) : ControllerBase
 {
+    [HttpGet("materias")]
+    [ProducesResponseType(typeof(IEnumerable<InscripcionMateriaListadoDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Listar(CancellationToken cancellationToken)
+        => Ok(await listarUseCase.EjecutarAsync(cancellationToken));
+
     /// <summary>
     /// POST api/inscripciones/materias
     /// Inscribe a un estudiante en una materia validando correlatividades automáticamente (CU-22).
     /// </summary>
     [HttpPost("materias")]
+    [ProducesResponseType(typeof(InscripcionMateriaResultDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> InscribirseEnMateria(
         [FromBody] InscribirseEnMateriaDto dto,
         CancellationToken cancellationToken)
     {
         var resultado = await inscribirseUseCase.EjecutarAsync(dto, cancellationToken);
-        return CreatedAtAction(nameof(InscribirseEnMateria), new { id = resultado.Id }, resultado);
+        return CreatedAtAction(nameof(Listar), new { id = resultado.Id }, resultado);
     }
 }

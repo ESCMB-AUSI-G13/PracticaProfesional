@@ -1,0 +1,53 @@
+<div class="page">
+  <header class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="irAlDashboard()">← Dashboard</button>
+      <h1>Inscripción a Exámenes Finales</h1>
+    </div>
+  </header>
+
+  @if (error()) { <p class="estado error">{{ error() }}</p> }
+
+  @if (cargando()) {
+    <p class="estado">Cargando...</p>
+  } @else if (examenes().length === 0) {
+    <p class="estado">No hay exámenes finales disponibles para tus materias.</p>
+  } @else {
+    <p class="info">Podés inscribirte a los exámenes finales de las materias en las que estás activo. Las correlatividades se validan automáticamente.</p>
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Materia</th>
+          <th>Tipo</th>
+          <th>Fecha</th>
+          <th>Horario</th>
+          <th>Cupo</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (ex of examenes(); track ex.id) {
+          <tr [class.inscripto]="ex.yaInscripto">
+            <td><code>{{ ex.materiaCodigo }}</code> {{ ex.materiaNombre }}</td>
+            <td>{{ ex.tipoExamen }}</td>
+            <td>{{ ex.fechaExamen | date:'dd/MM/yyyy' }}</td>
+            <td>{{ ex.horario }}</td>
+            <td>{{ ex.cupo }}</td>
+            <td>
+              @if (ex.yaInscripto) {
+                <span class="badge badge-ok">Inscripto</span>
+              } @else {
+                <button
+                  class="btn btn-primary btn-sm"
+                  (click)="inscribirse(ex)"
+                  [disabled]="inscribiendo() === ex.id">
+                  {{ inscribiendo() === ex.id ? 'Inscribiendo...' : 'Inscribirse' }}
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

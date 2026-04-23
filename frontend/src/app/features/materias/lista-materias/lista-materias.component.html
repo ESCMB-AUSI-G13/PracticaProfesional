@@ -1,0 +1,42 @@
+<div class="page">
+  <header class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="irAlDashboard()">← Dashboard</button>
+      <h1>Gestión de Materias</h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="irACrear()">+ Nueva materia</button>
+    </div>
+  </header>
+
+  @if (cargando()) {
+    <p class="estado">Cargando...</p>
+  } @else if (error()) {
+    <p class="estado error">{{ error() }}</p>
+  } @else if (materias().length === 0) {
+    <p class="estado">No hay materias registradas.</p>
+  } @else {
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Plan</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (m of materias(); track m.id) {
+          <tr>
+            <td><code>{{ m.codigo }}</code></td>
+            <td>{{ m.nombre }}</td>
+            <td>{{ m.plan }}</td>
+            <td class="acciones">
+              <button class="btn btn-secondary btn-sm" (click)="irAEditar(m.id)">Editar</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

@@ -1,0 +1,82 @@
+<div class="page">
+  <header class="page-header">
+    <div class="header-left">
+      <button class="btn-back" (click)="irAlDashboard()">← Dashboard</button>
+      <h1>Inscripciones a Materias</h1>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" (click)="mostrarForm.set(!mostrarForm())">
+        {{ mostrarForm() ? 'Cancelar' : '+ Nueva inscripción' }}
+      </button>
+    </div>
+  </header>
+
+  @if (error()) { <p class="estado error">{{ error() }}</p> }
+
+  @if (mostrarForm()) {
+    <section class="form-inline">
+      <h2>Nueva inscripción</h2>
+      <div class="form-grid">
+        <div class="campo">
+          <label>Estudiante *</label>
+          <select [ngModel]="nuevoEstudianteId()" (ngModelChange)="nuevoEstudianteId.set($event ? +$event : null)">
+            <option [value]="null">-- Seleccionar --</option>
+            @for (e of estudiantes(); track e.id) {
+              <option [value]="e.id">{{ e.apellido }}, {{ e.nombre }} ({{ e.condicion }})</option>
+            }
+          </select>
+        </div>
+        <div class="campo">
+          <label>Materia *</label>
+          <select [ngModel]="nuevoMateriaId()" (ngModelChange)="nuevoMateriaId.set($event ? +$event : null)">
+            <option [value]="null">-- Seleccionar --</option>
+            @for (m of materias(); track m.id) {
+              <option [value]="m.id">{{ m.codigo }} — {{ m.nombre }}</option>
+            }
+          </select>
+        </div>
+        <div class="campo">
+          <label>Curso *</label>
+          <select [ngModel]="nuevoCursoId()" (ngModelChange)="nuevoCursoId.set($event ? +$event : null)">
+            <option [value]="null">-- Seleccionar --</option>
+            @for (c of cursos(); track c.id) {
+              <option [value]="c.id">{{ c.anio }}° — {{ c.comision }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <button class="btn btn-primary" (click)="guardar()" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando...' : 'Inscribir' }}
+      </button>
+    </section>
+  }
+
+  @if (cargando()) {
+    <p class="estado">Cargando...</p>
+  } @else if (inscripciones().length === 0) {
+    <p class="estado">No hay inscripciones registradas.</p>
+  } @else {
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Estudiante</th>
+          <th>Materia</th>
+          <th>Curso</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (i of inscripciones(); track i.id) {
+          <tr>
+            <td>{{ i.estudianteNombre }}</td>
+            <td><code>{{ i.materiaCodigo }}</code> {{ i.materiaNombre }}</td>
+            <td>{{ i.cursoAnio }}° {{ i.cursoComision }}</td>
+            <td><span class="badge" [class]="'badge-' + i.estado.toLowerCase()">{{ i.estado }}</span></td>
+            <td>{{ i.fechaInscripcion | date:'dd/MM/yyyy' }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

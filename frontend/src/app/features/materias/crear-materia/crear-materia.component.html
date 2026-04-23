@@ -1,0 +1,30 @@
+<div class="page">
+  <header class="page-header">
+    <button class="btn-back" (click)="cancelar()">← Materias</button>
+    <h1>Nueva Materia</h1>
+  </header>
+
+  <form class="form" (ngSubmit)="guardar()">
+    @if (error()) { <p class="error">{{ error() }}</p> }
+
+    <div class="campo">
+      <label>Código *</label>
+      <input type="text" [ngModel]="codigo()" (ngModelChange)="codigo.set($event)" name="codigo" placeholder="Ej: MAT-101" />
+    </div>
+    <div class="campo">
+      <label>Nombre *</label>
+      <input type="text" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" name="nombre" placeholder="Ej: Matemática I" />
+    </div>
+    <div class="campo">
+      <label>Plan *</label>
+      <input type="text" [ngModel]="plan()" (ngModelChange)="plan.set($event)" name="plan" placeholder="Ej: 2020" />
+    </div>
+
+    <div class="acciones">
+      <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+        {{ guardando() ? 'Guardando...' : 'Guardar' }}
+      </button>
+      <button type="button" class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
+    </div>
+  </form>
+</div>

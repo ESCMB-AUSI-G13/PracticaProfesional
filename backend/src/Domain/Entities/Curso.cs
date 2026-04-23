@@ -6,6 +6,7 @@ public class Curso
 {
     public int Id { get; private set; }
     public int Anio { get; private set; }
+    public int AnioLectivo { get; private set; }
     public string Comision { get; private set; } = string.Empty;
     public int Cupo { get; private set; }
     public EstadoCurso Estado { get; private set; }
@@ -14,15 +15,17 @@ public class Curso
 
     private Curso() { }
 
-    public static Curso Crear(int anio, string comision, int cupo, int preceptorId)
+    public static Curso Crear(int anio, int anioLectivo, string comision, int cupo, int preceptorId)
     {
         if (anio < 2000 || anio > 2100) throw new ArgumentException("El año académico no es válido.");
+        if (anioLectivo < 1 || anioLectivo > 6) throw new ArgumentException("El año lectivo debe estar entre 1 y 6.");
         if (string.IsNullOrWhiteSpace(comision)) throw new ArgumentException("La comisión es obligatoria.");
         if (cupo <= 0) throw new ArgumentException("El cupo debe ser mayor a cero.");
 
         return new Curso
         {
             Anio = anio,
+            AnioLectivo = anioLectivo,
             Comision = comision.ToUpperInvariant(),
             Cupo = cupo,
             Estado = EstadoCurso.Activo,

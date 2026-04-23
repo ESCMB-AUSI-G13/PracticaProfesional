@@ -1,0 +1,21 @@
+.page { padding: 2rem; font-family: sans-serif; max-width: 1100px; margin: 0 auto; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.header-left { display: flex; align-items: center; gap: 0.75rem; h1 { margin: 0; font-size: 1.5rem; } }
+.btn-back { background: none; border: none; color: #3498db; cursor: pointer; font-size: 0.9rem; padding: 0; &:hover { text-decoration: underline; } }
+.header-actions { display: flex; gap: 0.75rem; }
+
+.form-inline { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1.25rem; margin-bottom: 1.5rem; h2 { margin: 0 0 1rem; font-size: 1rem; color: #444; } }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.campo { display: flex; flex-direction: column; gap: 0.3rem; label { font-size: 0.85rem; font-weight: 600; color: #555; } select { padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; } }
+
+.tabla { width: 100%; border-collapse: collapse; font-size: 0.9rem; th, td { padding: 0.6rem 0.75rem; border: 1px solid #e0e0e0; text-align: left; } th { background: #f5f5f5; font-weight: 600; } }
+code { background: #f0f0f0; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.82rem; }
+.badge { padding: 0.15rem 0.55rem; border-radius: 4px; font-size: 0.8rem; font-weight: 600;
+  &.badge-activa    { background: #e8f8f0; color: #27ae60; }
+  &.badge-aprobada  { background: #eaf4fb; color: #2980b9; }
+  &.badge-baja      { background: #fdf0f0; color: #c0392b; }
+  &.badge-desaprobada { background: #fef9e7; color: #d4ac0d; }
+  &.badge-pendiente { background: #f5f5f5; color: #888; }
+}
+.estado { padding: 1rem; color: #555; &.error { color: #c0392b; } }
+.btn { padding: 0.45rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; &.btn-primary { background: #3498db; color: white; } &:hover:not(:disabled) { opacity: 0.9; } &:disabled { opacity: 0.6; cursor: not-allowed; } }

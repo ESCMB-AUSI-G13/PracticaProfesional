@@ -4,6 +4,9 @@ namespace PracticaProfesional.Application.Interfaces;
 
 public interface IInscripcionMateriaRepository
 {
+    Task<IEnumerable<InscripcionMateria>> ListarAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<InscripcionMateria>> ListarActivasPorMateriaAsync(int materiaId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<InscripcionMateria>> ListarActivasPorEstudianteAsync(int estudianteId, CancellationToken cancellationToken = default);
     Task<bool> ExisteInscripcionActivaAsync(int estudianteId, int materiaId, CancellationToken cancellationToken = default);
 
     /// <summary>
