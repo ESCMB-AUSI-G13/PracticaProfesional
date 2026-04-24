@@ -1,8 +1,9 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ReportesService, ReporteEvolucionNotas } from '../reportes.service';
+import { MateriasService, Materia } from '../../materias/materias.service';
 
 @Component({
   selector: 'app-panel-evolucion',
@@ -11,7 +12,8 @@ import { ReportesService, ReporteEvolucionNotas } from '../reportes.service';
   templateUrl: './panel-evolucion.component.html',
   styleUrl: './panel-evolucion.component.scss'
 })
-export class PanelEvolucionComponent {
+export class PanelEvolucionComponent implements OnInit {
+  materias  = signal<Materia[]>([]);
   materiaId = signal<number | null>(null);
   anio      = signal<number | null>(null);
 
@@ -33,7 +35,15 @@ export class PanelEvolucionComponent {
     return Math.max(...puntos.map(p => p.porcentajeAprobacion));
   });
 
-  constructor(private reportesService: ReportesService, private router: Router) {}
+  constructor(
+    private reportesService: ReportesService,
+    private materiasService: MateriasService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.materiasService.listar().subscribe({ next: m => this.materias.set(m) });
+  }
 
   buscar(): void {
     this.cargando.set(true);

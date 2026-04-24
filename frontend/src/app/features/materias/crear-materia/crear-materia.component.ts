@@ -12,7 +12,6 @@ import { MateriasService } from '../materias.service';
   styleUrl: './crear-materia.component.scss'
 })
 export class CrearMateriaComponent {
-  codigo  = signal('');
   nombre  = signal('');
   plan    = signal('');
   guardando = signal(false);
@@ -21,13 +20,13 @@ export class CrearMateriaComponent {
   constructor(private materiasService: MateriasService, private router: Router) {}
 
   guardar(): void {
-    if (!this.codigo() || !this.nombre() || !this.plan()) {
+    if (!this.nombre() || !this.plan()) {
       this.error.set('Todos los campos son obligatorios.');
       return;
     }
     this.guardando.set(true);
     this.error.set(null);
-    this.materiasService.crear({ codigo: this.codigo(), nombre: this.nombre(), plan: this.plan() }).subscribe({
+    this.materiasService.crear({ nombre: this.nombre(), plan: this.plan() }).subscribe({
       next: () => this.router.navigate(['/materias']),
       error: (e) => {
         this.error.set(e.error?.mensaje ?? 'Error al crear la materia.');

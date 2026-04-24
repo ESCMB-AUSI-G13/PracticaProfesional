@@ -26,7 +26,7 @@ export class ListaExamenesComponent implements OnInit {
   nuevoFecha      = signal('');
   nuevoHorario    = signal('');
   nuevoCupo       = signal<number>(30);
-  nuevoTipo       = signal('ParcialEscrito');
+  nuevoTipo       = signal('Parcial');
 
   constructor(
     private service: ExamenesService,
@@ -74,7 +74,7 @@ export class ListaExamenesComponent implements OnInit {
     this.nuevoFecha.set('');
     this.nuevoHorario.set('');
     this.nuevoCupo.set(30);
-    this.nuevoTipo.set('ParcialEscrito');
+    this.nuevoTipo.set('Parcial');
     this.mostrarForm.set(false);
   }
 

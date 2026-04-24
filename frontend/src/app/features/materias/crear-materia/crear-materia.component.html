@@ -8,10 +8,6 @@
     @if (error()) { <p class="error">{{ error() }}</p> }
 
     <div class="campo">
-      <label>Código *</label>
-      <input type="text" [ngModel]="codigo()" (ngModelChange)="codigo.set($event)" name="codigo" placeholder="Ej: MAT-101" />
-    </div>
-    <div class="campo">
       <label>Nombre *</label>
       <input type="text" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" name="nombre" placeholder="Ej: Matemática I" />
     </div>

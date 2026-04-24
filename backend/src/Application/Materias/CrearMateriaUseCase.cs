@@ -9,10 +9,10 @@ public class CrearMateriaUseCase(IMateriaRepository materiaRepository, IAuditori
 {
     public async Task<MateriaDto> EjecutarAsync(CrearMateriaDto dto, CancellationToken cancellationToken = default)
     {
-        if (await materiaRepository.ExistePorCodigoAsync(dto.Codigo, cancellationToken))
-            throw new BusinessException($"Ya existe una materia con el código '{dto.Codigo.ToUpperInvariant()}'.");
+        var numero = await materiaRepository.ObtenerSiguienteNumeroAsync(cancellationToken);
+        var codigo = $"MAT-{numero:D3}";
 
-        var materia = Materia.Crear(dto.Codigo, dto.Nombre, dto.Plan);
+        var materia = Materia.Crear(codigo, dto.Nombre, dto.Plan);
         await materiaRepository.AgregarAsync(materia, cancellationToken);
 
         await auditoria.RegistrarAsync("Materia", materia.Id.ToString(), "CREAR",

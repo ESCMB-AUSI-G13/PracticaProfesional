@@ -8,6 +8,7 @@ public interface IMateriaRepository
     Task<Materia?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default);
     Task<bool> ExistePorCodigoAsync(string codigo, CancellationToken cancellationToken = default);
     Task<bool> ExistePorCodigoExcluyendoAsync(string codigo, int excludeId, CancellationToken cancellationToken = default);
+    Task<int> ObtenerSiguienteNumeroAsync(CancellationToken cancellationToken = default);
     Task AgregarAsync(Materia materia, CancellationToken cancellationToken = default);
     Task GuardarCambiosAsync(CancellationToken cancellationToken = default);
     Task<string?> ObtenerPlanAsync(int materiaId, CancellationToken cancellationToken = default);

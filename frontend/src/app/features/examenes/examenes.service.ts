@@ -32,10 +32,8 @@ export interface InscripcionExamenResult {
 }
 
 export const TIPOS_EXAMEN = [
-  'ParcialEscrito',
-  'ParcialOral',
-  'FinalEscrito',
-  'FinalOral',
+  'Parcial',
+  'Final',
   'Recuperatorio'
 ];
 

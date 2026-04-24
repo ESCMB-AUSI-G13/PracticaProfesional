@@ -5,8 +5,8 @@ using PracticaProfesional.Domain.Enums;
 namespace PracticaProfesional.Application.Examenes;
 
 /// <summary>
-/// Retorna los exámenes finales (FinalEscrito / FinalOral) de las materias
-/// en las que el estudiante tiene una inscripción activa, indicando si ya está inscripto.
+/// Retorna los exámenes finales de las materias en las que el estudiante
+/// tiene una inscripción activa, indicando si ya está inscripto.
 /// </summary>
 public class ListarFinalesDisponiblesUseCase(
     IEstudianteRepository estudianteRepository,
@@ -32,7 +32,7 @@ public class ListarFinalesDisponiblesUseCase(
         var finales = todosExamenes
             .Where(e =>
                 materiaIds.Contains(e.MateriaId) &&
-                (e.TipoExamen == TipoExamen.FinalEscrito || e.TipoExamen == TipoExamen.FinalOral) &&
+                e.TipoExamen == TipoExamen.Final &&
                 e.FechaExamen >= DateTime.UtcNow.Date)
             .ToList();
 

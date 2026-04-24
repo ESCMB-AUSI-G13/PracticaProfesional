@@ -1,12 +1,15 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { forkJoin } from 'rxjs';
 import {
   ReportesService,
   FiltroInasistencias,
   ReporteInasistencias
 } from '../reportes.service';
+import { CursosService, Curso } from '../../cursos/cursos.service';
+import { MateriasService, Materia } from '../../materias/materias.service';
 
 @Component({
   selector: 'app-panel-inasistencias',
@@ -15,7 +18,11 @@ import {
   templateUrl: './panel-inasistencias.component.html',
   styleUrl: './panel-inasistencias.component.scss'
 })
-export class PanelInasistenciasComponent {
+export class PanelInasistenciasComponent implements OnInit {
+  // ── Opciones para selects ──────────────────────────────────────────────────
+  cursos    = signal<Curso[]>([]);
+  materias  = signal<Materia[]>([]);
+
   // ── Filtros ────────────────────────────────────────────────────────────────
   cursoId    = signal<number | null>(null);
   materiaId  = signal<number | null>(null);
@@ -31,8 +38,22 @@ export class PanelInasistenciasComponent {
 
   constructor(
     private reportesService: ReportesService,
+    private cursosService: CursosService,
+    private materiasService: MateriasService,
     private router: Router
   ) {}
+
+  ngOnInit(): void {
+    forkJoin({
+      cursos:   this.cursosService.listar(),
+      materias: this.materiasService.listar()
+    }).subscribe({
+      next: ({ cursos, materias }) => {
+        this.cursos.set(cursos);
+        this.materias.set(materias);
+      }
+    });
+  }
 
   buscar(): void {
     this.cargando.set(true);

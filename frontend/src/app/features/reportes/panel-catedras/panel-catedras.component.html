@@ -14,8 +14,13 @@
         <input type="number" [ngModel]="anio()" (ngModelChange)="anio.set($event || null)" placeholder="Ej: 2025" min="2000" />
       </div>
       <div class="campo">
-        <label>ID de Curso</label>
-        <input type="number" [ngModel]="cursoId()" (ngModelChange)="cursoId.set($event || null)" placeholder="Ej: 2" min="1" />
+        <label>Curso</label>
+        <select [ngModel]="cursoId()" (ngModelChange)="cursoId.set($event ? +$event : null)">
+          <option [value]="null">— Todos —</option>
+          @for (c of cursos(); track c.id) {
+            <option [value]="c.id">{{ c.anio }} · {{ c.anioLectivo }}° año · Com. {{ c.comision }}</option>
+          }
+        </select>
       </div>
     </div>
     <div class="filtros-acciones">

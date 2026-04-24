@@ -33,7 +33,7 @@ public class InscribirseEnExamenUseCase(
             ?? throw new BusinessException($"No se encontró el examen con Id {dto.ExamenId}.");
 
         // Validar correlatividades para RENDIR (solo aplica a exámenes finales)
-        if (examen.TipoExamen is TipoExamen.FinalEscrito or TipoExamen.FinalOral)
+        if (examen.TipoExamen is TipoExamen.Final)
             await ValidarCorrelativiadadesParaRendirAsync(estudiante.Id, examen.MateriaId, cancellationToken);
 
         var inscripcion = InscripcionExamen.Crear(estudiante.Id, dto.ExamenId);

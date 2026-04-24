@@ -1,8 +1,9 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ReportesService, ReporteComparativoComisiones } from '../reportes.service';
+import { MateriasService, Materia } from '../../materias/materias.service';
 
 @Component({
   selector: 'app-panel-comisiones',
@@ -11,7 +12,8 @@ import { ReportesService, ReporteComparativoComisiones } from '../reportes.servi
   templateUrl: './panel-comisiones.component.html',
   styleUrl: './panel-comisiones.component.scss'
 })
-export class PanelComisionesComponent {
+export class PanelComisionesComponent implements OnInit {
+  materias  = signal<Materia[]>([]);
   materiaId = signal<number | null>(null);
   anio      = signal<number | null>(null);
 
@@ -34,7 +36,15 @@ export class PanelComisionesComponent {
     return total > 0 ? (aprobados * 100) / total : 0;
   });
 
-  constructor(private reportesService: ReportesService, private router: Router) {}
+  constructor(
+    private reportesService: ReportesService,
+    private materiasService: MateriasService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.materiasService.listar().subscribe({ next: m => this.materias.set(m) });
+  }
 
   buscar(): void {
     this.cargando.set(true);

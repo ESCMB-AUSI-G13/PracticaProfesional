@@ -10,7 +10,6 @@ export interface Materia {
 }
 
 export interface CrearMateriaRequest {
-  codigo: string;
   nombre: string;
   plan:   string;
 }

@@ -11,25 +11,23 @@
     <h2>Filtros</h2>
     <div class="filtros-grid">
       <div class="campo">
-        <label>ID de Curso</label>
-        <input
-          type="number"
-          [ngModel]="cursoId()"
-          (ngModelChange)="cursoId.set($event || null)"
-          placeholder="Ej: 3"
-          min="1"
-        />
+        <label>Curso</label>
+        <select [ngModel]="cursoId()" (ngModelChange)="cursoId.set($event ? +$event : null)">
+          <option [value]="null">— Todos —</option>
+          @for (c of cursos(); track c.id) {
+            <option [value]="c.id">{{ c.anio }} · {{ c.anioLectivo }}° año · Com. {{ c.comision }}</option>
+          }
+        </select>
       </div>
 
       <div class="campo">
-        <label>ID de Materia</label>
-        <input
-          type="number"
-          [ngModel]="materiaId()"
-          (ngModelChange)="materiaId.set($event || null)"
-          placeholder="Ej: 12"
-          min="1"
-        />
+        <label>Materia</label>
+        <select [ngModel]="materiaId()" (ngModelChange)="materiaId.set($event ? +$event : null)">
+          <option [value]="null">— Todas —</option>
+          @for (m of materias(); track m.id) {
+            <option [value]="m.id">{{ m.codigo }} · {{ m.nombre }}</option>
+          }
+        </select>
       </div>
 
       <div class="campo">

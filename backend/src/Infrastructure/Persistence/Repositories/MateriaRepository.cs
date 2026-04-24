@@ -18,6 +18,22 @@ public class MateriaRepository(AppDbContext context) : IMateriaRepository
     public async Task<bool> ExistePorCodigoExcluyendoAsync(string codigo, int excludeId, CancellationToken cancellationToken = default)
         => await context.Materias.AnyAsync(m => m.Codigo == codigo.ToUpperInvariant() && m.Id != excludeId, cancellationToken);
 
+    public async Task<int> ObtenerSiguienteNumeroAsync(CancellationToken cancellationToken = default)
+    {
+        // Extrae el número del formato "MAT-NNN" y devuelve el máximo + 1
+        var codigos = await context.Materias
+            .Select(m => m.Codigo)
+            .ToListAsync(cancellationToken);
+
+        var maxNumero = codigos
+            .Where(c => c.StartsWith("MAT-") && int.TryParse(c[4..], out _))
+            .Select(c => int.Parse(c[4..]))
+            .DefaultIfEmpty(0)
+            .Max();
+
+        return maxNumero + 1;
+    }
+
     public async Task AgregarAsync(Materia materia, CancellationToken cancellationToken = default)
     {
         await context.Materias.AddAsync(materia, cancellationToken);

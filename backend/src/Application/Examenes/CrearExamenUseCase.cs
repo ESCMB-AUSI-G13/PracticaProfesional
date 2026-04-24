@@ -15,8 +15,7 @@ public class CrearExamenUseCase(
 {
     private static readonly HashSet<TipoExamen> _tiposAutoInscripcion =
     [
-        TipoExamen.ParcialEscrito,
-        TipoExamen.ParcialOral,
+        TipoExamen.Parcial,
         TipoExamen.Recuperatorio
     ];
 

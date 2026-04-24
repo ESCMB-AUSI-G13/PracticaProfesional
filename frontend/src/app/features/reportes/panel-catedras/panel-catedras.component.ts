@@ -1,8 +1,9 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ReportesService, ReportePromediosCatedra } from '../reportes.service';
+import { CursosService, Curso } from '../../cursos/cursos.service';
 
 @Component({
   selector: 'app-panel-catedras',
@@ -11,7 +12,8 @@ import { ReportesService, ReportePromediosCatedra } from '../reportes.service';
   templateUrl: './panel-catedras.component.html',
   styleUrl: './panel-catedras.component.scss'
 })
-export class PanelCatedrasComponent {
+export class PanelCatedrasComponent implements OnInit {
+  cursos  = signal<Curso[]>([]);
   anio    = signal<number | null>(null);
   cursoId = signal<number | null>(null);
 
@@ -34,7 +36,15 @@ export class PanelCatedrasComponent {
     return total > 0 ? (aprobados * 100) / total : 0;
   });
 
-  constructor(private reportesService: ReportesService, private router: Router) {}
+  constructor(
+    private reportesService: ReportesService,
+    private cursosService: CursosService,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.cursosService.listar().subscribe({ next: c => this.cursos.set(c) });
+  }
 
   buscar(): void {
     this.cargando.set(true);
