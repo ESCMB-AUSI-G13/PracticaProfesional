@@ -93,6 +93,9 @@ cd backend/src && dotnet ef migrations add NombreDeLaMigracion
 
 # Aplicar migraciones manualmente
 cd backend/src && dotnet ef database update
+
+# Reconstruir y levantar los contenedores Docker (después de cualquier cambio en el código)
+docker-compose up --build -d
 ```
 
 ---

@@ -17,7 +17,8 @@
       "Bash(npx ng *)",
       "Bash(powershell.exe -Command \"Get-Command node,npm,npx 2>&1 | Select-Object Name, Source\")",
       "Bash(powershell.exe -Command ' *)",
-      "Bash(powershell.exe -Command 'where.exe node 2>&1; where.exe npm 2>&1; $env:PATH -split '\\\\'';'\\\\'' | Where-Object { $_ -match '\\\\''node|npm'\\\\'' }')"
+      "Bash(powershell.exe -Command 'where.exe node 2>&1; where.exe npm 2>&1; $env:PATH -split '\\\\'';'\\\\'' | Where-Object { $_ -match '\\\\''node|npm'\\\\'' }')",
+      "Bash(npm install *)"
     ]
   }
 }

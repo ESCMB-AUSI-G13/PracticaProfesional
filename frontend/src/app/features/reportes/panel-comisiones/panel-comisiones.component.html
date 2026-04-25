@@ -59,6 +59,9 @@
     @if (reporte()!.comisiones.length === 0) {
       <p class="estado">No hay datos para los filtros aplicados.</p>
     } @else {
+      <div class="chart-wrapper">
+        <canvas #chartCanvas></canvas>
+      </div>
       <div class="tabla-wrapper">
         <table class="tabla">
           <thead>
