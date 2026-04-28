@@ -53,18 +53,6 @@ cd frontend && ng serve
 | Frontend | http://localhost:4200 |
 | Backend API | http://localhost:5201 |
 
----
-
-## Usuario administrador (seed inicial)
-
-| Campo | Valor |
-|---|---|
-| Email | `admin@institucion.edu.ar` |
-| Contraseña | `Admin1234!` |
-| Rol | Dirección |
-
----
-
 ## Base de datos
 
 La base de datos está en **Azure SQL**. Para conectarse desde un cliente visual (DBeaver, VS Code mssql):
@@ -74,7 +62,7 @@ La base de datos está en **Azure SQL**. Para conectarse desde un cliente visual
 | Server | `escmb-data-server.database.windows.net,1433` |
 | Database | `escmb-db` |
 | User | `admin-db` |
-| Password | *(pedirle a Pablo)* |
+| Password |
 | Encrypt | `True` |
 
 ---
