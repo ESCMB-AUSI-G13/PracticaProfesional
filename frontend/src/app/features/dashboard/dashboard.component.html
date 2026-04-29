@@ -1,40 +1,13 @@
-<div class="dashboard">
-  <header class="topbar">
-    <div class="topbar-brand">
-      <img src="assets/images/logo_instituto.png" alt="Logo Instituto" class="topbar-logo" />
-      <span class="topbar-title">Sistema Académico</span>
+<div class="inicio">
+  <div class="inicio-card">
+    <h1 class="inicio-titulo">Bienvenido, {{ authService.usuario()?.nombreCompleto }}</h1>
+    <p class="inicio-subtitulo">
+      Instituto Superior del Profesorado en Ciencias Económicas y Jurídicas<br>
+      "Dr. José A. Ortiz y Herrera"
+    </p>
+    <div class="inicio-rol">
+      <span class="badge-rol">{{ authService.rolVista() }}</span>
     </div>
-    <div class="topbar-user">
-      <span>{{ authService.usuario()?.nombreCompleto }}</span>
-      <span class="badge-rol">{{ authService.usuario()?.rol }}</span>
-
-      @if (authService.vistasDisponibles().length > 0 && !authService.enModoVista()) {
-        <select class="select-vista" (change)="activarVista($event)" title="Ver como otro rol">
-          <option value="">Ver como...</option>
-          @for (r of authService.vistasDisponibles(); track r) {
-            <option [value]="r">{{ r }}</option>
-          }
-        </select>
-      }
-
-      <button class="btn-logout" (click)="authService.logout()">Cerrar sesión</button>
-    </div>
-  </header>
-
-  <main class="content">
-    <h2>Módulos disponibles</h2>
-
-    @if (modulosVisibles().length === 0) {
-      <p class="sin-modulos">No hay módulos disponibles para tu rol.</p>
-    } @else {
-      <div class="modulos-grid">
-        @for (modulo of modulosVisibles(); track modulo.ruta) {
-          <a class="modulo-card" [routerLink]="modulo.ruta">
-            <h3>{{ modulo.titulo }}</h3>
-            <p>{{ modulo.descripcion }}</p>
-          </a>
-        }
-      </div>
-    }
-  </main>
+    <p class="inicio-hint">Usá el menú de la izquierda para navegar entre los módulos disponibles.</p>
+  </div>
 </div>

@@ -1,0 +1,79 @@
+<div class="shell-layout">
+
+  <aside class="sidebar">
+
+    <div class="sidebar-header">
+      <img src="assets/images/logo_instituto.png" alt="Logo" class="brand-logo" />
+      <span class="brand-name">Sistema Académico</span>
+    </div>
+
+    <div class="sidebar-user">
+      <div class="user-avatar">{{ iniciales }}</div>
+      <div class="user-info">
+        <span class="user-name">{{ authService.usuario()?.nombreCompleto }}</span>
+        <span class="user-role">{{ authService.rolVista() }}</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      @for (item of itemsVisibles(); track item.label) {
+        @if (!item.children) {
+          <a
+            class="nav-item"
+            [routerLink]="item.ruta"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: item.ruta === '/dashboard' }">
+            <span class="nav-icon" [innerHTML]="getIcon(item.icon)"></span>
+            <span class="nav-label">{{ item.label }}</span>
+          </a>
+        } @else {
+          <div class="nav-group">
+            <button class="nav-group-header" (click)="toggleGroup(item.label)">
+              <span class="nav-icon" [innerHTML]="getIcon(item.icon)"></span>
+              <span class="nav-label">{{ item.label }}</span>
+              <svg class="nav-arrow" [class.open]="isExpanded(item.label)" width="12" height="12" viewBox="0 0 12 12" fill="currentColor">
+                <path d="M6 8L1 3h10L6 8z"/>
+              </svg>
+            </button>
+            @if (isExpanded(item.label)) {
+              <div class="nav-group-children">
+                @for (child of item.children; track child.ruta) {
+                  <a class="nav-item nav-child" [routerLink]="child.ruta" routerLinkActive="active">
+                    <span class="nav-dot"></span>
+                    <span class="nav-label">{{ child.label }}</span>
+                  </a>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      @if (authService.vistasDisponibles().length > 0 && !authService.enModoVista()) {
+        <select class="select-vista" (change)="activarVista($event)" title="Ver como otro rol">
+          <option value="">Ver como...</option>
+          @for (r of authService.vistasDisponibles(); track r) {
+            <option [value]="r">{{ r }}</option>
+          }
+        </select>
+      }
+      <button class="btn-logout" (click)="authService.logout()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/>
+        </svg>
+        Cerrar sesión
+      </button>
+    </div>
+
+  </aside>
+
+  <div class="shell-main">
+    <app-banner-vista-rol />
+    <div class="shell-content">
+      <router-outlet />
+    </div>
+  </div>
+
+</div>
