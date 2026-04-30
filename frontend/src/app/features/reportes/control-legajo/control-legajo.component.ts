@@ -54,4 +54,15 @@ export class ControlLegajoComponent {
   irAlDashboard(): void {
     this.router.navigate(['/dashboard']);
   }
+
+  condicionLabel(condicion: string): string {
+    const map: Record<string, string> = {
+      'regular':     '● Regular',
+      'libre':       '✗ Libre',
+      'promocional': '✓ Promocional',
+      'egresado':    '★ Egresado',
+      'desertor':    '✗ Desertor',
+    };
+    return map[condicion.toLowerCase()] ?? condicion;
+  }
 }

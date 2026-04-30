@@ -1,7 +1,7 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { MisExamenesService, ExamenFinalDisponible } from './mis-examenes.service';
+import { MisExamenesService, ExamenFinalDisponible, ComprobanteInscripcionExamen } from './mis-examenes.service';
 
 @Component({
   selector: 'app-mis-examenes',
@@ -12,9 +12,10 @@ import { MisExamenesService, ExamenFinalDisponible } from './mis-examenes.servic
 })
 export class MisExamenesComponent implements OnInit {
   examenes  = signal<ExamenFinalDisponible[]>([]);
-  cargando  = signal(true);
-  error     = signal<string | null>(null);
+  cargando     = signal(true);
+  error        = signal<string | null>(null);
   inscribiendo = signal<number | null>(null);
+  comprobante  = signal<ComprobanteInscripcionExamen | null>(null);
 
   constructor(
     private service: MisExamenesService,
@@ -37,11 +38,15 @@ export class MisExamenesComponent implements OnInit {
     this.inscribiendo.set(examen.id);
     this.error.set(null);
     this.service.inscribirse(examen.id).subscribe({
-      next: () => {
+      next: (resultado) => {
         this.examenes.update(list =>
           list.map(e => e.id === examen.id ? { ...e, yaInscripto: true } : e)
         );
         this.inscribiendo.set(null);
+        this.service.obtenerComprobante(resultado.id).subscribe({
+          next: (c) => this.comprobante.set(c),
+          error: () => {}
+        });
       },
       error: (e) => {
         this.error.set(e.error?.mensaje ?? 'Error al inscribirse.');
@@ -50,5 +55,19 @@ export class MisExamenesComponent implements OnInit {
     });
   }
 
+  cerrarComprobante(): void { this.comprobante.set(null); }
+
+  imprimirComprobante(): void { window.print(); }
+
   irAlDashboard(): void { this.router.navigate(['/dashboard']); }
+
+  estadoLabel(estado: string): string {
+    const map: Record<string, string> = {
+      'activa':      '● Activa',
+      'aprobada':    '✓ Aprobada',
+      'desaprobada': '✗ Desaprobada',
+      'baja':        '✗ Baja',
+    };
+    return map[estado.toLowerCase()] ?? estado;
+  }
 }

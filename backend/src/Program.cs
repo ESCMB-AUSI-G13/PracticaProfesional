@@ -92,6 +92,8 @@ builder.Services.AddScoped<ReactivarPreceptorUseCase>();
 // Inscripciones
 builder.Services.AddScoped<ListarInscripcionesUseCase>();
 builder.Services.AddScoped<InscribirseEnMateriaUseCase>();
+builder.Services.AddScoped<ObtenerComprobanteInscripcionUseCase>();
+builder.Services.AddScoped<ObtenerComprobanteInscripcionExamenUseCase>();
 builder.Services.AddScoped<IInscripcionExamenRepository, InscripcionExamenRepository>();
 
 // Calificaciones

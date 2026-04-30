@@ -22,6 +22,21 @@ export interface CrearInscripcionMateriaRequest {
   cursoId:      number;
 }
 
+export interface ComprobanteInscripcionMateria {
+  id:                      number;
+  estudianteNombreCompleto: string;
+  estudianteDni:           string;
+  estudianteLegajo:        string;
+  materiaCodigo:           string;
+  materiaNombre:           string;
+  materiaPlan:             string;
+  cursoAnioLectivo:        number;
+  cursoComision:           string;
+  estado:                  string;
+  fechaInscripcion:        string;
+  fechaEmision:            string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class InscripcionesMateriaService {
   private readonly apiUrl = 'http://localhost:5000/api/inscripciones/materias';
@@ -34,5 +49,9 @@ export class InscripcionesMateriaService {
 
   inscribir(dto: CrearInscripcionMateriaRequest): Observable<any> {
     return this.http.post(this.apiUrl, dto);
+  }
+
+  obtenerComprobante(id: number): Observable<ComprobanteInscripcionMateria> {
+    return this.http.get<ComprobanteInscripcionMateria>(`${this.apiUrl}/${id}/comprobante`);
   }
 }

@@ -63,6 +63,7 @@
           <th>Curso</th>
           <th>Estado</th>
           <th>Fecha</th>
+          <th>Comprobante</th>
         </tr>
       </thead>
       <tbody>
@@ -71,11 +72,53 @@
             <td>{{ i.estudianteNombre }}</td>
             <td><code>{{ i.materiaCodigo }}</code> {{ i.materiaNombre }}</td>
             <td>{{ i.cursoAnio }}° {{ i.cursoComision }}</td>
-            <td><span class="badge" [class]="'badge-' + i.estado.toLowerCase()">{{ i.estado }}</span></td>
+            <td><span class="badge" [class]="'badge-' + i.estado.toLowerCase()">{{ estadoLabel(i.estado) }}</span></td>
             <td>{{ i.fechaInscripcion | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <button class="btn btn-comprobante" (click)="verComprobante(i.id)" [disabled]="cargandoComprobante()">
+                Ver comprobante
+              </button>
+            </td>
           </tr>
         }
       </tbody>
     </table>
+  }
+
+  @if (comprobante(); as c) {
+    <div class="modal-overlay" (click)="cerrarComprobante()">
+      <div class="modal-comprobante" (click)="$event.stopPropagation()">
+        <div class="comprobante-header">
+          <p class="inst-nombre">Instituto Superior del Profesorado en Ciencias Económicas y Jurídicas</p>
+          <p class="inst-subtitulo">"Dr. José A. Ortiz y Herrera"</p>
+          <h2>Comprobante de Inscripción</h2>
+          <p class="comprobante-num">N.° {{ c.id }}</p>
+        </div>
+
+        <div class="comprobante-body">
+          <section class="seccion">
+            <h3>Datos del Estudiante</h3>
+            <div class="fila"><span class="etiqueta">Apellido y Nombre</span><span>{{ c.estudianteNombreCompleto }}</span></div>
+            <div class="fila"><span class="etiqueta">DNI</span><span>{{ c.estudianteDni }}</span></div>
+            <div class="fila"><span class="etiqueta">Legajo</span><span>{{ c.estudianteLegajo }}</span></div>
+          </section>
+
+          <section class="seccion">
+            <h3>Datos de la Inscripción</h3>
+            <div class="fila"><span class="etiqueta">Materia</span><span><code>{{ c.materiaCodigo }}</code> {{ c.materiaNombre }}</span></div>
+            <div class="fila"><span class="etiqueta">Plan</span><span>{{ c.materiaPlan }}</span></div>
+            <div class="fila"><span class="etiqueta">Curso</span><span>{{ c.cursoAnioLectivo }}° año — Comisión {{ c.cursoComision }}</span></div>
+            <div class="fila"><span class="etiqueta">Estado</span><span class="badge" [class]="'badge-' + c.estado.toLowerCase()">{{ estadoLabel(c.estado) }}</span></div>
+            <div class="fila"><span class="etiqueta">Fecha de inscripción</span><span>{{ c.fechaInscripcion | date:'dd/MM/yyyy HH:mm' }}</span></div>
+            <div class="fila"><span class="etiqueta">Fecha de emisión</span><span>{{ c.fechaEmision | date:'dd/MM/yyyy HH:mm' }}</span></div>
+          </section>
+        </div>
+
+        <div class="comprobante-footer no-print">
+          <button class="btn btn-primary" (click)="imprimirComprobante()">Imprimir</button>
+          <button class="btn btn-secondary" (click)="cerrarComprobante()">Cerrar</button>
+        </div>
+      </div>
+    </div>
   }
 </div>

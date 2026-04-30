@@ -46,7 +46,7 @@
           <span class="dato-label">Condición académica</span>
           <span class="dato-valor">
             <span [class]="'badge condicion-' + r.condicionAcademica.toLowerCase()">
-              {{ r.condicionAcademica }}
+              {{ condicionLabel(r.condicionAcademica) }}
             </span>
           </span>
         </div>
@@ -114,11 +114,11 @@
                 <td class="centrado">{{ m.porcentajeAusencias | number:'1.1-1' }}%</td>
                 <td>
                   @if (m.perdioRegularidad) {
-                    <span class="badge badge-critico">Regularidad perdida</span>
+                    <span class="badge badge-critico">✗ Regularidad perdida</span>
                   } @else if (m.enRiesgoRegularidad) {
-                    <span class="badge badge-riesgo">En riesgo</span>
+                    <span class="badge badge-riesgo">! En riesgo</span>
                   } @else {
-                    <span class="badge badge-ok">Regular</span>
+                    <span class="badge badge-ok">✓ Regular</span>
                   }
                 </td>
               </tr>

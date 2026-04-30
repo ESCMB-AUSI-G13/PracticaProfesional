@@ -4,6 +4,7 @@ using PracticaProfesional.Application.Examenes;
 using PracticaProfesional.Application.Examenes.DTOs;
 using PracticaProfesional.Application.Inscripciones;
 using PracticaProfesional.Application.Inscripciones.DTOs;
+using System.Security.Claims;
 
 namespace PracticaProfesional.Controllers;
 
@@ -14,7 +15,8 @@ public class ExamenesController(
     CrearExamenUseCase crearExamen,
     ListarExamenesUseCase listarExamenes,
     ListarFinalesDisponiblesUseCase listarFinales,
-    InscribirseEnExamenUseCase inscribirseEnExamen) : ControllerBase
+    InscribirseEnExamenUseCase inscribirseEnExamen,
+    ObtenerComprobanteInscripcionExamenUseCase comprobanteExamenUseCase) : ControllerBase
 {
     [HttpGet]
     [Authorize(Roles = "Direccion,Docente")]
@@ -51,10 +53,21 @@ public class ExamenesController(
         int examenId,
         CancellationToken cancellationToken)
     {
-        var usuarioId = int.Parse(User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)!.Value);
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var dto = new InscribirseEnExamenDto(usuarioId, examenId);
         var resultado = await inscribirseEnExamen.EjecutarAsync(dto, cancellationToken);
         return CreatedAtAction(nameof(Listar), new { id = resultado.Id }, resultado);
+    }
+
+    /// <summary>GET api/examenes/inscripciones/{id}/comprobante — comprobante de confirmación de inscripción a examen.</summary>
+    [HttpGet("inscripciones/{id:int}/comprobante")]
+    [Authorize(Roles = "Estudiante,Direccion")]
+    [ProducesResponseType(typeof(ComprobanteInscripcionExamenDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ObtenerComprobanteInscripcion(int id, CancellationToken cancellationToken)
+    {
+        var comprobante = await comprobanteExamenUseCase.EjecutarAsync(id, cancellationToken);
+        return Ok(comprobante);
     }
 }
 

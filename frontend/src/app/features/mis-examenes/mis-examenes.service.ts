@@ -14,6 +14,32 @@ export interface ExamenFinalDisponible {
   yaInscripto:   boolean;
 }
 
+export interface InscripcionExamenResult {
+  id:              number;
+  estudianteId:    number;
+  estudianteNombre: string;
+  examenId:        number;
+  materiaNombre:   string;
+  tipoExamen:      string;
+  fechaExamen:     string;
+  estado:          string;
+}
+
+export interface ComprobanteInscripcionExamen {
+  id:                       number;
+  estudianteNombreCompleto: string;
+  estudianteDni:            string;
+  estudianteLegajo:         string;
+  materiaCodigo:            string;
+  materiaNombre:            string;
+  tipoExamen:               string;
+  fechaExamen:              string;
+  horario:                  string;
+  estado:                   string;
+  fechaInscripcion:         string;
+  fechaEmision:             string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class MisExamenesService {
   private readonly apiUrl = 'http://localhost:5000/api/examenes';
@@ -24,7 +50,11 @@ export class MisExamenesService {
     return this.http.get<ExamenFinalDisponible[]>(`${this.apiUrl}/mis-finales`);
   }
 
-  inscribirse(examenId: number): Observable<any> {
-    return this.http.post(`${this.apiUrl}/${examenId}/inscripciones`, {});
+  inscribirse(examenId: number): Observable<InscripcionExamenResult> {
+    return this.http.post<InscripcionExamenResult>(`${this.apiUrl}/${examenId}/inscripciones`, {});
+  }
+
+  obtenerComprobante(inscripcionId: number): Observable<ComprobanteInscripcionExamen> {
+    return this.http.get<ComprobanteInscripcionExamen>(`${this.apiUrl}/inscripciones/${inscripcionId}/comprobante`);
   }
 }

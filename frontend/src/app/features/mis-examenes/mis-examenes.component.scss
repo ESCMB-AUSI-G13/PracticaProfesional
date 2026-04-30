@@ -17,3 +17,23 @@ code { background: #f0f0f0; padding: 0.1rem 0.4rem; border-radius: 3px; font-siz
   &:hover:not(:disabled) { opacity: 0.9; }
   &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
+
+// ── Modal comprobante ─────────────────────────────────────────────────────────
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal-comprobante { background: #fff; border-radius: 8px; width: 600px; max-width: 95vw; max-height: 90vh; overflow-y: auto; padding: 2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.18); }
+.comprobante-header { text-align: center; border-bottom: 2px solid #2c3e50; padding-bottom: 1rem; margin-bottom: 1.5rem;
+  .inst-nombre { font-weight: 700; font-size: 0.95rem; color: #2c3e50; margin: 0; }
+  .inst-subtitulo { font-style: italic; font-size: 0.85rem; color: #555; margin: 0.1rem 0 0.75rem; }
+  h2 { font-size: 1.2rem; margin: 0.25rem 0 0; color: #2c3e50; }
+  .comprobante-num { color: #888; font-size: 0.85rem; margin: 0.25rem 0 0; }
+}
+.comprobante-body { display: flex; flex-direction: column; gap: 1.25rem; }
+.seccion { h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; color: #888; margin: 0 0 0.6rem; border-bottom: 1px solid #eee; padding-bottom: 0.3rem; } }
+.fila { display: flex; gap: 1rem; padding: 0.3rem 0; font-size: 0.9rem; .etiqueta { width: 180px; flex-shrink: 0; color: #555; font-weight: 600; } }
+.comprobante-footer { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #eee; }
+
+@media print {
+  .no-print, .page-header, .info, .tabla { display: none !important; }
+  .modal-overlay { position: static; background: none; }
+  .modal-comprobante { box-shadow: none; max-height: none; padding: 0; }
+}

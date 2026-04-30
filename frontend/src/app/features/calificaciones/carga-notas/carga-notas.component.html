@@ -85,7 +85,7 @@
                   [class.badge-aprobada]="fila.estado === 'Aprobada'"
                   [class.badge-desaprobada]="fila.estado === 'Desaprobada'"
                   [class.badge-baja]="fila.estado === 'Baja'">
-                  {{ fila.estado }}
+                  {{ estadoLabel(fila.estado) }}
                 </span>
               </td>
 

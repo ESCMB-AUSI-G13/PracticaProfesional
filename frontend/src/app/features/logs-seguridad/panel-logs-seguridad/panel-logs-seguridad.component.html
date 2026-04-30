@@ -74,9 +74,9 @@
               <td class="col-email">{{ log.email }}</td>
               <td class="col-resultado">
                 @if (log.exitoso) {
-                  <span class="badge badge-ok">Exitoso</span>
+                  <span class="badge badge-ok">✓ Exitoso</span>
                 } @else {
-                  <span class="badge badge-fail">Fallido</span>
+                  <span class="badge badge-fail">✗ Fallido</span>
                 }
               </td>
               <td class="col-motivo">{{ log.motivoFallo ?? '—' }}</td>

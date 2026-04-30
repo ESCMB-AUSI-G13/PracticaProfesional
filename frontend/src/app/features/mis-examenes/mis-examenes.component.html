@@ -34,7 +34,7 @@
             <td>{{ ex.cupo }}</td>
             <td>
               @if (ex.yaInscripto) {
-                <span class="badge badge-ok">Inscripto</span>
+                <span class="badge badge-ok">✓ Inscripto</span>
               } @else {
                 <button
                   class="btn btn-primary btn-sm"
@@ -50,3 +50,41 @@
     </table>
   }
 </div>
+
+@if (comprobante(); as c) {
+  <div class="modal-overlay" (click)="cerrarComprobante()">
+    <div class="modal-comprobante" (click)="$event.stopPropagation()">
+      <div class="comprobante-header">
+        <p class="inst-nombre">Instituto Superior del Profesorado en Ciencias Económicas y Jurídicas</p>
+        <p class="inst-subtitulo">"Dr. José A. Ortiz y Herrera"</p>
+        <h2>Comprobante de Inscripción a Examen</h2>
+        <p class="comprobante-num">N.° {{ c.id }}</p>
+      </div>
+
+      <div class="comprobante-body">
+        <section class="seccion">
+          <h3>Datos del Estudiante</h3>
+          <div class="fila"><span class="etiqueta">Apellido y Nombre</span><span>{{ c.estudianteNombreCompleto }}</span></div>
+          <div class="fila"><span class="etiqueta">DNI</span><span>{{ c.estudianteDni }}</span></div>
+          <div class="fila"><span class="etiqueta">Legajo</span><span>{{ c.estudianteLegajo }}</span></div>
+        </section>
+
+        <section class="seccion">
+          <h3>Datos del Examen</h3>
+          <div class="fila"><span class="etiqueta">Materia</span><span><code>{{ c.materiaCodigo }}</code> {{ c.materiaNombre }}</span></div>
+          <div class="fila"><span class="etiqueta">Tipo</span><span>{{ c.tipoExamen }}</span></div>
+          <div class="fila"><span class="etiqueta">Fecha del examen</span><span>{{ c.fechaExamen | date:'dd/MM/yyyy' }}</span></div>
+          <div class="fila"><span class="etiqueta">Horario</span><span>{{ c.horario }}</span></div>
+          <div class="fila"><span class="etiqueta">Estado</span><span class="badge-ok">{{ estadoLabel(c.estado) }}</span></div>
+          <div class="fila"><span class="etiqueta">Fecha de inscripción</span><span>{{ c.fechaInscripcion | date:'dd/MM/yyyy HH:mm' }}</span></div>
+          <div class="fila"><span class="etiqueta">Fecha de emisión</span><span>{{ c.fechaEmision | date:'dd/MM/yyyy HH:mm' }}</span></div>
+        </section>
+      </div>
+
+      <div class="comprobante-footer no-print">
+        <button class="btn btn-primary" (click)="imprimirComprobante()">Imprimir</button>
+        <button class="btn" (click)="cerrarComprobante()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+}

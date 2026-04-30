@@ -10,7 +10,8 @@ namespace PracticaProfesional.Controllers;
 [Authorize(Roles = "Direccion")]
 public class InscripcionesController(
     ListarInscripcionesUseCase listarUseCase,
-    InscribirseEnMateriaUseCase inscribirseUseCase) : ControllerBase
+    InscribirseEnMateriaUseCase inscribirseUseCase,
+    ObtenerComprobanteInscripcionUseCase comprobanteUseCase) : ControllerBase
 {
     [HttpGet("materias")]
     [ProducesResponseType(typeof(IEnumerable<InscripcionMateriaListadoDto>), StatusCodes.Status200OK)]
@@ -30,5 +31,14 @@ public class InscripcionesController(
     {
         var resultado = await inscribirseUseCase.EjecutarAsync(dto, cancellationToken);
         return CreatedAtAction(nameof(Listar), new { id = resultado.Id }, resultado);
+    }
+
+    [HttpGet("materias/{id}/comprobante")]
+    [ProducesResponseType(typeof(ComprobanteInscripcionMateriaDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> ObtenerComprobante(int id, CancellationToken cancellationToken)
+    {
+        var comprobante = await comprobanteUseCase.EjecutarAsync(id, cancellationToken);
+        return Ok(comprobante);
     }
 }

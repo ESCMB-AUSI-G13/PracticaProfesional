@@ -200,4 +200,14 @@ export class CargaNotasComponent {
 
   get pendientes(): number  { return this.filas().filter(f => f.estado === 'Activa').length; }
   get calificados(): number { return this.filas().filter(f => f.estado !== 'Activa' && f.estado !== 'Baja').length; }
+
+  estadoLabel(estado: string): string {
+    const map: Record<string, string> = {
+      'activa':      '— Pendiente',
+      'aprobada':    '✓ Aprobada',
+      'desaprobada': '✗ Desaprobada',
+      'baja':        '✗ Baja',
+    };
+    return map[estado.toLowerCase()] ?? estado;
+  }
 }

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
-import { InscripcionesMateriaService, InscripcionMateria, CrearInscripcionMateriaRequest } from '../inscripciones-materia.service';
+import { InscripcionesMateriaService, InscripcionMateria, CrearInscripcionMateriaRequest, ComprobanteInscripcionMateria } from '../inscripciones-materia.service';
 import { EstudiantesService, Estudiante } from '../../estudiantes/estudiantes.service';
 import { MateriasService, Materia } from '../../materias/materias.service';
 import { CursosService, Curso } from '../../cursos/cursos.service';
@@ -25,6 +25,9 @@ export class ListaInscripcionesComponent implements OnInit {
   mostrarForm = signal(false);
   guardando   = signal(false);
   error       = signal<string | null>(null);
+
+  comprobante         = signal<ComprobanteInscripcionMateria | null>(null);
+  cargandoComprobante = signal(false);
 
   nuevoEstudianteId = signal<number | null>(null);
   nuevoMateriaId    = signal<number | null>(null);
@@ -86,4 +89,27 @@ export class ListaInscripcionesComponent implements OnInit {
   }
 
   irAlDashboard(): void { this.router.navigate(['/dashboard']); }
+
+  estadoLabel(estado: string): string {
+    const map: Record<string, string> = {
+      'activa':      '● Activa',
+      'aprobada':    '✓ Aprobada',
+      'desaprobada': '✗ Desaprobada',
+      'baja':        '✗ Baja',
+      'pendiente':   '— Pendiente',
+    };
+    return map[estado.toLowerCase()] ?? estado;
+  }
+
+  verComprobante(id: number): void {
+    this.cargandoComprobante.set(true);
+    this.service.obtenerComprobante(id).subscribe({
+      next: (c) => { this.comprobante.set(c); this.cargandoComprobante.set(false); },
+      error: () => { this.error.set('Error al obtener el comprobante.'); this.cargandoComprobante.set(false); }
+    });
+  }
+
+  cerrarComprobante(): void { this.comprobante.set(null); }
+
+  imprimirComprobante(): void { window.print(); }
 }
