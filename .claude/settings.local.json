@@ -18,7 +18,12 @@
       "Bash(powershell.exe -Command \"Get-Command node,npm,npx 2>&1 | Select-Object Name, Source\")",
       "Bash(powershell.exe -Command ' *)",
       "Bash(powershell.exe -Command 'where.exe node 2>&1; where.exe npm 2>&1; $env:PATH -split '\\\\'';'\\\\'' | Where-Object { $_ -match '\\\\''node|npm'\\\\'' }')",
-      "Bash(npm install *)"
+      "Bash(npm install *)",
+      "Bash(findstr /i \"email\\\\|mail\\\\|notif\\\\|comm\")",
+      "Bash(dir \"d:\\\\Documents\\\\3A\\\\PRACTICA PROFESIONAL\\\\PracticaProfesional\\\\backend\\\\src\\\\Infrastructure\" /s /b)",
+      "Bash(Get-ChildItem -Path \"d:\\\\Documents\\\\3A\\\\PRACTICA PROFESIONAL\\\\PracticaProfesional\\\\frontend\" -Recurse -Directory)",
+      "Bash(Select-Object -First 50)",
+      "Bash(Format-Table FullName)"
     ]
   }
 }

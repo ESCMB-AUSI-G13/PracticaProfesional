@@ -7,13 +7,14 @@ namespace PracticaProfesional.Controllers;
 
 [ApiController]
 [Route("api/materias")]
-[Authorize(Roles = "Direccion")]
+[Authorize]
 public class MateriasController(
     CrearMateriaUseCase crearMateria,
     ListarMateriasUseCase listarMaterias,
     ModificarMateriaUseCase modificarMateria) : ControllerBase
 {
     [HttpGet]
+    [Authorize(Roles = "Direccion,Estudiante")]
     [ProducesResponseType(typeof(IEnumerable<MateriaDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Listar(CancellationToken cancellationToken)
     {
@@ -22,6 +23,7 @@ public class MateriasController(
     }
 
     [HttpPost]
+    [Authorize(Roles = "Direccion")]
     [ProducesResponseType(typeof(MateriaDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -32,6 +34,7 @@ public class MateriasController(
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Direccion")]
     [ProducesResponseType(typeof(MateriaDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Modificar(int id, [FromBody] ModificarMateriaDto dto, CancellationToken cancellationToken)

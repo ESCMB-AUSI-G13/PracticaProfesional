@@ -41,12 +41,14 @@ public class CalendarioAcademico
         };
     }
 
-    public void Modificar(string nombreEvento, DateTime fechaInicio, DateTime fechaFin)
+    public void Modificar(string nombreEvento, string comision, DateTime fechaInicio, DateTime fechaFin, TipoEvento tipoEvento)
     {
         if (string.IsNullOrWhiteSpace(nombreEvento)) throw new ArgumentException("El nombre del evento es obligatorio.");
         if (fechaFin < fechaInicio) throw new ArgumentException("La fecha de fin no puede ser anterior a la de inicio.");
         NombreEvento = nombreEvento;
-        FechaInicio = fechaInicio.Date;
-        FechaFin = fechaFin.Date;
+        Comision     = comision;
+        FechaInicio  = fechaInicio.Date;
+        FechaFin     = fechaFin.Date;
+        TipoEvento   = tipoEvento;
     }
 }

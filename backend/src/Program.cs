@@ -12,7 +12,10 @@ using PracticaProfesional.Application.EstadoAcademico;
 using PracticaProfesional.Application.Inscripciones;
 using PracticaProfesional.Application.Reportes;
 using PracticaProfesional.Application.Materias;
+using PracticaProfesional.Application.Correlatividades;
+using PracticaProfesional.Application.Calendario;
 using PracticaProfesional.Application.Cursos;
+using PracticaProfesional.Infrastructure.Seeding;
 using PracticaProfesional.Application.EspaciosCurriculares;
 using PracticaProfesional.Application.Examenes;
 using PracticaProfesional.Infrastructure.Persistence.Repositories;
@@ -27,7 +30,8 @@ using PracticaProfesional.Infrastructure.Seguridad;
 using PracticaProfesional.Infrastructure.Sesiones;
 using PracticaProfesional.Infrastructure.Email;
 using PracticaProfesional.Infrastructure.Persistence;
-using PracticaProfesional.Infrastructure.Middleware;
+using PracticaProfesional.Domain.Exceptions;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +58,7 @@ builder.Services.AddScoped<IDocenteRepository, DocenteRepository>();
 builder.Services.AddScoped<IPreceptorRepository, PreceptorRepository>();
 builder.Services.AddScoped<IEstudianteRepository, EstudianteRepository>();
 builder.Services.AddScoped<ICorrelativiadadRepository, CorrelativiadadRepository>();
+builder.Services.AddScoped<ICalendarioAcademicoRepository, CalendarioAcademicoRepository>();
 builder.Services.AddScoped<IHistorialAcademicoRepository, HistorialAcademicoRepository>();
 builder.Services.AddScoped<IInscripcionMateriaRepository, InscripcionMateriaRepository>();
 builder.Services.AddScoped<IAsistenciaRepository, AsistenciaRepository>();
@@ -61,7 +66,6 @@ builder.Services.AddScoped<IMateriaRepository, MateriaRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 // ── Use Cases ──────────────────────────────────────────────────────────────────
-builder.Services.AddHttpClient();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<LoginUseCase>();
 builder.Services.AddScoped<RegistroUseCase>();
@@ -92,6 +96,8 @@ builder.Services.AddScoped<ReactivarPreceptorUseCase>();
 // Inscripciones
 builder.Services.AddScoped<ListarInscripcionesUseCase>();
 builder.Services.AddScoped<InscribirseEnMateriaUseCase>();
+builder.Services.AddScoped<InscribirseEnMateriaAutogestUseCase>();
+builder.Services.AddScoped<ListarMisInscripcionesEstudianteUseCase>();
 builder.Services.AddScoped<ObtenerComprobanteInscripcionUseCase>();
 builder.Services.AddScoped<ObtenerComprobanteInscripcionExamenUseCase>();
 builder.Services.AddScoped<IInscripcionExamenRepository, InscripcionExamenRepository>();
@@ -113,6 +119,17 @@ builder.Services.AddScoped<ControlIndividualPorLegajoUseCase>();
 builder.Services.AddScoped<CrearMateriaUseCase>();
 builder.Services.AddScoped<ListarMateriasUseCase>();
 builder.Services.AddScoped<ModificarMateriaUseCase>();
+
+// Correlatividades
+builder.Services.AddScoped<CrearCorrelativiadadUseCase>();
+builder.Services.AddScoped<ListarCorrelativiadadesUseCase>();
+builder.Services.AddScoped<EliminarCorrelativiadadUseCase>();
+
+// Calendario Académico
+builder.Services.AddScoped<ListarEventosCalendarioUseCase>();
+builder.Services.AddScoped<CrearEventoCalendarioUseCase>();
+builder.Services.AddScoped<ModificarEventoCalendarioUseCase>();
+builder.Services.AddScoped<EliminarEventoCalendarioUseCase>();
 
 // Cursos
 builder.Services.AddScoped<ICursoRepository, CursoRepository>();
@@ -181,9 +198,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ── Middleware global de excepciones ───────────────────────────────────────────
-builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddControllers();
 
 var app = builder.Build();
@@ -212,6 +226,9 @@ if (app.Environment.IsDevelopment())
             db.Usuarios.Add(admin);
             db.SaveChanges();
         }
+
+        var calendarioRepo = scope.ServiceProvider.GetRequiredService<ICalendarioAcademicoRepository>();
+        await CalendarioSeeder.SeedAsync(calendarioRepo);
     }
     catch (Exception ex)
     {
@@ -219,8 +236,37 @@ if (app.Environment.IsDevelopment())
     }
 }
 
-app.UseExceptionHandler();
 app.UseCors("AllowFrontend");
+
+// Manejo de excepciones DESPUÉS de CORS para que los headers no se pierdan
+app.Use(async (context, next) =>
+{
+    try
+    {
+        await next(context);
+    }
+    catch (Exception ex)
+    {
+        var (statusCode, title) = ex switch
+        {
+            BusinessException bex         => (bex.StatusCode, "Error de negocio"),
+            UnauthorizedAccessException   => (StatusCodes.Status401Unauthorized, "No autorizado"),
+            ArgumentException             => (StatusCodes.Status400BadRequest, "Solicitud inválida"),
+            KeyNotFoundException          => (StatusCodes.Status404NotFound, "Recurso no encontrado"),
+            InvalidOperationException     => (StatusCodes.Status409Conflict, "Conflicto de negocio"),
+            _                             => (StatusCodes.Status500InternalServerError, "Error interno del servidor")
+        };
+
+        context.Response.StatusCode = statusCode;
+        await context.Response.WriteAsJsonAsync(new ProblemDetails
+        {
+            Status = statusCode,
+            Title  = title,
+            Detail = ex.Message
+        });
+    }
+});
+
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

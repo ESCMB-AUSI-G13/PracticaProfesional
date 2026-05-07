@@ -1,0 +1,57 @@
+<div class="page">
+  <header class="page-header">
+    <button class="btn-back" (click)="cancelar()">← Calendario</button>
+    <h1>{{ esEdicion ? 'Editar evento' : 'Nuevo evento' }}</h1>
+  </header>
+
+  @if (cargando()) {
+    <p class="estado">Cargando...</p>
+  } @else {
+    <form class="form" (ngSubmit)="guardar()">
+      @if (error()) { <p class="error">{{ error() }}</p> }
+
+      <div class="campo">
+        <label>Nombre del evento *</label>
+        <input type="text" [ngModel]="nombreEvento()" (ngModelChange)="nombreEvento.set($event)"
+               name="nombre" placeholder="Ej: Período de exámenes 1er turno" />
+      </div>
+
+      <div class="fila-2">
+        <div class="campo">
+          <label>Tipo de evento *</label>
+          <select [ngModel]="tipoEvento()" (ngModelChange)="tipoEvento.set(+$event)" name="tipo">
+            @for (t of tiposEvento; track t.valor) {
+              <option [value]="t.valor">{{ t.etiqueta }}</option>
+            }
+          </select>
+        </div>
+        <div class="campo">
+          <label>Carrera</label>
+          <select [ngModel]="comision()" (ngModelChange)="comision.set($event)" name="comision">
+            @for (c of carrerasOpciones; track c) {
+              <option [value]="c">{{ c }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="fila-2">
+        <div class="campo">
+          <label>Fecha inicio *</label>
+          <input type="date" [ngModel]="fechaInicio()" (ngModelChange)="fechaInicio.set($event)" name="inicio" />
+        </div>
+        <div class="campo">
+          <label>Fecha fin *</label>
+          <input type="date" [ngModel]="fechaFin()" (ngModelChange)="fechaFin.set($event)" name="fin" />
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button type="submit" class="btn btn-primary" [disabled]="guardando()">
+          {{ guardando() ? 'Guardando...' : (esEdicion ? 'Guardar cambios' : 'Crear evento') }}
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
+      </div>
+    </form>
+  }
+</div>

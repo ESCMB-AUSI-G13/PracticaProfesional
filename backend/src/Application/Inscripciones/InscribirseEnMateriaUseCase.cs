@@ -15,6 +15,7 @@ public class InscribirseEnMateriaUseCase(
     IInscripcionMateriaRepository inscripcionMateriaRepository,
     ICorrelativiadadRepository correlativiadadRepository,
     IHistorialAcademicoRepository historialRepository,
+    ICalendarioAcademicoRepository calendarioRepository,
     IAuditoriaService auditoria)
 {
     public async Task<InscripcionMateriaResultDto> EjecutarAsync(
@@ -32,18 +33,22 @@ public class InscribirseEnMateriaUseCase(
         if (estudiante.Condicion == CondicionEstudiante.Desertor)
             throw new BusinessException("El estudiante está en condición de desertor. Debe re-inscribirse primero.");
 
-        // 3. Verificar que no existe ya una inscripción activa para esa materia
+        // 3. Validar período de inscripción (CU-47)
+        if (!await calendarioRepository.EstaEnPeriodoAsync(TipoEvento.InscripcionMateria, DateTime.Today, cancellationToken))
+            throw new BusinessException("Inscripción fuera del período habilitado según el Calendario Académico.");
+
+        // 4. Verificar que no existe ya una inscripción activa para esa materia
         if (await inscripcionMateriaRepository.ExisteInscripcionActivaAsync(dto.EstudianteId, dto.MateriaId, cancellationToken))
             throw new BusinessException("El estudiante ya tiene una inscripción activa en esta materia.");
 
-        // 4. Validar correlatividades para CURSAR
+        // 5. Validar correlatividades para CURSAR
         await ValidarCorrelativiadadesParaCursarAsync(dto.EstudianteId, dto.MateriaId, cancellationToken);
 
-        // 5. Crear la inscripción
+        // 6. Crear la inscripción
         var inscripcion = InscripcionMateria.Crear(dto.EstudianteId, dto.MateriaId, dto.CursoId);
         await inscripcionMateriaRepository.AgregarAsync(inscripcion, cancellationToken);
 
-        // 6. Auditoría (CU-06)
+        // 7. Auditoría (CU-06)
         await auditoria.RegistrarAsync(
             "InscripcionMateria",
             inscripcion.Id.ToString(),

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using PracticaProfesional.Application.Auth;
 using PracticaProfesional.Application.Auth.DTOs;
 using PracticaProfesional.Application.Interfaces;
+using PracticaProfesional.Domain.Exceptions;
 
 namespace PracticaProfesional.Controllers;
 
@@ -57,12 +58,15 @@ public class AuthController(
         [FromBody] SolicitarRestablecimientoRequest request,
         CancellationToken cancellationToken)
     {
-        var resultado = await solicitarRestablecimientoUseCase.EjecutarAsync(request, cancellationToken);
-
-        if (resultado.EnlaceDevMode is not null)
-            return Ok(new { mensaje = "Modo desarrollo: usá el enlace a continuación.", enlace = resultado.EnlaceDevMode });
-
-        return Ok(new { mensaje = "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña." });
+        try
+        {
+            await solicitarRestablecimientoUseCase.EjecutarAsync(request, cancellationToken);
+            return Ok(new { mensaje = "Si el correo está registrado, recibirás un enlace para restablecer tu contraseña." });
+        }
+        catch (BusinessException ex)
+        {
+            return StatusCode(ex.StatusCode, new { detail = ex.Message });
+        }
     }
 
     [HttpPost("reset-password")]
@@ -72,7 +76,14 @@ public class AuthController(
         [FromBody] RestablecerPasswordRequest request,
         CancellationToken cancellationToken)
     {
-        await restablecerPasswordUseCase.EjecutarAsync(request, cancellationToken);
-        return Ok(new { mensaje = "Contraseña restablecida correctamente." });
+        try
+        {
+            await restablecerPasswordUseCase.EjecutarAsync(request, cancellationToken);
+            return Ok(new { mensaje = "Contraseña restablecida correctamente." });
+        }
+        catch (BusinessException ex)
+        {
+            return StatusCode(ex.StatusCode, new { detail = ex.Message });
+        }
     }
 }

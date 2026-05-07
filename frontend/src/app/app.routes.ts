@@ -129,6 +129,26 @@ export const routes: Routes = [
             .then(m => m.PanelLogsSeguridadComponent)
       },
 
+      // Calendario Académico — solo Dirección
+      {
+        path: 'calendario',
+        canActivate: [roleGuard('Direccion')],
+        loadComponent: () =>
+          import('./features/calendario/lista-calendario/lista-calendario.component').then(m => m.ListaCalendarioComponent)
+      },
+      {
+        path: 'calendario/nuevo',
+        canActivate: [roleGuard('Direccion')],
+        loadComponent: () =>
+          import('./features/calendario/crear-evento/crear-evento.component').then(m => m.CrearEventoComponent)
+      },
+      {
+        path: 'calendario/:id/editar',
+        canActivate: [roleGuard('Direccion')],
+        loadComponent: () =>
+          import('./features/calendario/crear-evento/crear-evento.component').then(m => m.CrearEventoComponent)
+      },
+
       // Auditoría — solo Dirección
       {
         path: 'auditoria',
@@ -208,6 +228,14 @@ export const routes: Routes = [
         canActivate: [roleGuard('Direccion', 'Docente')],
         loadComponent: () =>
           import('./features/examenes/lista-examenes/lista-examenes.component').then(m => m.ListaExamenesComponent)
+      },
+
+      // Mis Materias — solo Estudiante
+      {
+        path: 'mis-materias',
+        canActivate: [roleGuard('Estudiante')],
+        loadComponent: () =>
+          import('./features/mis-materias/mis-materias.component').then(m => m.MisMateriasComponent)
       },
 
       // Mis Exámenes — solo Estudiante

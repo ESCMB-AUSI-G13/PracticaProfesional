@@ -66,7 +66,8 @@ public class Usuario
     }
 
     public bool EsTokenResetValido(string token)
-        => PasswordResetToken == token && PasswordResetTokenExpiry > DateTime.UtcNow;
+        => string.Equals(PasswordResetToken, token?.Trim(), StringComparison.OrdinalIgnoreCase)
+           && PasswordResetTokenExpiry > DateTime.UtcNow;
 
     public void RestablecerPassword(string nuevoPasswordHash)
     {

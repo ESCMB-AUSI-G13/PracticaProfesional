@@ -2,7 +2,8 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MateriasService } from '../materias.service';
+import { MateriasService, Materia } from '../materias.service';
+import { CorrelativiadadesService, Correlatividad } from '../correlatividades.service';
 
 @Component({
   selector: 'app-editar-materia',
@@ -12,16 +13,29 @@ import { MateriasService } from '../materias.service';
   styleUrl: './editar-materia.component.scss'
 })
 export class EditarMateriaComponent implements OnInit {
-  id      = 0;
-  codigo  = signal('');
-  nombre  = signal('');
-  plan    = signal('');
+  id       = 0;
+  codigo   = signal('');
+  nombre   = signal('');
+  plan     = signal('');
   cargando  = signal(true);
   guardando = signal(false);
   error     = signal<string | null>(null);
 
+  // Correlatividades
+  todasLasMaterias     = signal<Materia[]>([]);
+  correlatividades     = signal<Correlatividad[]>([]);
+  cargandoCorr         = signal(false);
+  errorCorr            = signal<string | null>(null);
+  agregandoCorr        = signal(false);
+
+  // Formulario nueva correlatividad
+  nuevaRequisitoId    = signal<number | null>(null);
+  nuevaTipo           = signal<'Cursar' | 'Rendir'>('Cursar');
+  nuevaCondicion      = signal<number>(1); // 1=Regularizado, 2=Aprobado
+
   constructor(
     private materiasService: MateriasService,
+    private correlativiadadesService: CorrelativiadadesService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
@@ -35,7 +49,10 @@ export class EditarMateriaComponent implements OnInit {
         this.codigo.set(m.codigo);
         this.nombre.set(m.nombre);
         this.plan.set(m.plan);
+        // Opciones para el selector (excluye la materia actual)
+        this.todasLasMaterias.set(data.filter(x => x.id !== this.id));
         this.cargando.set(false);
+        this.cargarCorrelatividades();
       },
       error: () => { this.error.set('Error al cargar la materia.'); this.cargando.set(false); }
     });
@@ -52,4 +69,52 @@ export class EditarMateriaComponent implements OnInit {
   }
 
   cancelar(): void { this.router.navigate(['/materias']); }
+
+  // ── Correlatividades ─────────────────────────────────────────────────────────
+
+  private cargarCorrelatividades(): void {
+    this.cargandoCorr.set(true);
+    this.correlativiadadesService.listarPorMateria(this.id).subscribe({
+      next: data => { this.correlatividades.set(data); this.cargandoCorr.set(false); },
+      error: () => { this.errorCorr.set('Error al cargar correlatividades.'); this.cargandoCorr.set(false); }
+    });
+  }
+
+  agregarCorrelatividad(): void {
+    const requisitoId = this.nuevaRequisitoId();
+    if (!requisitoId) { this.errorCorr.set('Seleccioná una materia requisito.'); return; }
+
+    this.agregandoCorr.set(true);
+    this.errorCorr.set(null);
+
+    this.correlativiadadesService.crear({
+      materiaDestinoId:   this.id,
+      materiaRequisitoId: requisitoId,
+      tipoRequerimiento:  this.nuevaTipo(),
+      condicionAcademica: this.nuevaCondicion() as 1 | 2
+    }).subscribe({
+      next: nueva => {
+        this.correlatividades.update(list => [...list, nueva]);
+        this.nuevaRequisitoId.set(null);
+        this.nuevaTipo.set('Cursar');
+        this.nuevaCondicion.set(1 as number);
+        this.agregandoCorr.set(false);
+      },
+      error: (e) => {
+        this.errorCorr.set(e.error?.mensaje ?? 'Error al agregar correlatividad.');
+        this.agregandoCorr.set(false);
+      }
+    });
+  }
+
+  eliminarCorrelatividad(id: number): void {
+    this.correlativiadadesService.eliminar(id).subscribe({
+      next: () => this.correlatividades.update(list => list.filter(c => c.id !== id)),
+      error: () => this.errorCorr.set('Error al eliminar la correlatividad.')
+    });
+  }
+
+  condicionLabel(c: Correlatividad): string {
+    return c.condicionAcademica === 'Aprobado' ? 'Aprobada' : 'Regularizada';
+  }
 }

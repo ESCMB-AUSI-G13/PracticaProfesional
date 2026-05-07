@@ -266,3 +266,7 @@ D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\obj\Debug\net8.0\scopedcss
 D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\obj\Debug\net8.0\Practica.5F7DCA43.Up2Date
 D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\obj\Debug\net8.0\PracticaProfesional.genruntimeconfig.cache
 D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\obj\Debug\net8.0\ref\PracticaProfesional.dll
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\Azure.Communication.Email.dll
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\Microsoft.Extensions.Logging.Abstractions.dll
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\System.ClientModel.dll

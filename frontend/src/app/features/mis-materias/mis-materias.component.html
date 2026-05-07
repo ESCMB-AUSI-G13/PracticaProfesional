@@ -1,0 +1,120 @@
+<div class="page">
+  <header class="page-header">
+    <h1>Mis Inscripciones a Materias</h1>
+    @if (!mostrarForm()) {
+      <button class="btn btn-primary" (click)="mostrarForm.set(true)">+ Nueva inscripción</button>
+    }
+  </header>
+
+  @if (error()) { <p class="estado error">{{ error() }}</p> }
+
+  @if (mostrarForm()) {
+    <div class="form-card">
+      <h2 class="form-title">Inscribirse a una materia</h2>
+      <p class="info">Las correlatividades se validan automáticamente. Necesitás estar regularizado en las materias previas requeridas.</p>
+
+      <div class="form-row">
+        <label>Materia</label>
+        <select [ngModel]="selectedMateriaId()" (ngModelChange)="selectedMateriaId.set($event ? +$event : null)">
+          <option [value]="null">— Seleccioná una materia —</option>
+          @for (m of materias(); track m.id) {
+            <option [value]="m.id">{{ m.codigo }} — {{ m.nombre }} ({{ m.plan }})</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>Curso</label>
+        <select [ngModel]="selectedCursoId()" (ngModelChange)="selectedCursoId.set($event ? +$event : null)">
+          <option [value]="null">— Seleccioná un curso —</option>
+          @for (c of cursos(); track c.id) {
+            <option [value]="c.id">{{ c.anio }}° año — Comisión {{ c.comision }} ({{ c.anioLectivo }})</option>
+          }
+        </select>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" (click)="inscribirse()" [disabled]="guardando()">
+          {{ guardando() ? 'Inscribiendo...' : 'Confirmar inscripción' }}
+        </button>
+        <button class="btn" (click)="limpiarForm()" [disabled]="guardando()">Cancelar</button>
+      </div>
+    </div>
+  }
+
+  @if (cargando()) {
+    <p class="estado">Cargando...</p>
+  } @else if (inscripciones().length === 0 && !mostrarForm()) {
+    <p class="estado">No tenés inscripciones activas. Usá el botón de arriba para inscribirte.</p>
+  } @else if (inscripciones().length > 0) {
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th>Materia</th>
+          <th>Curso</th>
+          <th>Comisión</th>
+          <th>Estado</th>
+          <th>Fecha</th>
+          <th>Comprobante</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (i of inscripciones(); track i.id) {
+          <tr>
+            <td><code>{{ i.materiaCodigo }}</code> {{ i.materiaNombre }}</td>
+            <td>{{ i.cursoAnio }}° año</td>
+            <td>{{ i.cursoComision }}</td>
+            <td><span class="badge-ok">{{ estadoLabel(i.estado) }}</span></td>
+            <td>{{ i.fechaInscripcion | date:'dd/MM/yyyy' }}</td>
+            <td>
+              <button
+                class="btn btn-sm"
+                (click)="verComprobante(i.id)"
+                [disabled]="cargandoComprobante()">
+                {{ cargandoComprobante() ? '...' : 'Ver' }}
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
+
+@if (comprobante(); as c) {
+  <div class="modal-overlay" (click)="cerrarComprobante()">
+    <div class="modal-comprobante" (click)="$event.stopPropagation()">
+      <div class="comprobante-header">
+        <p class="inst-nombre">Instituto Superior del Profesorado en Ciencias Económicas y Jurídicas</p>
+        <p class="inst-subtitulo">"Dr. José A. Ortiz y Herrera"</p>
+        <h2>Comprobante de Inscripción a Materia</h2>
+        <p class="comprobante-num">N.° {{ c.id }}</p>
+      </div>
+
+      <div class="comprobante-body">
+        <section class="seccion">
+          <h3>Datos del Estudiante</h3>
+          <div class="fila"><span class="etiqueta">Apellido y Nombre</span><span>{{ c.estudianteNombreCompleto }}</span></div>
+          <div class="fila"><span class="etiqueta">DNI</span><span>{{ c.estudianteDni }}</span></div>
+          <div class="fila"><span class="etiqueta">Legajo</span><span>{{ c.estudianteLegajo }}</span></div>
+        </section>
+
+        <section class="seccion">
+          <h3>Datos de la Inscripción</h3>
+          <div class="fila"><span class="etiqueta">Materia</span><span><code>{{ c.materiaCodigo }}</code> {{ c.materiaNombre }}</span></div>
+          <div class="fila"><span class="etiqueta">Plan</span><span>{{ c.materiaPlan }}</span></div>
+          <div class="fila"><span class="etiqueta">Año Lectivo</span><span>{{ c.cursoAnioLectivo }}</span></div>
+          <div class="fila"><span class="etiqueta">Comisión</span><span>{{ c.cursoComision }}</span></div>
+          <div class="fila"><span class="etiqueta">Estado</span><span class="badge-ok">{{ estadoLabel(c.estado) }}</span></div>
+          <div class="fila"><span class="etiqueta">Fecha de inscripción</span><span>{{ c.fechaInscripcion | date:'dd/MM/yyyy HH:mm' }}</span></div>
+          <div class="fila"><span class="etiqueta">Fecha de emisión</span><span>{{ c.fechaEmision | date:'dd/MM/yyyy HH:mm' }}</span></div>
+        </section>
+      </div>
+
+      <div class="comprobante-footer no-print">
+        <button class="btn btn-primary" (click)="imprimirComprobante()">Imprimir</button>
+        <button class="btn" (click)="cerrarComprobante()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+}

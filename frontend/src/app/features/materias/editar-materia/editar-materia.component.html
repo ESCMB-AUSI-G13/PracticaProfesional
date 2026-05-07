@@ -30,5 +30,86 @@
         <button type="button" class="btn btn-secondary" (click)="cancelar()">Cancelar</button>
       </div>
     </form>
+
+    <!-- ── Correlatividades ─────────────────────────────────────────────── -->
+    <section class="corr-seccion">
+      <h2 class="corr-titulo">Correlatividades</h2>
+
+      @if (errorCorr()) {
+        <p class="error">{{ errorCorr() }}</p>
+      }
+
+      @if (cargandoCorr()) {
+        <p class="estado">Cargando correlatividades...</p>
+      } @else {
+        <!-- Lista actual -->
+        @if (correlatividades().length === 0) {
+          <p class="corr-vacia">Esta materia no tiene correlatividades configuradas.</p>
+        } @else {
+          <table class="corr-tabla">
+            <thead>
+              <tr>
+                <th>Materia requisito</th>
+                <th>Para</th>
+                <th>Condición requerida</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of correlatividades(); track c.id) {
+                <tr>
+                  <td>{{ c.nombreRequisito }}</td>
+                  <td>
+                    <span class="badge" [class.badge-cursar]="c.tipoRequerimiento === 'Cursar'"
+                                        [class.badge-rendir]="c.tipoRequerimiento === 'Rendir'">
+                      {{ c.tipoRequerimiento }}
+                    </span>
+                  </td>
+                  <td>{{ condicionLabel(c) }}</td>
+                  <td>
+                    <button class="btn-eliminar" type="button" (click)="eliminarCorrelatividad(c.id)"
+                            title="Eliminar">✕</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+
+        <!-- Formulario agregar -->
+        <div class="corr-form">
+          <h3 class="corr-subtitulo">Agregar correlatividad</h3>
+          <div class="corr-campos">
+            <div class="campo">
+              <label>Materia requisito *</label>
+              <select [ngModel]="nuevaRequisitoId()" (ngModelChange)="nuevaRequisitoId.set($event ? +$event : null)"
+                      name="requisitoId">
+                <option [ngValue]="null">— Seleccionar —</option>
+                @for (m of todasLasMaterias(); track m.id) {
+                  <option [value]="m.id">{{ m.nombre }} ({{ m.codigo }})</option>
+                }
+              </select>
+            </div>
+            <div class="campo">
+              <label>Para</label>
+              <select [ngModel]="nuevaTipo()" (ngModelChange)="nuevaTipo.set($event)" name="tipo">
+                <option value="Cursar">Cursar</option>
+                <option value="Rendir">Rendir (final)</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label>Condición exigida</label>
+              <select [ngModel]="nuevaCondicion()" (ngModelChange)="nuevaCondicion.set(+$event)" name="condicion">
+                <option [value]="1">Regularizada</option>
+                <option [value]="2">Aprobada</option>
+              </select>
+            </div>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="agregarCorrelatividad()" [disabled]="agregandoCorr()">
+            {{ agregandoCorr() ? 'Agregando...' : '+ Agregar' }}
+          </button>
+        </div>
+      }
+    </section>
   }
 </div>

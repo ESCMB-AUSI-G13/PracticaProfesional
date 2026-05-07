@@ -1,0 +1,32 @@
+.page { padding: 2rem; font-family: sans-serif; max-width: 1000px; margin: 0 auto; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+.header-left h1 { margin: 0; font-size: 1.5rem; }
+.header-actions { display: flex; gap: 0.75rem; align-items: center;
+  select { padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
+}
+.estado { padding: 1rem; color: #555; &.error { color: #c0392b; } }
+.tabla { width: 100%; border-collapse: collapse; font-size: 0.88rem;
+  th, td { padding: 0.55rem 0.75rem; border: 1px solid #e0e0e0; text-align: left; vertical-align: middle; }
+  th { background: #f5f5f5; font-weight: 600; }
+  tr:hover td { background: #fafafa; }
+}
+.col-nombre { max-width: 280px; }
+.acciones { display: flex; gap: 0.4rem; white-space: nowrap; }
+.btn { padding: 0.45rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;
+  &.btn-primary    { background: #3498db; color: white; }
+  &.btn-secondary  { background: #6c757d; color: white; }
+  &.btn-danger     { background: #e74c3c; color: white; }
+  &.btn-sm         { padding: 0.28rem 0.65rem; font-size: 0.8rem; }
+  &:hover:not(:disabled) { opacity: 0.88; }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+.badge { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; white-space: nowrap;
+  &.badge-examen         { background: #fdecea; color: #c0392b; }
+  &.badge-inscr-examen   { background: #fef9e7; color: #b7950b; }
+  &.badge-inscr-materia  { background: #eaf4fb; color: #2471a3; }
+  &.badge-inicio         { background: #eafaf1; color: #1e8449; }
+  &.badge-fin            { background: #f9ebea; color: #943126; }
+  &.badge-limite         { background: #fdf2f8; color: #7d3c98; }
+  &.badge-feriado        { background: #f0f3f4; color: #566573; }
+  &.badge-otro           { background: #f2f3f4; color: #5d6d7e; }
+}
