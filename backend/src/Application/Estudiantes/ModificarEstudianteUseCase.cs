@@ -23,17 +23,17 @@ public class ModificarEstudianteUseCase(
         if (!Enum.TryParse<CondicionEstudiante>(dto.Condicion, ignoreCase: true, out var condicionDestino))
             throw new ArgumentException($"Condición inválida: {dto.Condicion}");
 
-        var anterior = new { usuario.Email, usuario.Nombre, usuario.Apellido, estudiante.Anio, Condicion = estudiante.Condicion.ToString() };
+        var anterior = new { usuario.Email, usuario.Nombre, usuario.Apellido, estudiante.Anio, estudiante.Plan, Condicion = estudiante.Condicion.ToString() };
 
         usuario.Modificar(dto.Nombre, dto.Apellido, dto.Email, usuario.Rol);
-        estudiante.Modificar(dto.Anio);
+        estudiante.Modificar(dto.Anio, dto.Plan);
         AplicarTransicion(estudiante, condicionDestino);
 
         await usuarioRepository.GuardarCambiosAsync(cancellationToken);
 
         await auditoria.RegistrarAsync("Estudiante", estudiante.Id.ToString(), "MODIFICAR",
             valorAnterior: anterior,
-            valorNuevo: new { usuario.Email, usuario.Nombre, usuario.Apellido, estudiante.Anio, Condicion = estudiante.Condicion.ToString() },
+            valorNuevo: new { usuario.Email, usuario.Nombre, usuario.Apellido, estudiante.Anio, estudiante.Plan, Condicion = estudiante.Condicion.ToString() },
             cancellationToken);
 
         return CrearEstudianteUseCase.ToDto(estudiante, usuario);

@@ -22,30 +22,35 @@ public class Estudiante : AggregateRoot
     public int UsuarioId { get; private set; }
     public Usuario Usuario { get; private set; } = null!;
     public int Anio { get; private set; }
+    public string Plan { get; private set; } = string.Empty;
     public CondicionEstudiante Condicion { get; private set; }
     public DateTime FechaDeIngreso { get; private set; }
 
     private Estudiante() { }
 
     // ── Factory ──────────────────────────────────────────────────────────────
-    public static Estudiante Crear(int usuarioId, int anio, DateTime fechaDeIngreso)
+    public static Estudiante Crear(int usuarioId, int anio, string plan, DateTime fechaDeIngreso)
     {
         if (anio < 1 || anio > 6) throw new ArgumentException("El año debe estar entre 1 y 6.");
+        if (string.IsNullOrWhiteSpace(plan)) throw new ArgumentException("El plan es obligatorio.");
 
         return new Estudiante
         {
             UsuarioId = usuarioId,
             Anio = anio,
+            Plan = plan.Trim(),
             Condicion = CondicionEstudiante.Regular,
             FechaDeIngreso = fechaDeIngreso.Date
         };
     }
 
     // ── Modificación de datos (sin tocar Condicion) ──────────────────────────
-    public void Modificar(int anio)
+    public void Modificar(int anio, string plan)
     {
         if (anio < 1 || anio > 6) throw new ArgumentException("El año debe estar entre 1 y 6.");
+        if (string.IsNullOrWhiteSpace(plan)) throw new ArgumentException("El plan es obligatorio.");
         Anio = anio;
+        Plan = plan.Trim();
     }
 
     // ── Máquina de estados ───────────────────────────────────────────────────

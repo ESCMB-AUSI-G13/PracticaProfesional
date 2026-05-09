@@ -151,6 +151,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Anio).IsRequired();
+            entity.Property(e => e.Plan).IsRequired().HasMaxLength(100);
             entity.Property(e => e.Condicion).IsRequired().HasConversion<string>();
             entity.Property(e => e.FechaDeIngreso).IsRequired();
             entity.HasOne(e => e.Usuario)

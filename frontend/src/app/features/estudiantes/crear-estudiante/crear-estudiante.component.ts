@@ -17,6 +17,10 @@ export class CrearEstudianteComponent {
   error = signal<string | null>(null);
 
   readonly anios = [1, 2, 3, 4, 5, 6];
+  readonly carreras = [
+    { valor: 'Profesorado', etiqueta: 'Prof. de Educación Secundaria en Economía' },
+    { valor: 'Trayecto',    etiqueta: 'Trayecto Pedagógico para Graduados No Docentes' }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -31,6 +35,7 @@ export class CrearEstudianteComponent {
       apellido: ['', [Validators.required, Validators.maxLength(100)]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       anio: [1, [Validators.required, Validators.min(1), Validators.max(6)]],
+      plan: ['', Validators.required],
       fechaDeIngreso: ['', Validators.required]
     });
   }

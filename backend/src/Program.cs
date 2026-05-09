@@ -229,6 +229,9 @@ if (app.Environment.IsDevelopment())
 
         var calendarioRepo = scope.ServiceProvider.GetRequiredService<ICalendarioAcademicoRepository>();
         await CalendarioSeeder.SeedAsync(calendarioRepo);
+
+        await CorrelativiadadesSeeder.SeedCarrera1Async(db, logger);
+        await CorrelativiadadesSeeder.SeedCarrera2Async(db, logger);
     }
     catch (Exception ex)
     {

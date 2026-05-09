@@ -1,11 +1,1 @@
-{
-  "Version": 1,
-  "Hash": "ruheMw/uVZVbRuVU+WCYSpe2LZMARnHER+w6oak6R+Q=",
-  "Source": "PracticaProfesional",
-  "BasePath": "_content/PracticaProfesional",
-  "Mode": "Default",
-  "ManifestType": "Build",
-  "ReferencedProjectsConfiguration": [],
-  "DiscoveryPatterns": [],
-  "Assets": []
-}
+{"Version":1,"Hash":"pSF5v5zqtScBtN7XdMhLGEZHLcLl9cd5m6StgdNTq3M=","Source":"PracticaProfesional","BasePath":"/","Mode":"Root","ManifestType":"Build","ReferencedProjectsConfiguration":[],"DiscoveryPatterns":[],"Assets":[],"Endpoints":[]}

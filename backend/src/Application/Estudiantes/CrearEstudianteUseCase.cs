@@ -26,12 +26,12 @@ public class CrearEstudianteUseCase(
 
         await usuarioRepository.AgregarAsync(usuario, cancellationToken);
 
-        var estudiante = Estudiante.Crear(usuario.Id, dto.Anio, dto.FechaDeIngreso);
+        var estudiante = Estudiante.Crear(usuario.Id, dto.Anio, dto.Plan, dto.FechaDeIngreso);
         await estudianteRepository.AgregarAsync(estudiante, cancellationToken);
 
         await auditoria.RegistrarAsync("Estudiante", estudiante.Id.ToString(), "CREAR",
             valorAnterior: null,
-            valorNuevo: new { usuario.DNI, usuario.Legajo, usuario.Email, usuario.Nombre, usuario.Apellido, estudiante.Anio, Condicion = estudiante.Condicion.ToString(), estudiante.FechaDeIngreso },
+            valorNuevo: new { usuario.DNI, usuario.Legajo, usuario.Email, usuario.Nombre, usuario.Apellido, estudiante.Anio, estudiante.Plan, Condicion = estudiante.Condicion.ToString(), estudiante.FechaDeIngreso },
             cancellationToken);
 
         return ToDto(estudiante, usuario);
@@ -39,6 +39,6 @@ public class CrearEstudianteUseCase(
 
     internal static EstudianteDto ToDto(Estudiante e, Usuario u) => new(
         e.Id, u.Id, u.DNI, u.Legajo, u.Email, u.Nombre, u.Apellido,
-        e.Anio, e.Condicion.ToString(), e.FechaDeIngreso, u.Activo, u.FechaCreacion
+        e.Anio, e.Plan, e.Condicion.ToString(), e.FechaDeIngreso, u.Activo, u.FechaCreacion
     );
 }

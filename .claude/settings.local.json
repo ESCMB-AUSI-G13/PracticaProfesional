@@ -27,7 +27,11 @@
       "Bash(Get-ChildItem -Path \"d:\\\\facum\\\\GITHUB TESIS\\\\PracticaProfesional\\\\frontend\\\\src\" -Recurse -Directory)",
       "Bash(Select-Object -First 20)",
       "Bash(Get-ChildItem -Directory)",
-      "Bash(Select-Object -ExpandProperty Name)"
+      "Bash(Select-Object -ExpandProperty Name)",
+      "Bash(Get-ChildItem -Path \"d:\\\\facum\\\\GITHUB TESIS\\\\PracticaProfesional\\\\backend\" -Directory)",
+      "Bash(Select-Object Name)",
+      "PowerShell(Select-String -Pattern \"estudiant|alumno\" -CaseSensitive:$false)",
+      "PowerShell(head -20)"
     ]
   }
 }

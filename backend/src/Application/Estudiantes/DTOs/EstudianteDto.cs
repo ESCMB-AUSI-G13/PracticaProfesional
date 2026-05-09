@@ -9,6 +9,7 @@ public record EstudianteDto(
     string Nombre,
     string Apellido,
     int Anio,
+    string Plan,
     string Condicion,
     DateTime FechaDeIngreso,
     bool Activo,

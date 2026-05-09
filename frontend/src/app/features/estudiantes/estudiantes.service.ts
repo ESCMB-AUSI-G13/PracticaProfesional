@@ -11,6 +11,7 @@ export interface Estudiante {
   nombre: string;
   apellido: string;
   anio: number;
+  plan: string;
   condicion: string;
   fechaDeIngreso: string;
   activo: boolean;
@@ -25,6 +26,7 @@ export interface CrearEstudianteRequest {
   apellido: string;
   password: string;
   anio: number;
+  plan: string;
   fechaDeIngreso: string;
 }
 
@@ -33,6 +35,7 @@ export interface ModificarEstudianteRequest {
   apellido: string;
   email: string;
   anio: number;
+  plan: string;
   condicion: string;
 }
 

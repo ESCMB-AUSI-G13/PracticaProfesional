@@ -20,6 +20,10 @@ export class EditarEstudianteComponent implements OnInit {
 
   readonly anios = [1, 2, 3, 4, 5, 6];
   readonly condiciones = ['Regular', 'Libre', 'Promocional', 'Egresado', 'Desertor'];
+  readonly carreras = [
+    { valor: 'Profesorado', etiqueta: 'Prof. de Educación Secundaria en Economía' },
+    { valor: 'Trayecto',    etiqueta: 'Trayecto Pedagógico para Graduados No Docentes' }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -32,6 +36,7 @@ export class EditarEstudianteComponent implements OnInit {
       apellido: ['', [Validators.required, Validators.maxLength(100)]],
       email: ['', [Validators.required, Validators.email]],
       anio: [1, [Validators.required, Validators.min(1), Validators.max(6)]],
+      plan: ['', Validators.required],
       condicion: ['Regular', Validators.required]
     });
   }
@@ -52,6 +57,7 @@ export class EditarEstudianteComponent implements OnInit {
           apellido: estudiante.apellido,
           email: estudiante.email,
           anio: estudiante.anio,
+          plan: estudiante.plan,
           condicion: estudiante.condicion
         });
         this.cargandoDatos.set(false);

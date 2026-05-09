@@ -8,5 +8,6 @@ public record CrearEstudianteDto(
     string Apellido,
     string Password,
     int Anio,
+    string Plan,
     DateTime FechaDeIngreso
 );
