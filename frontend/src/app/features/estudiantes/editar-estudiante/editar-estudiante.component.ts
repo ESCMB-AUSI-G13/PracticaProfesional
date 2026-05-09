@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { EstudiantesService } from '../estudiantes.service';
+import { CarrerasService, Carrera } from '../../carreras/carreras.service';
 
 @Component({
   selector: 'app-editar-estudiante',
@@ -20,14 +21,12 @@ export class EditarEstudianteComponent implements OnInit {
 
   readonly anios = [1, 2, 3, 4, 5, 6];
   readonly condiciones = ['Regular', 'Libre', 'Promocional', 'Egresado', 'Desertor'];
-  readonly carreras = [
-    { valor: 'Profesorado', etiqueta: 'Prof. de Educación Secundaria en Economía' },
-    { valor: 'Trayecto',    etiqueta: 'Trayecto Pedagógico para Graduados No Docentes' }
-  ];
+  carreras = signal<Carrera[]>([]);
 
   constructor(
     private fb: FormBuilder,
     private estudiantesService: EstudiantesService,
+    private carrerasService: CarrerasService,
     private route: ActivatedRoute,
     private router: Router
   ) {
@@ -36,13 +35,17 @@ export class EditarEstudianteComponent implements OnInit {
       apellido: ['', [Validators.required, Validators.maxLength(100)]],
       email: ['', [Validators.required, Validators.email]],
       anio: [1, [Validators.required, Validators.min(1), Validators.max(6)]],
-      plan: ['', Validators.required],
+      carreraId: [null, Validators.required],
       condicion: ['Regular', Validators.required]
     });
   }
 
   ngOnInit(): void {
     this.usuarioId = Number(this.route.snapshot.paramMap.get('id'));
+
+    this.carrerasService.listar().subscribe({
+      next: data => this.carreras.set(data)
+    });
 
     this.estudiantesService.listar().subscribe({
       next: (estudiantes) => {
@@ -57,7 +60,7 @@ export class EditarEstudianteComponent implements OnInit {
           apellido: estudiante.apellido,
           email: estudiante.email,
           anio: estudiante.anio,
-          plan: estudiante.plan,
+          carreraId: estudiante.carreraId,
           condicion: estudiante.condicion
         });
         this.cargandoDatos.set(false);
@@ -75,7 +78,11 @@ export class EditarEstudianteComponent implements OnInit {
     this.error.set(null);
     this.cargando.set(true);
 
-    const payload = { ...this.form.value, anio: Number(this.form.value.anio) };
+    const payload = {
+      ...this.form.value,
+      anio: Number(this.form.value.anio),
+      carreraId: Number(this.form.value.carreraId)
+    };
 
     this.estudiantesService.modificar(this.usuarioId, payload).subscribe({
       next: () => {

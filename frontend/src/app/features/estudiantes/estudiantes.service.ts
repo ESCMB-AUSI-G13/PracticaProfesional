@@ -3,39 +3,40 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Estudiante {
-  id: number;
-  usuarioId: number;
-  dni: string;
-  legajo: string;
-  email: string;
-  nombre: string;
-  apellido: string;
-  anio: number;
-  plan: string;
-  condicion: string;
+  id:            number;
+  usuarioId:     number;
+  dni:           string;
+  legajo:        string;
+  email:         string;
+  nombre:        string;
+  apellido:      string;
+  anio:          number;
+  carreraId:     number;
+  carreraNombre: string;
+  condicion:     string;
   fechaDeIngreso: string;
-  activo: boolean;
+  activo:        boolean;
   fechaCreacion: string;
 }
 
 export interface CrearEstudianteRequest {
-  dni: string;
-  legajo: string;
-  email: string;
-  nombre: string;
-  apellido: string;
-  password: string;
-  anio: number;
-  plan: string;
+  dni:           string;
+  legajo:        string;
+  email:         string;
+  nombre:        string;
+  apellido:      string;
+  password:      string;
+  anio:          number;
+  carreraId:     number;
   fechaDeIngreso: string;
 }
 
 export interface ModificarEstudianteRequest {
-  nombre: string;
-  apellido: string;
-  email: string;
-  anio: number;
-  plan: string;
+  nombre:    string;
+  apellido:  string;
+  email:     string;
+  anio:      number;
+  carreraId: number;
   condicion: string;
 }
 

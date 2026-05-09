@@ -1,8 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EstudiantesService } from '../estudiantes.service';
+import { CarrerasService, Carrera } from '../../carreras/carreras.service';
 
 @Component({
   selector: 'app-crear-estudiante',
@@ -11,20 +12,18 @@ import { EstudiantesService } from '../estudiantes.service';
   templateUrl: './crear-estudiante.component.html',
   styleUrl: './crear-estudiante.component.scss'
 })
-export class CrearEstudianteComponent {
+export class CrearEstudianteComponent implements OnInit {
   form: FormGroup;
   cargando = signal(false);
   error = signal<string | null>(null);
 
   readonly anios = [1, 2, 3, 4, 5, 6];
-  readonly carreras = [
-    { valor: 'Profesorado', etiqueta: 'Prof. de Educación Secundaria en Economía' },
-    { valor: 'Trayecto',    etiqueta: 'Trayecto Pedagógico para Graduados No Docentes' }
-  ];
+  carreras = signal<Carrera[]>([]);
 
   constructor(
     private fb: FormBuilder,
     private estudiantesService: EstudiantesService,
+    private carrerasService: CarrerasService,
     private router: Router
   ) {
     this.form = this.fb.group({
@@ -35,8 +34,15 @@ export class CrearEstudianteComponent {
       apellido: ['', [Validators.required, Validators.maxLength(100)]],
       password: ['', [Validators.required, Validators.minLength(8)]],
       anio: [1, [Validators.required, Validators.min(1), Validators.max(6)]],
-      plan: ['', Validators.required],
+      carreraId: [null, Validators.required],
       fechaDeIngreso: ['', Validators.required]
+    });
+  }
+
+  ngOnInit(): void {
+    this.carrerasService.listar().subscribe({
+      next: data => this.carreras.set(data),
+      error: () => this.error.set('Error al cargar las carreras.')
     });
   }
 
@@ -49,6 +55,7 @@ export class CrearEstudianteComponent {
     const payload = {
       ...this.form.value,
       anio: Number(this.form.value.anio),
+      carreraId: Number(this.form.value.carreraId),
       fechaDeIngreso: new Date(this.form.value.fechaDeIngreso).toISOString()
     };
 

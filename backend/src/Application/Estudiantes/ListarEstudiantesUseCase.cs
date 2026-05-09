@@ -8,6 +8,6 @@ public class ListarEstudiantesUseCase(IEstudianteRepository estudianteRepository
     public async Task<IEnumerable<EstudianteDto>> EjecutarAsync(CancellationToken cancellationToken = default)
     {
         var estudiantes = await estudianteRepository.ListarAsync(cancellationToken);
-        return estudiantes.Select(e => CrearEstudianteUseCase.ToDto(e, e.Usuario));
+        return estudiantes.Select(e => CrearEstudianteUseCase.ToDtoConNavegacion(e, e.Usuario));
     }
 }

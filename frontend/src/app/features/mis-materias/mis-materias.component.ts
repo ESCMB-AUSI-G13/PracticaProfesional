@@ -1,7 +1,8 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { MisMateriasService, InscripcionMateria, ComprobanteInscripcionMateria } from './mis-materias.service';
 import { MateriasService, Materia } from '../materias/materias.service';
 import { CursosService, Curso } from '../cursos/cursos.service';
@@ -37,17 +38,31 @@ export class MisMateriasComponent implements OnInit {
 
   ngOnInit(): void {
     forkJoin({
-      inscripciones: this.service.listarMisInscripciones(),
-      materias:      this.materiasService.listar(),
-      cursos:        this.cursosService.listar()
+      inscripciones: this.service.listarMisInscripciones().pipe(
+        catchError((e: { error?: { detail?: string }; message?: string }) => {
+          this.error.set(`Error al cargar inscripciones: ${e.error?.detail ?? e.message ?? 'desconocido'}`);
+          return of([] as InscripcionMateria[]);
+        })
+      ),
+      materias: this.materiasService.listarMiCarrera().pipe(
+        catchError((e: { error?: { detail?: string }; message?: string }) => {
+          this.error.set(`Error al cargar materias: ${e.error?.detail ?? e.message ?? 'desconocido'}`);
+          return of([] as Materia[]);
+        })
+      ),
+      cursos: this.cursosService.listar().pipe(
+        catchError((e: { error?: { detail?: string }; message?: string }) => {
+          this.error.set(`Error al cargar cursos: ${e.error?.detail ?? e.message ?? 'desconocido'}`);
+          return of([] as Curso[]);
+        })
+      )
     }).subscribe({
       next: ({ inscripciones, materias, cursos }) => {
         this.inscripciones.set(inscripciones);
         this.materias.set(materias);
         this.cursos.set(cursos.filter(c => c.estado === 'Activo'));
         this.cargando.set(false);
-      },
-      error: () => { this.error.set('Error al cargar los datos.'); this.cargando.set(false); }
+      }
     });
   }
 
@@ -70,7 +85,7 @@ export class MisMateriasComponent implements OnInit {
         this.service.listarMisInscripciones().subscribe(list => this.inscripciones.set(list));
       },
       error: (e) => {
-        this.error.set(e.error?.mensaje ?? 'Error al inscribirse.');
+        this.error.set(e.error?.detail ?? e.error?.mensaje ?? 'Error al inscribirse.');
         this.guardando.set(false);
       }
     });

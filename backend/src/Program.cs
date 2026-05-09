@@ -12,6 +12,7 @@ using PracticaProfesional.Application.EstadoAcademico;
 using PracticaProfesional.Application.Inscripciones;
 using PracticaProfesional.Application.Reportes;
 using PracticaProfesional.Application.Materias;
+using PracticaProfesional.Application.Carreras;
 using PracticaProfesional.Application.Correlatividades;
 using PracticaProfesional.Application.Calendario;
 using PracticaProfesional.Application.Cursos;
@@ -63,6 +64,7 @@ builder.Services.AddScoped<IHistorialAcademicoRepository, HistorialAcademicoRepo
 builder.Services.AddScoped<IInscripcionMateriaRepository, InscripcionMateriaRepository>();
 builder.Services.AddScoped<IAsistenciaRepository, AsistenciaRepository>();
 builder.Services.AddScoped<IMateriaRepository, MateriaRepository>();
+builder.Services.AddScoped<ICarreraRepository, CarreraRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 
 // ── Use Cases ──────────────────────────────────────────────────────────────────
@@ -115,9 +117,13 @@ builder.Services.AddScoped<ActualizarEstadoAcademicoUseCase>();
 builder.Services.AddScoped<ReporteInasistenciasUseCase>();
 builder.Services.AddScoped<ControlIndividualPorLegajoUseCase>();
 
+// Carreras
+builder.Services.AddScoped<ListarCarrerasUseCase>();
+
 // Materias
 builder.Services.AddScoped<CrearMateriaUseCase>();
 builder.Services.AddScoped<ListarMateriasUseCase>();
+builder.Services.AddScoped<ListarMateriasEstudianteUseCase>();
 builder.Services.AddScoped<ModificarMateriaUseCase>();
 
 // Correlatividades
@@ -203,7 +209,6 @@ builder.Services.AddControllers();
 var app = builder.Build();
 
 // ── Migración automática + seed inicial ───────────────────────────────────────
-if (app.Environment.IsDevelopment())
 {
     using var scope = app.Services.CreateScope();
     var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
@@ -224,6 +229,13 @@ if (app.Environment.IsDevelopment())
                 rol: Rol.Direccion
             );
             db.Usuarios.Add(admin);
+            db.SaveChanges();
+        }
+
+        if (!db.Carreras.Any())
+        {
+            db.Carreras.Add(Carrera.Crear("Profesorado de Educación Secundaria en Economía", "Res. 0013"));
+            db.Carreras.Add(Carrera.Crear("Trayecto Pedagógico para Graduados No Docentes", "Res. 104/22"));
             db.SaveChanges();
         }
 

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PracticaProfesional.Application.Materias;
 using PracticaProfesional.Application.Materias.DTOs;
+using System.Security.Claims;
 
 namespace PracticaProfesional.Controllers;
 
@@ -11,14 +12,26 @@ namespace PracticaProfesional.Controllers;
 public class MateriasController(
     CrearMateriaUseCase crearMateria,
     ListarMateriasUseCase listarMaterias,
+    ListarMateriasEstudianteUseCase listarMateriasEstudiante,
     ModificarMateriaUseCase modificarMateria) : ControllerBase
 {
     [HttpGet]
-    [Authorize(Roles = "Direccion,Estudiante")]
+    [Authorize(Roles = "Direccion")]
     [ProducesResponseType(typeof(IEnumerable<MateriaDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Listar(CancellationToken cancellationToken)
     {
         var resultado = await listarMaterias.EjecutarAsync(cancellationToken);
+        return Ok(resultado);
+    }
+
+    /// <summary>GET api/materias/mi-carrera — materias del plan del estudiante autenticado.</summary>
+    [HttpGet("mi-carrera")]
+    [Authorize(Roles = "Estudiante")]
+    [ProducesResponseType(typeof(IEnumerable<MateriaDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> MiCarrera(CancellationToken cancellationToken)
+    {
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var resultado = await listarMateriasEstudiante.EjecutarAsync(usuarioId, cancellationToken);
         return Ok(resultado);
     }
 

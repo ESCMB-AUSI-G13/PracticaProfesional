@@ -33,9 +33,10 @@
 
       <div class="form-group">
         <label>Carrera *</label>
-        <select formControlName="plan">
-          @for (c of carreras; track c.valor) {
-            <option [value]="c.valor">{{ c.etiqueta }}</option>
+        <select formControlName="carreraId">
+          <option [value]="null">-- Seleccionar carrera --</option>
+          @for (c of carreras(); track c.id) {
+            <option [value]="c.id">{{ c.nombre }} ({{ c.resolucion }})</option>
           }
         </select>
       </div>

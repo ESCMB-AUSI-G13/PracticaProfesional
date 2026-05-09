@@ -18,7 +18,7 @@
         <select [ngModel]="selectedMateriaId()" (ngModelChange)="selectedMateriaId.set($event ? +$event : null)">
           <option [value]="null">— Seleccioná una materia —</option>
           @for (m of materias(); track m.id) {
-            <option [value]="m.id">{{ m.codigo }} — {{ m.nombre }} ({{ m.plan }})</option>
+            <option [value]="m.id">{{ m.codigo }} — {{ m.nombre }} ({{ m.carreraNombre }})</option>
           }
         </select>
       </div>

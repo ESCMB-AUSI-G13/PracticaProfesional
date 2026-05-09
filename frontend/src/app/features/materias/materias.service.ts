@@ -3,20 +3,21 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface Materia {
-  id:     number;
-  codigo: string;
-  nombre: string;
-  plan:   string;
+  id:           number;
+  codigo:       string;
+  nombre:       string;
+  carreraId:    number;
+  carreraNombre: string;
 }
 
 export interface CrearMateriaRequest {
-  nombre: string;
-  plan:   string;
+  nombre:    string;
+  carreraId: number;
 }
 
 export interface ModificarMateriaRequest {
-  nombre: string;
-  plan:   string;
+  nombre:    string;
+  carreraId: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -27,6 +28,10 @@ export class MateriasService {
 
   listar(): Observable<Materia[]> {
     return this.http.get<Materia[]>(this.apiUrl);
+  }
+
+  listarMiCarrera(): Observable<Materia[]> {
+    return this.http.get<Materia[]>(`${this.apiUrl}/mi-carrera`);
   }
 
   crear(dto: CrearMateriaRequest): Observable<Materia> {

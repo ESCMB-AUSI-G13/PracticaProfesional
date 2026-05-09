@@ -4,7 +4,7 @@ public record ModificarEstudianteDto(
     string Nombre,
     string Apellido,
     string Email,
-    int Anio,
-    string Plan,
+    int    Anio,
+    int    CarreraId,
     string Condicion
 );

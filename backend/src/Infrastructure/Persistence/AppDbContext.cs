@@ -13,6 +13,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Estudiante> Estudiantes => Set<Estudiante>();
 
     // Plan académico
+    public DbSet<Carrera> Carreras => Set<Carrera>();
     public DbSet<Materia> Materias => Set<Materia>();
     public DbSet<Correlatividad> Correlatividades => Set<Correlatividad>();
     public DbSet<Curso> Cursos => Set<Curso>();
@@ -145,18 +146,33 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         });
 
         // ──────────────────────────────────────────────
+        // Carrera
+        // ──────────────────────────────────────────────
+        modelBuilder.Entity<Carrera>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.Nombre).IsRequired().HasMaxLength(200);
+            entity.HasIndex(c => c.Nombre).IsUnique();
+            entity.Property(c => c.Resolucion).IsRequired().HasMaxLength(50);
+        });
+
+        // ──────────────────────────────────────────────
         // Estudiante
         // ──────────────────────────────────────────────
         modelBuilder.Entity<Estudiante>(entity =>
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Anio).IsRequired();
-            entity.Property(e => e.Plan).IsRequired().HasMaxLength(100);
+            entity.Property(e => e.CarreraId).IsRequired();
             entity.Property(e => e.Condicion).IsRequired().HasConversion<string>();
             entity.Property(e => e.FechaDeIngreso).IsRequired();
             entity.HasOne(e => e.Usuario)
                 .WithOne()
                 .HasForeignKey<Estudiante>(e => e.UsuarioId)
+                .OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Carrera)
+                .WithMany(c => c.Estudiantes)
+                .HasForeignKey(e => e.CarreraId)
                 .OnDelete(DeleteBehavior.Restrict);
             entity.HasIndex(e => e.UsuarioId).IsUnique();
         });
@@ -170,7 +186,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(m => m.Codigo).IsRequired().HasMaxLength(20);
             entity.HasIndex(m => m.Codigo).IsUnique();
             entity.Property(m => m.Nombre).IsRequired().HasMaxLength(200);
-            entity.Property(m => m.Plan).IsRequired().HasMaxLength(20);
+            entity.Property(m => m.CarreraId).IsRequired();
+            entity.HasOne(m => m.Carrera)
+                .WithMany(c => c.Materias)
+                .HasForeignKey(m => m.CarreraId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
 
         // ──────────────────────────────────────────────

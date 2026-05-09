@@ -276,3 +276,13 @@ D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\obj\Debug\net8.0\rjsmcshtm
 D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\obj\Debug\net8.0\staticwebassets.build.json.cache
 D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\obj\Debug\net8.0\staticwebassets.build.endpoints.json
 D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\obj\Debug\net8.0\swae.build.ex.cache
+D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\appsettings.Development.json
+C:\Users\facum\AppData\Local\Temp\build-check\appsettings.Development.example.json
+C:\Users\facum\AppData\Local\Temp\build-check\appsettings.Development.json
+C:\Users\facum\AppData\Local\Temp\build-check\appsettings.json
+C:\Users\facum\AppData\Local\Temp\build-check\PracticaProfesional.staticwebassets.endpoints.json
+C:\Users\facum\AppData\Local\Temp\build-check\PracticaProfesional.exe
+C:\Users\facum\AppData\Local\Temp\build-check\PracticaProfesional.deps.json
+C:\Users\facum\AppData\Local\Temp\build-check\PracticaProfesional.runtimeconfig.json
+C:\Users\facum\AppData\Local\Temp\build-check\PracticaProfesional.dll
+C:\Users\facum\AppData\Local\Temp\build-check\PracticaProfesional.pdb

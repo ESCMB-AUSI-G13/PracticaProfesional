@@ -105,15 +105,15 @@ public class ActualizarEstadoAcademicoUseCase(
     private async Task<string?> EvaluarEgresoAsync(
         int estudianteId, int materiaId, CancellationToken ct)
     {
-        var plan = await materiaRepository.ObtenerPlanAsync(materiaId, ct);
-        if (plan is null) return null;
+        var carreraId = await materiaRepository.ObtenerCarreraIdAsync(materiaId, ct);
+        if (carreraId is null) return null;
 
-        var totalPlan  = await materiaRepository.ContarPorPlanAsync(plan, ct);
+        var totalPlan  = await materiaRepository.ContarPorCarreraIdAsync(carreraId.Value, ct);
         if (totalPlan == 0) return null;
 
-        var aprobados  = await historialRepository.ContarAprobadosEnPlanAsync(estudianteId, plan, ct);
+        var aprobados  = await historialRepository.ContarAprobadosEnCarreraAsync(estudianteId, carreraId.Value, ct);
         if (aprobados >= totalPlan)
-            return $"Aprobación total del plan académico '{plan}' ({aprobados}/{totalPlan} materias)";
+            return $"Aprobación total de la carrera (carreraId={carreraId.Value}) ({aprobados}/{totalPlan} materias)";
 
         return null;
     }

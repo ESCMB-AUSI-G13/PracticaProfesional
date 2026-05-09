@@ -12,8 +12,13 @@
       <input type="text" [ngModel]="nombre()" (ngModelChange)="nombre.set($event)" name="nombre" placeholder="Ej: Matemática I" />
     </div>
     <div class="campo">
-      <label>Plan *</label>
-      <input type="text" [ngModel]="plan()" (ngModelChange)="plan.set($event)" name="plan" placeholder="Ej: 2020" />
+      <label>Carrera *</label>
+      <select [ngModel]="carreraId()" (ngModelChange)="carreraId.set($event ? +$event : null)" name="carreraId">
+        <option [ngValue]="null">— Seleccionar carrera —</option>
+        @for (c of carreras(); track c.id) {
+          <option [value]="c.id">{{ c.nombre }} ({{ c.resolucion }})</option>
+        }
+      </select>
     </div>
 
     <div class="acciones">

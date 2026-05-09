@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MateriasService, Materia } from '../materias.service';
 import { CorrelativiadadesService, Correlatividad } from '../correlatividades.service';
+import { CarrerasService, Carrera } from '../../carreras/carreras.service';
 
 @Component({
   selector: 'app-editar-materia',
@@ -13,13 +14,15 @@ import { CorrelativiadadesService, Correlatividad } from '../correlatividades.se
   styleUrl: './editar-materia.component.scss'
 })
 export class EditarMateriaComponent implements OnInit {
-  id       = 0;
-  codigo   = signal('');
-  nombre   = signal('');
-  plan     = signal('');
+  id        = 0;
+  codigo    = signal('');
+  nombre    = signal('');
+  carreraId = signal<number | null>(null);
   cargando  = signal(true);
   guardando = signal(false);
   error     = signal<string | null>(null);
+
+  carreras = signal<Carrera[]>([]);
 
   // Correlatividades
   todasLasMaterias     = signal<Materia[]>([]);
@@ -31,25 +34,31 @@ export class EditarMateriaComponent implements OnInit {
   // Formulario nueva correlatividad
   nuevaRequisitoId    = signal<number | null>(null);
   nuevaTipo           = signal<'Cursar' | 'Rendir'>('Cursar');
-  nuevaCondicion      = signal<number>(1); // 1=Regularizado, 2=Aprobado
+  nuevaCondicion      = signal<number>(1);
 
   constructor(
     private materiasService: MateriasService,
     private correlativiadadesService: CorrelativiadadesService,
+    private carrerasService: CarrerasService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.id = Number(this.route.snapshot.paramMap.get('id'));
+
+    this.carrerasService.listar().subscribe({
+      next: data => this.carreras.set(data),
+      error: () => this.error.set('Error al cargar las carreras.')
+    });
+
     this.materiasService.listar().subscribe({
       next: data => {
         const m = data.find(x => x.id === this.id);
         if (!m) { this.router.navigate(['/materias']); return; }
         this.codigo.set(m.codigo);
         this.nombre.set(m.nombre);
-        this.plan.set(m.plan);
-        // Opciones para el selector (excluye la materia actual)
+        this.carreraId.set(m.carreraId);
         this.todasLasMaterias.set(data.filter(x => x.id !== this.id));
         this.cargando.set(false);
         this.cargarCorrelatividades();
@@ -59,12 +68,12 @@ export class EditarMateriaComponent implements OnInit {
   }
 
   guardar(): void {
-    if (!this.nombre() || !this.plan()) { this.error.set('Todos los campos son obligatorios.'); return; }
+    if (!this.nombre() || !this.carreraId()) { this.error.set('Todos los campos son obligatorios.'); return; }
     this.guardando.set(true);
     this.error.set(null);
-    this.materiasService.modificar(this.id, { nombre: this.nombre(), plan: this.plan() }).subscribe({
+    this.materiasService.modificar(this.id, { nombre: this.nombre(), carreraId: this.carreraId()! }).subscribe({
       next: () => this.router.navigate(['/materias']),
-      error: (e) => { this.error.set(e.error?.mensaje ?? 'Error al guardar.'); this.guardando.set(false); }
+      error: (e) => { this.error.set(e.error?.detail ?? 'Error al guardar.'); this.guardando.set(false); }
     });
   }
 
@@ -101,7 +110,7 @@ export class EditarMateriaComponent implements OnInit {
         this.agregandoCorr.set(false);
       },
       error: (e) => {
-        this.errorCorr.set(e.error?.mensaje ?? 'Error al agregar correlatividad.');
+        this.errorCorr.set(e.error?.detail ?? 'Error al agregar correlatividad.');
         this.agregandoCorr.set(false);
       }
     });

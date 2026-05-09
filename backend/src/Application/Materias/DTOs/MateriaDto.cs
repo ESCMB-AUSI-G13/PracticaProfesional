@@ -4,5 +4,6 @@ public record MateriaDto(
     int    Id,
     string Codigo,
     string Nombre,
-    string Plan
+    int    CarreraId,
+    string CarreraNombre
 );

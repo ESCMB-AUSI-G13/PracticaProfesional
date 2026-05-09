@@ -64,6 +64,37 @@
           }
         </div>
 
+        <div class="form-group">
+          <label for="carreraId">Carrera *</label>
+          <select id="carreraId" formControlName="carreraId">
+            <option [value]="null">-- Seleccionar carrera --</option>
+            @for (c of carreras(); track c.id) {
+              <option [value]="c.id">{{ c.nombre }} ({{ c.resolucion }})</option>
+            }
+          </select>
+          @if (form.get('carreraId')?.invalid && form.get('carreraId')?.touched) {
+            <span class="error-msg">Seleccioná una carrera.</span>
+          }
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="anio">Año cursando *</label>
+            <select id="anio" formControlName="anio">
+              @for (anio of anios; track anio) {
+                <option [value]="anio">{{ anio }}° año</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="fechaDeIngreso">Fecha de ingreso *</label>
+            <input id="fechaDeIngreso" type="date" formControlName="fechaDeIngreso">
+            @if (form.get('fechaDeIngreso')?.invalid && form.get('fechaDeIngreso')?.touched) {
+              <span class="error-msg">La fecha de ingreso es obligatoria.</span>
+            }
+          </div>
+        </div>
+
         @if (error()) {
           <p class="alert-error">{{ error() }}</p>
         }

@@ -22,35 +22,36 @@ public class Estudiante : AggregateRoot
     public int UsuarioId { get; private set; }
     public Usuario Usuario { get; private set; } = null!;
     public int Anio { get; private set; }
-    public string Plan { get; private set; } = string.Empty;
+    public int CarreraId { get; private set; }
+    public Carrera Carrera { get; private set; } = null!;
     public CondicionEstudiante Condicion { get; private set; }
     public DateTime FechaDeIngreso { get; private set; }
 
     private Estudiante() { }
 
     // ── Factory ──────────────────────────────────────────────────────────────
-    public static Estudiante Crear(int usuarioId, int anio, string plan, DateTime fechaDeIngreso)
+    public static Estudiante Crear(int usuarioId, int anio, int carreraId, DateTime fechaDeIngreso)
     {
         if (anio < 1 || anio > 6) throw new ArgumentException("El año debe estar entre 1 y 6.");
-        if (string.IsNullOrWhiteSpace(plan)) throw new ArgumentException("El plan es obligatorio.");
+        if (carreraId <= 0) throw new ArgumentException("La carrera es obligatoria.");
 
         return new Estudiante
         {
             UsuarioId = usuarioId,
             Anio = anio,
-            Plan = plan.Trim(),
+            CarreraId = carreraId,
             Condicion = CondicionEstudiante.Regular,
             FechaDeIngreso = fechaDeIngreso.Date
         };
     }
 
     // ── Modificación de datos (sin tocar Condicion) ──────────────────────────
-    public void Modificar(int anio, string plan)
+    public void Modificar(int anio, int carreraId)
     {
         if (anio < 1 || anio > 6) throw new ArgumentException("El año debe estar entre 1 y 6.");
-        if (string.IsNullOrWhiteSpace(plan)) throw new ArgumentException("El plan es obligatorio.");
+        if (carreraId <= 0) throw new ArgumentException("La carrera es obligatoria.");
         Anio = anio;
-        Plan = plan.Trim();
+        CarreraId = carreraId;
     }
 
     // ── Máquina de estados ───────────────────────────────────────────────────

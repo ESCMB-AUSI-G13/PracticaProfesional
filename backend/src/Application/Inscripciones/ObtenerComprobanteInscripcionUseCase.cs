@@ -18,7 +18,7 @@ public class ObtenerComprobanteInscripcionUseCase(IInscripcionMateriaRepository 
             inscripcion.Estudiante.Usuario.Legajo,
             inscripcion.Materia.Codigo,
             inscripcion.Materia.Nombre,
-            inscripcion.Materia.Plan,
+            inscripcion.Materia.Carrera?.Nombre ?? string.Empty,
             inscripcion.Curso.AnioLectivo,
             inscripcion.Curso.Comision,
             inscripcion.Estado.ToString(),

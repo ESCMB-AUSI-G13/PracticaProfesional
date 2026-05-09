@@ -58,16 +58,16 @@ public class HistorialAcademicoRepository(AppDbContext context) : IHistorialAcad
             .Select(h => h.NotaFinal)
             .FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<int> ContarAprobadosEnPlanAsync(
+    public async Task<int> ContarAprobadosEnCarreraAsync(
         int estudianteId,
-        string plan,
+        int carreraId,
         CancellationToken cancellationToken = default)
         => await context.HistorialAcademico
             .Where(h =>
                 h.EstudianteId == estudianteId &&
                 h.NotaFinal != null &&
                 h.NotaFinal >= 4 &&
-                h.Materia.Plan == plan)
+                h.Materia.CarreraId == carreraId)
             .Select(h => h.MateriaId)
             .Distinct()
             .CountAsync(cancellationToken);

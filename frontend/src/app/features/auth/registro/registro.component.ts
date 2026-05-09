@@ -1,8 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { CarrerasService, Carrera } from '../../carreras/carreras.service';
 
 @Component({
   selector: 'app-registro',
@@ -11,16 +12,20 @@ import { HttpClient } from '@angular/common/http';
   templateUrl: './registro.component.html',
   styleUrl: './registro.component.scss'
 })
-export class RegistroComponent {
+export class RegistroComponent implements OnInit {
   form: FormGroup;
   cargando = signal(false);
   error = signal<string | null>(null);
   exitoso = signal(false);
 
+  readonly anios = [1, 2, 3, 4, 5, 6];
+  carreras = signal<Carrera[]>([]);
+
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private carrerasService: CarrerasService
   ) {
     this.form = this.fb.group({
       dni: ['', [Validators.required, Validators.pattern(/^\d{7,8}$/)]],
@@ -28,7 +33,17 @@ export class RegistroComponent {
       email: ['', [Validators.required, Validators.email]],
       nombre: ['', [Validators.required, Validators.maxLength(100)]],
       apellido: ['', [Validators.required, Validators.maxLength(100)]],
-      password: ['', [Validators.required, Validators.minLength(8)]]
+      password: ['', [Validators.required, Validators.minLength(8)]],
+      carreraId: [null, Validators.required],
+      anio: [1, [Validators.required, Validators.min(1), Validators.max(6)]],
+      fechaDeIngreso: ['', Validators.required]
+    });
+  }
+
+  ngOnInit(): void {
+    this.carrerasService.listar().subscribe({
+      next: data => this.carreras.set(data),
+      error: () => this.error.set('Error al cargar las carreras.')
     });
   }
 
@@ -38,7 +53,14 @@ export class RegistroComponent {
     this.error.set(null);
     this.cargando.set(true);
 
-    this.http.post('http://localhost:5000/api/auth/registro', this.form.value).subscribe({
+    const payload = {
+      ...this.form.value,
+      anio: Number(this.form.value.anio),
+      carreraId: Number(this.form.value.carreraId),
+      fechaDeIngreso: new Date(this.form.value.fechaDeIngreso).toISOString()
+    };
+
+    this.http.post('http://localhost:5000/api/auth/registro', payload).subscribe({
       next: () => {
         this.cargando.set(false);
         this.exitoso.set(true);

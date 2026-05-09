@@ -7,10 +7,22 @@ namespace PracticaProfesional.Infrastructure.Persistence.Repositories;
 public class MateriaRepository(AppDbContext context) : IMateriaRepository
 {
     public async Task<IEnumerable<Materia>> ListarAsync(CancellationToken cancellationToken = default)
-        => await context.Materias.OrderBy(m => m.Plan).ThenBy(m => m.Nombre).ToListAsync(cancellationToken);
+        => await context.Materias
+            .Include(m => m.Carrera)
+            .OrderBy(m => m.Carrera.Nombre).ThenBy(m => m.Nombre)
+            .ToListAsync(cancellationToken);
+
+    public async Task<IEnumerable<Materia>> ListarPorCarreraIdAsync(int carreraId, CancellationToken cancellationToken = default)
+        => await context.Materias
+            .Include(m => m.Carrera)
+            .Where(m => m.CarreraId == carreraId)
+            .OrderBy(m => m.Nombre)
+            .ToListAsync(cancellationToken);
 
     public async Task<Materia?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default)
-        => await context.Materias.FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
+        => await context.Materias
+            .Include(m => m.Carrera)
+            .FirstOrDefaultAsync(m => m.Id == id, cancellationToken);
 
     public async Task<bool> ExistePorCodigoAsync(string codigo, CancellationToken cancellationToken = default)
         => await context.Materias.AnyAsync(m => m.Codigo == codigo.ToUpperInvariant(), cancellationToken);
@@ -20,7 +32,6 @@ public class MateriaRepository(AppDbContext context) : IMateriaRepository
 
     public async Task<int> ObtenerSiguienteNumeroAsync(CancellationToken cancellationToken = default)
     {
-        // Extrae el número del formato "MAT-NNN" y devuelve el máximo + 1
         var codigos = await context.Materias
             .Select(m => m.Codigo)
             .ToListAsync(cancellationToken);
@@ -43,9 +54,9 @@ public class MateriaRepository(AppDbContext context) : IMateriaRepository
     public async Task GuardarCambiosAsync(CancellationToken cancellationToken = default)
         => await context.SaveChangesAsync(cancellationToken);
 
-    public async Task<string?> ObtenerPlanAsync(int materiaId, CancellationToken cancellationToken = default)
-        => await context.Materias.Where(m => m.Id == materiaId).Select(m => m.Plan).FirstOrDefaultAsync(cancellationToken);
+    public async Task<int?> ObtenerCarreraIdAsync(int materiaId, CancellationToken cancellationToken = default)
+        => await context.Materias.Where(m => m.Id == materiaId).Select(m => (int?)m.CarreraId).FirstOrDefaultAsync(cancellationToken);
 
-    public async Task<int> ContarPorPlanAsync(string plan, CancellationToken cancellationToken = default)
-        => await context.Materias.CountAsync(m => m.Plan == plan, cancellationToken);
+    public async Task<int> ContarPorCarreraIdAsync(int carreraId, CancellationToken cancellationToken = default)
+        => await context.Materias.CountAsync(m => m.CarreraId == carreraId, cancellationToken);
 }

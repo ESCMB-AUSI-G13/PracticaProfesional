@@ -44,13 +44,13 @@
 
     <div class="form-group">
       <label>Carrera *</label>
-      <select formControlName="plan">
-        <option value="">-- Seleccionar carrera --</option>
-        @for (c of carreras; track c.valor) {
-          <option [value]="c.valor">{{ c.etiqueta }}</option>
+      <select formControlName="carreraId">
+        <option [value]="null">-- Seleccionar carrera --</option>
+        @for (c of carreras(); track c.id) {
+          <option [value]="c.id">{{ c.nombre }} ({{ c.resolucion }})</option>
         }
       </select>
-      @if (form.get('plan')?.invalid && form.get('plan')?.touched) {
+      @if (form.get('carreraId')?.invalid && form.get('carreraId')?.touched) {
         <span class="field-error">Seleccioná una carrera</span>
       }
     </div>

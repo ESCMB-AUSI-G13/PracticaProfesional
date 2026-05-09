@@ -48,7 +48,7 @@ public class InscripcionMateriaRepository(AppDbContext context) : IInscripcionMa
 
     public async Task<InscripcionMateria?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default)
         => await context.InscripcionesMateria
-            .Include(i => i.Materia)
+            .Include(i => i.Materia).ThenInclude(m => m.Carrera)
             .Include(i => i.Estudiante).ThenInclude(e => e.Usuario)
             .Include(i => i.Curso)
             .FirstOrDefaultAsync(i => i.Id == id, cancellationToken);
