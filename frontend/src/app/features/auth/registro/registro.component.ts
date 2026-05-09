@@ -17,8 +17,6 @@ export class RegistroComponent {
   error = signal<string | null>(null);
   exitoso = signal(false);
 
-  readonly rolesDisponibles = ['Estudiante', 'Docente'];
-
   constructor(
     private fb: FormBuilder,
     private http: HttpClient,
@@ -30,8 +28,7 @@ export class RegistroComponent {
       email: ['', [Validators.required, Validators.email]],
       nombre: ['', [Validators.required, Validators.maxLength(100)]],
       apellido: ['', [Validators.required, Validators.maxLength(100)]],
-      password: ['', [Validators.required, Validators.minLength(8)]],
-      rol: ['Estudiante', Validators.required]
+      password: ['', [Validators.required, Validators.minLength(8)]]
     });
   }
 

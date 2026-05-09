@@ -6,6 +6,5 @@ public record RegistroRequestDto(
     string Email,
     string Nombre,
     string Apellido,
-    string Password,
-    string Rol  // Solo "Estudiante" o "Docente"
+    string Password
 );
