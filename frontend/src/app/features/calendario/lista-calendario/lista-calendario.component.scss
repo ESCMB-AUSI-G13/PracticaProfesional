@@ -1,4 +1,4 @@
-.page { padding: 2rem; font-family: sans-serif; max-width: 1000px; margin: 0 auto; }
+.page { padding: 2rem; font-family: sans-serif; max-width: 1200px; margin: 0 auto; }
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
 .header-left h1 { margin: 0; font-size: 1.5rem; }
 .header-actions { display: flex; gap: 0.75rem; align-items: center;
@@ -30,3 +30,155 @@
   &.badge-feriado        { background: #f0f3f4; color: #566573; }
   &.badge-otro           { background: #f2f3f4; color: #5d6d7e; }
 }
+
+// ── Vista toggle ──────────────────────────────────────────
+.vista-toggle {
+  display: flex;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  overflow: hidden;
+
+  button {
+    padding: 0.38rem 0.9rem;
+    border: none;
+    background: white;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #555;
+
+    &.active { background: #3498db; color: white; font-weight: 600; }
+    &:hover:not(.active) { background: #f5f5f5; }
+  }
+}
+
+// ── Grilla anual ──────────────────────────────────────────
+.cal-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.9rem;
+  margin-bottom: 1.25rem;
+
+  @media (max-width: 900px) { grid-template-columns: repeat(3, 1fr); }
+  @media (max-width: 640px) { grid-template-columns: repeat(2, 1fr); }
+}
+
+.cal-mes {
+  border: 1px solid #dde3ea;
+  border-radius: 7px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
+
+.cal-mes-nombre {
+  background: #2980b9;
+  color: white;
+  text-align: center;
+  padding: 0.4rem 0.5rem;
+  font-weight: 700;
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.cal-dias-header {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: #eaf2f8;
+
+  span {
+    text-align: center;
+    padding: 0.22rem 0;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #5d6d7e;
+  }
+}
+
+.cal-dias {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  background: white;
+  padding: 3px 2px;
+  gap: 1px 0;
+}
+
+// ── Celda de día ──────────────────────────────────────────
+.cal-dia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 24px;
+
+  &.vacio { visibility: hidden; }
+}
+
+// ── Número del día ────────────────────────────────────────
+.dia-num {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: #333;
+  cursor: default;
+  transition: opacity 0.1s;
+
+  // Día de hoy sin evento: contorno azul
+  &.hoy {
+    border: 2px solid #2980b9;
+    font-weight: 700;
+    color: #2980b9;
+  }
+
+  // Día de hoy con evento: borde blanco interior sobre el círculo de color
+  &.hoy-evento {
+    box-shadow: inset 0 0 0 2px rgba(255,255,255,0.7);
+    font-weight: 700;
+  }
+
+  // Círculos de eventos — fondo sólido + número blanco
+  &.badge-examen        { background: #e74c3c; color: white; font-weight: 600; }
+  &.badge-inscr-examen  { background: #e67e22; color: white; font-weight: 600; }
+  &.badge-inscr-materia { background: #2980b9; color: white; font-weight: 600; }
+  &.badge-inicio        { background: #27ae60; color: white; font-weight: 600; }
+  &.badge-fin           { background: #c0392b; color: white; font-weight: 600; }
+  &.badge-limite        { background: #8e44ad; color: white; font-weight: 600; }
+  &.badge-feriado       { background: #16a085; color: white; font-weight: 600; }
+  &.badge-otro          { background: #7f8c8d; color: white; font-weight: 600; }
+}
+
+// ── Leyenda ───────────────────────────────────────────────
+.cal-leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  padding: 0.7rem 1rem;
+  background: #f9f9f9;
+  border: 1px solid #e8e8e8;
+  border-radius: 6px;
+  font-size: 0.78rem;
+}
+
+.leyenda-item { display: flex; align-items: center; gap: 0.5rem; }
+
+.leyenda-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+
+  &.badge-examen        { background: #e74c3c; }
+  &.badge-inscr-examen  { background: #e67e22; }
+  &.badge-inscr-materia { background: #2980b9; }
+  &.badge-inicio        { background: #27ae60; }
+  &.badge-fin           { background: #c0392b; }
+  &.badge-limite        { background: #8e44ad; }
+  &.badge-feriado       { background: #16a085; }
+  &.badge-otro          { background: #7f8c8d; }
+}
+
+.leyenda-label { color: #444; }

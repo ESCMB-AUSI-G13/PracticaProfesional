@@ -129,10 +129,10 @@ export const routes: Routes = [
             .then(m => m.PanelLogsSeguridadComponent)
       },
 
-      // Calendario Académico — solo Dirección
+      // Calendario Académico — Dirección gestiona, otros roles solo visualizan
       {
         path: 'calendario',
-        canActivate: [roleGuard('Direccion')],
+        canActivate: [roleGuard('Direccion', 'Docente', 'Preceptor', 'Estudiante')],
         loadComponent: () =>
           import('./features/calendario/lista-calendario/lista-calendario.component').then(m => m.ListaCalendarioComponent)
       },

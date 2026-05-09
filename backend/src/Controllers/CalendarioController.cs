@@ -6,7 +6,7 @@ namespace PracticaProfesional.Controllers;
 
 [ApiController]
 [Route("api/calendario")]
-[Authorize(Roles = "Direccion")]
+[Authorize]
 public class CalendarioController(
     ListarEventosCalendarioUseCase listar,
     CrearEventoCalendarioUseCase crear,
@@ -22,6 +22,7 @@ public class CalendarioController(
     }
 
     [HttpPost]
+    [Authorize(Roles = "Direccion")]
     [ProducesResponseType(typeof(EventoCalendarioDto), StatusCodes.Status201Created)]
     public async Task<IActionResult> Crear([FromBody] CrearEventoCalendarioDto dto, CancellationToken cancellationToken)
     {
@@ -30,6 +31,7 @@ public class CalendarioController(
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = "Direccion")]
     [ProducesResponseType(typeof(EventoCalendarioDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> Modificar(int id, [FromBody] ModificarEventoCalendarioDto dto, CancellationToken cancellationToken)
     {
@@ -38,6 +40,7 @@ public class CalendarioController(
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Direccion")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     public async Task<IActionResult> Eliminar(int id, CancellationToken cancellationToken)
     {

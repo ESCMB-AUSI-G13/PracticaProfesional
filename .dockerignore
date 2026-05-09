@@ -1,0 +1,19 @@
+# Dependencias (Esto es lo que te está matando el tiempo)
+**/node_modules
+**/bin
+**/obj
+**/dist
+**/out
+
+# Archivos de IDE y Git
+.git
+.vs
+.vscode
+*.user
+*.suo
+*.dbmdl
+*.jfm
+
+# Logs y temporales
+*.log
+.npm

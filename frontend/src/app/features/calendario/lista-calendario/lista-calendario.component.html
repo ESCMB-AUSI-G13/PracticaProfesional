@@ -4,12 +4,20 @@
       <h1>Calendario Académico</h1>
     </div>
     <div class="header-actions">
+      @if (esDireccion()) {
+        <div class="vista-toggle">
+          <button [class.active]="vistaActual() === 'lista'" (click)="vistaActual.set('lista')">Lista</button>
+          <button [class.active]="vistaActual() === 'calendario'" (click)="vistaActual.set('calendario')">Calendario</button>
+        </div>
+      }
       <select [ngModel]="anioFiltro()" (ngModelChange)="anioFiltro.set($event); cargar()" name="anio">
         @for (a of aniosDisponibles; track a) {
           <option [value]="a">{{ a }}</option>
         }
       </select>
-      <button class="btn btn-primary" (click)="irACrear()">+ Nuevo evento</button>
+      @if (esDireccion()) {
+        <button class="btn btn-primary" (click)="irACrear()">+ Nuevo evento</button>
+      }
     </div>
   </header>
 
@@ -17,41 +25,81 @@
 
   @if (cargando()) {
     <p class="estado">Cargando...</p>
-  } @else if (eventos().length === 0) {
-    <p class="estado">No hay eventos para el año {{ anioFiltro() }}.</p>
-  } @else {
-    <table class="tabla">
-      <thead>
-        <tr>
-          <th>Evento</th>
-          <th>Carrera</th>
-          <th>Tipo</th>
-          <th>Inicio</th>
-          <th>Fin</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (e of eventos(); track e.id) {
+
+  } @else if (vistaActual() === 'lista') {
+    @if (eventos().length === 0) {
+      <p class="estado">No hay eventos para el año {{ anioFiltro() }}.</p>
+    } @else {
+      <table class="tabla">
+        <thead>
           <tr>
-            <td class="col-nombre">{{ e.nombreEvento }}</td>
-            <td>{{ e.comision }}</td>
-            <td>
-              <span class="badge" [ngClass]="claseTipo(e.tipoEvento)">
-                {{ etiqueta(e.tipoEvento) }}
-              </span>
-            </td>
-            <td>{{ formatFecha(e.fechaInicio) }}</td>
-            <td>{{ formatFecha(e.fechaFin) }}</td>
-            <td class="acciones">
-              <button class="btn btn-secondary btn-sm" (click)="irAEditar(e.id)">Editar</button>
-              <button class="btn btn-danger btn-sm"
-                      [disabled]="eliminandoId() === e.id"
-                      (click)="eliminar(e.id)">Eliminar</button>
-            </td>
+            <th>Evento</th>
+            <th>Carrera</th>
+            <th>Tipo</th>
+            <th>Inicio</th>
+            <th>Fin</th>
+            <th>Acciones</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (e of eventos(); track e.id) {
+            <tr>
+              <td class="col-nombre">{{ e.nombreEvento }}</td>
+              <td>{{ e.comision }}</td>
+              <td>
+                <span class="badge" [ngClass]="claseTipo(e.tipoEvento)">
+                  {{ etiqueta(e.tipoEvento) }}
+                </span>
+              </td>
+              <td>{{ formatFecha(e.fechaInicio) }}</td>
+              <td>{{ formatFecha(e.fechaFin) }}</td>
+              <td class="acciones">
+                <button class="btn btn-secondary btn-sm" (click)="irAEditar(e.id)">Editar</button>
+                <button class="btn btn-danger btn-sm"
+                        [disabled]="eliminandoId() === e.id"
+                        (click)="eliminar(e.id)">Eliminar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+
+  } @else {
+    <div class="cal-grid">
+      @for (mes of meses(); track mes.nombre) {
+        <div class="cal-mes">
+          <div class="cal-mes-nombre">{{ mes.nombre }}</div>
+          <div class="cal-dias-header">
+            @for (d of diasSemana; track $index) { <span>{{ d }}</span> }
+          </div>
+          <div class="cal-dias">
+            @for (dia of mes.dias; track $index) {
+              <div class="cal-dia" [class.vacio]="!dia.dia">
+                @if (dia.dia) {
+                  <span
+                    class="dia-num"
+                    [ngClass]="dia.clase"
+                    [class.hoy]="dia.esHoy && !dia.clase"
+                    [class.hoy-evento]="dia.esHoy && dia.clase"
+                    [title]="dia.tooltip">
+                    {{ dia.dia }}
+                  </span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="cal-leyenda">
+      @for (item of leyenda; track item.clase) {
+        <div class="leyenda-item">
+          <span class="leyenda-dot" [ngClass]="item.clase"></span>
+          <span class="leyenda-label">{{ item.label }}</span>
+        </div>
+      }
+    </div>
   }
 </div>

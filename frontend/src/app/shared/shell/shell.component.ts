@@ -85,7 +85,7 @@ const NAV: NavItem[] = [
     label: 'Calendario Académico',
     ruta: '/calendario',
     icon: 'calendario',
-    roles: ['Direccion']
+    roles: ['Direccion', 'Docente', 'Preceptor', 'Estudiante']
   },
   {
     label: 'Auditoría',
