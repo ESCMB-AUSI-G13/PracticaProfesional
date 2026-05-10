@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -21,14 +21,46 @@ export class ListaEspaciosComponent implements OnInit {
   docentes  = signal<Docente[]>([]);
   cursos    = signal<Curso[]>([]);
 
-  cargando  = signal(true);
+  cargando    = signal(true);
   mostrarForm = signal(false);
-  guardando = signal(false);
-  error     = signal<string | null>(null);
+  guardando   = signal(false);
+  error       = signal<string | null>(null);
 
   nuevoMateriaId  = signal<number | null>(null);
   nuevoDocenteId  = signal<number | null>(null);
   nuevoCursoId    = signal<number | null>(null);
+
+  // Filtros
+  filtroCarrera  = signal('');
+  filtroAnio     = signal('');
+  filtroComision = signal('');
+  filtroNombre   = signal('');
+
+  // Valores únicos para los dropdowns de filtro
+  carrerasUnicas = computed(() =>
+    [...new Set(this.espacios().map(e => e.carreraNombre))].sort()
+  );
+  aniosUnicos = computed(() =>
+    [...new Set(this.espacios().map(e => e.cursoAnioLectivo))].sort((a, b) => a - b)
+  );
+  comisionesUnicas = computed(() =>
+    [...new Set(this.espacios().map(e => e.cursoComision))].sort()
+  );
+
+  espaciosFiltrados = computed(() => {
+    const carrera  = this.filtroCarrera().toLowerCase();
+    const anio     = this.filtroAnio();
+    const comision = this.filtroComision().toLowerCase();
+    const nombre   = this.filtroNombre().toLowerCase();
+
+    return this.espacios().filter(e =>
+      (!carrera  || e.carreraNombre.toLowerCase().includes(carrera)) &&
+      (!anio     || e.cursoAnioLectivo === +anio) &&
+      (!comision || e.cursoComision.toLowerCase() === comision) &&
+      (!nombre   || e.materiaNombre.toLowerCase().includes(nombre) ||
+                    e.docenteNombre.toLowerCase().includes(nombre))
+    );
+  });
 
   constructor(
     private service: EspaciosCurricularesService,
@@ -64,9 +96,9 @@ export class ListaEspaciosComponent implements OnInit {
     this.guardando.set(true);
     this.error.set(null);
     const dto: CrearEspacioCurricularRequest = {
-      materiaId: this.nuevoMateriaId()!,
-      docenteId: this.nuevoDocenteId()!,
-      cursoId:   this.nuevoCursoId()!
+      materiaId:        this.nuevoMateriaId()!,
+      usuarioDocenteId: this.nuevoDocenteId()!,
+      cursoId:          this.nuevoCursoId()!
     };
     this.service.crear(dto).subscribe({
       next: ec => {
@@ -74,7 +106,7 @@ export class ListaEspaciosComponent implements OnInit {
         this.limpiarForm();
         this.guardando.set(false);
       },
-      error: (e) => { this.error.set(e.error?.mensaje ?? 'Error al crear la cátedra.'); this.guardando.set(false); }
+      error: (e) => { this.error.set(e.error?.detail ?? e.error?.mensaje ?? 'Error al crear la cátedra.'); this.guardando.set(false); }
     });
   }
 
@@ -84,6 +116,13 @@ export class ListaEspaciosComponent implements OnInit {
       next: () => this.espacios.update(list => list.filter(e => e.id !== id)),
       error: () => this.error.set('Error al eliminar.')
     });
+  }
+
+  limpiarFiltros(): void {
+    this.filtroCarrera.set('');
+    this.filtroAnio.set('');
+    this.filtroComision.set('');
+    this.filtroNombre.set('');
   }
 
   limpiarForm(): void {

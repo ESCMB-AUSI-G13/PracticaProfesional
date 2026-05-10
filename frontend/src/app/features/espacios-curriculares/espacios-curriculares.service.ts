@@ -4,21 +4,25 @@ import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
 export interface EspacioCurricular {
-  id:            number;
-  materiaId:     number;
-  materiaNombre: string;
-  materiaCodigo: string;
-  docenteId:     number;
-  docenteNombre: string;
-  cursoId:       number;
-  cursoAnio:     number;
-  cursoComision: string;
+  id:              number;
+  materiaId:       number;
+  materiaNombre:   string;
+  materiaCodigo:   string;
+  materiaAnio:     number;
+  carreraId:       number;
+  carreraNombre:   string;
+  docenteId:       number;
+  docenteNombre:   string;
+  cursoId:         number;
+  cursoAnio:       number;
+  cursoAnioLectivo: number;
+  cursoComision:   string;
 }
 
 export interface CrearEspacioCurricularRequest {
-  materiaId: number;
-  docenteId: number;
-  cursoId:   number;
+  materiaId:        number;
+  usuarioDocenteId: number;
+  cursoId:          number;
 }
 
 @Injectable({ providedIn: 'root' })

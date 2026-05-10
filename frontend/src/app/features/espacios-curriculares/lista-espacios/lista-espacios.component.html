@@ -1,4 +1,4 @@
-﻿<div class="page">
+<div class="page">
   <header class="page-header">
     <div class="header-left">
       <h1>Cátedras (Espacios Curriculares)</h1>
@@ -39,7 +39,7 @@
           <select [ngModel]="nuevoCursoId()" (ngModelChange)="nuevoCursoId.set($event ? +$event : null)">
             <option [value]="null">-- Seleccionar --</option>
             @for (c of cursos(); track c.id) {
-              <option [value]="c.id">{{ c.anio }} — {{ c.comision }}</option>
+              <option [value]="c.id">{{ c.anioLectivo }}° año — Comisión {{ c.comision }} ({{ c.anio }})</option>
             }
           </select>
         </div>
@@ -52,32 +52,76 @@
 
   @if (cargando()) {
     <p class="estado">Cargando...</p>
-  } @else if (espacios().length === 0) {
-    <p class="estado">No hay cátedras registradas.</p>
   } @else {
-    <table class="tabla">
-      <thead>
-        <tr>
-          <th>Materia</th>
-          <th>Docente</th>
-          <th>Año</th>
-          <th>Comisión</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (ec of espacios(); track ec.id) {
+
+    <!-- Filtros -->
+    <section class="filtros">
+      <div class="filtro-campo">
+        <label>Carrera</label>
+        <select [ngModel]="filtroCarrera()" (ngModelChange)="filtroCarrera.set($event)">
+          <option value="">Todas</option>
+          @for (c of carrerasUnicas(); track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
+      </div>
+      <div class="filtro-campo">
+        <label>Año lectivo</label>
+        <select [ngModel]="filtroAnio()" (ngModelChange)="filtroAnio.set($event)">
+          <option value="">Todos</option>
+          @for (a of aniosUnicos(); track a) {
+            <option [value]="a">{{ a }}° año</option>
+          }
+        </select>
+      </div>
+      <div class="filtro-campo">
+        <label>Comisión</label>
+        <select [ngModel]="filtroComision()" (ngModelChange)="filtroComision.set($event)">
+          <option value="">Todas</option>
+          @for (c of comisionesUnicas(); track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
+      </div>
+      <div class="filtro-campo filtro-nombre">
+        <label>Materia o docente</label>
+        <input type="text" placeholder="Buscar..." [ngModel]="filtroNombre()" (ngModelChange)="filtroNombre.set($event)" />
+      </div>
+      @if (filtroCarrera() || filtroAnio() || filtroComision() || filtroNombre()) {
+        <button class="btn btn-sm" (click)="limpiarFiltros()">✕ Limpiar</button>
+      }
+      <span class="resultado-count">{{ espaciosFiltrados().length }} de {{ espacios().length }}</span>
+    </section>
+
+    @if (espaciosFiltrados().length === 0) {
+      <p class="estado">No hay cátedras que coincidan con los filtros.</p>
+    } @else {
+      <table class="tabla">
+        <thead>
           <tr>
-            <td><code>{{ ec.materiaCodigo }}</code> {{ ec.materiaNombre }}</td>
-            <td>{{ ec.docenteNombre }}</td>
-            <td>{{ ec.cursoAnio }}</td>
-            <td>{{ ec.cursoComision }}</td>
-            <td>
-              <button class="btn btn-danger btn-sm" (click)="eliminar(ec.id)">Eliminar</button>
-            </td>
+            <th>Carrera</th>
+            <th>Materia</th>
+            <th>Docente</th>
+            <th>Año</th>
+            <th>Comisión</th>
+            <th>Acciones</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (ec of espaciosFiltrados(); track ec.id) {
+            <tr>
+              <td>{{ ec.carreraNombre }}</td>
+              <td><code>{{ ec.materiaCodigo }}</code> {{ ec.materiaNombre }}</td>
+              <td>{{ ec.docenteNombre }}</td>
+              <td>{{ ec.cursoAnioLectivo }}° año</td>
+              <td>{{ ec.cursoComision }}</td>
+              <td>
+                <button class="btn btn-danger btn-sm" (click)="eliminar(ec.id)">Eliminar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
   }
 </div>

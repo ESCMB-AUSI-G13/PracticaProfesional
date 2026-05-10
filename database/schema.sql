@@ -80,12 +80,13 @@ CREATE TABLE Correlatividades (
 CREATE TABLE Cursos (
     Id          INT IDENTITY(1,1) PRIMARY KEY,
     Anio        INT          NOT NULL,
+    AnioLectivo INT          NOT NULL,
     Comision    NVARCHAR(20) NOT NULL,
     Cupo        INT          NOT NULL,
     Estado      NVARCHAR(20) NOT NULL DEFAULT 'Activo',
     PreceptorId INT          NOT NULL,
     CONSTRAINT FK_Cursos_Preceptores FOREIGN KEY (PreceptorId) REFERENCES Preceptores(Id),
-    CONSTRAINT UQ_Cursos_AnioCom UNIQUE (Anio, Comision),
+    CONSTRAINT UQ_Cursos_AnioLectivoCom UNIQUE (Anio, AnioLectivo, Comision),
     CONSTRAINT CK_Cursos_Cupo CHECK (Cupo > 0)
 );
 

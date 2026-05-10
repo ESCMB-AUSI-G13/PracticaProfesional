@@ -25,7 +25,7 @@ public class ListarMisInscripcionesEstudianteUseCase(
             i.Materia?.Codigo ?? string.Empty,
             i.Materia?.Nombre ?? string.Empty,
             i.CursoId,
-            i.Curso?.Anio ?? 0,
+            i.Curso?.AnioLectivo ?? 0,
             i.Curso?.Comision ?? string.Empty,
             i.Estado.ToString(),
             i.FechaInscripcion

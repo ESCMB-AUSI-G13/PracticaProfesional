@@ -28,7 +28,7 @@
         <select [ngModel]="selectedCursoId()" (ngModelChange)="selectedCursoId.set($event ? +$event : null)">
           <option [value]="null">— Seleccioná un curso —</option>
           @for (c of cursos(); track c.id) {
-            <option [value]="c.id">{{ c.anio }}° año — Comisión {{ c.comision }} ({{ c.anioLectivo }})</option>
+            <option [value]="c.id">{{ c.anioLectivo }}° año — Comisión {{ c.comision }} ({{ c.anio }})</option>
           }
         </select>
       </div>

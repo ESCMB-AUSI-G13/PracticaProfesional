@@ -8,10 +8,10 @@ public class EspacioCurricularRepository(AppDbContext db) : IEspacioCurricularRe
 {
     public async Task<IEnumerable<EspacioCurricular>> ListarAsync(CancellationToken cancellationToken = default)
         => await db.EspaciosCurriculares
-            .Include(ec => ec.Materia)
+            .Include(ec => ec.Materia).ThenInclude(m => m.Carrera)
             .Include(ec => ec.Docente).ThenInclude(d => d.Usuario)
             .Include(ec => ec.Curso)
-            .OrderBy(ec => ec.Curso.Anio).ThenBy(ec => ec.Curso.Comision).ThenBy(ec => ec.Materia.Nombre)
+            .OrderBy(ec => ec.Curso.AnioLectivo).ThenBy(ec => ec.Curso.Comision).ThenBy(ec => ec.Materia.Nombre)
             .ToListAsync(cancellationToken);
 
     public async Task<EspacioCurricular?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default)

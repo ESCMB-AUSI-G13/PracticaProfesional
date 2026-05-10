@@ -5,9 +5,13 @@ public record EspacioCurricularDto(
     int    MateriaId,
     string MateriaNombre,
     string MateriaCodigo,
+    int    MateriaAnio,
+    int    CarreraId,
+    string CarreraNombre,
     int    DocenteId,
     string DocenteNombre,
     int    CursoId,
     int    CursoAnio,
+    int    CursoAnioLectivo,
     string CursoComision
 );

@@ -15,13 +15,13 @@ public class CrearEspacioCurricularUseCase(
     public async Task<EspacioCurricularDto> EjecutarAsync(
         CrearEspacioCurricularDto dto, CancellationToken cancellationToken = default)
     {
-        if (await repository.ExisteAsync(dto.MateriaId, dto.DocenteId, dto.CursoId, cancellationToken))
+        if (await repository.ExisteAsync(dto.MateriaId, dto.UsuarioDocenteId, dto.CursoId, cancellationToken))
             throw new BusinessException("Ya existe una cátedra con esa combinación de Materia, Docente y Curso.");
 
         var materia  = await materiaRepository.ObtenerPorIdAsync(dto.MateriaId, cancellationToken)
             ?? throw new BusinessException($"No se encontró la materia con Id {dto.MateriaId}.");
-        var docente  = await docenteRepository.ObtenerPorUsuarioIdAsync(dto.DocenteId, cancellationToken)
-            ?? throw new BusinessException($"No se encontró el docente con UsuarioId {dto.DocenteId}.");
+        var docente  = await docenteRepository.ObtenerPorUsuarioIdAsync(dto.UsuarioDocenteId, cancellationToken)
+            ?? throw new BusinessException($"No se encontró el docente con UsuarioId {dto.UsuarioDocenteId}.");
         var curso    = await cursoRepository.ObtenerPorIdAsync(dto.CursoId, cancellationToken)
             ?? throw new BusinessException($"No se encontró el curso con Id {dto.CursoId}.");
 
@@ -39,7 +39,8 @@ public class CrearEspacioCurricularUseCase(
     internal static EspacioCurricularDto ToDto(
         EspacioCurricular ec, Materia m, Docente d, Curso c) => new(
         ec.Id,
-        m.Id, m.Nombre, m.Codigo,
+        m.Id, m.Nombre, m.Codigo, m.Anio,
+        m.CarreraId, m.Carrera?.Nombre ?? string.Empty,
         d.Id, $"{d.Usuario.Nombre} {d.Usuario.Apellido}",
-        c.Id, c.Anio, c.Comision);
+        c.Id, c.Anio, c.AnioLectivo, c.Comision);
 }

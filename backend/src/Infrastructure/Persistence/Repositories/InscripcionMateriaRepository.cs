@@ -23,6 +23,7 @@ public class InscripcionMateriaRepository(AppDbContext context) : IInscripcionMa
     public async Task<IEnumerable<InscripcionMateria>> ListarActivasPorEstudianteAsync(int estudianteId, CancellationToken cancellationToken = default)
         => await context.InscripcionesMateria
             .Include(i => i.Materia)
+            .Include(i => i.Curso)
             .Where(i => i.EstudianteId == estudianteId && i.Estado == EstadoInscripcion.Activa)
             .ToListAsync(cancellationToken);
 
