@@ -18,6 +18,7 @@ export class EditarMateriaComponent implements OnInit {
   codigo    = signal('');
   nombre    = signal('');
   carreraId = signal<number | null>(null);
+  anio      = signal<number>(1);
   cargando  = signal(true);
   guardando = signal(false);
   error     = signal<string | null>(null);
@@ -59,6 +60,7 @@ export class EditarMateriaComponent implements OnInit {
         this.codigo.set(m.codigo);
         this.nombre.set(m.nombre);
         this.carreraId.set(m.carreraId);
+        this.anio.set(m.anio);
         this.todasLasMaterias.set(data.filter(x => x.id !== this.id));
         this.cargando.set(false);
         this.cargarCorrelatividades();
@@ -71,7 +73,7 @@ export class EditarMateriaComponent implements OnInit {
     if (!this.nombre() || !this.carreraId()) { this.error.set('Todos los campos son obligatorios.'); return; }
     this.guardando.set(true);
     this.error.set(null);
-    this.materiasService.modificar(this.id, { nombre: this.nombre(), carreraId: this.carreraId()! }).subscribe({
+    this.materiasService.modificar(this.id, { nombre: this.nombre(), carreraId: this.carreraId()!, anio: this.anio() }).subscribe({
       next: () => this.router.navigate(['/materias']),
       error: (e) => { this.error.set(e.error?.detail ?? 'Error al guardar.'); this.guardando.set(false); }
     });

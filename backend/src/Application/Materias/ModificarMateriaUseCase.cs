@@ -17,9 +17,9 @@ public class ModificarMateriaUseCase(
         var carrera = await carreraRepository.ObtenerPorIdAsync(dto.CarreraId, cancellationToken)
             ?? throw new BusinessException($"No se encontró la carrera con Id {dto.CarreraId}.");
 
-        var anterior = new { materia.Nombre, materia.CarreraId };
+        var anterior = new { materia.Nombre, materia.CarreraId, materia.Anio };
 
-        materia.Modificar(dto.Nombre, dto.CarreraId);
+        materia.Modificar(dto.Nombre, dto.CarreraId, dto.Anio);
         await materiaRepository.GuardarCambiosAsync(cancellationToken);
 
         await auditoria.RegistrarAsync("Materia", materia.Id.ToString(), "MODIFICAR",

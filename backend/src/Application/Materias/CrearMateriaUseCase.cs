@@ -18,7 +18,7 @@ public class CrearMateriaUseCase(
         var numero = await materiaRepository.ObtenerSiguienteNumeroAsync(cancellationToken);
         var codigo = $"MAT-{numero:D3}";
 
-        var materia = Materia.Crear(codigo, dto.Nombre, dto.CarreraId);
+        var materia = Materia.Crear(codigo, dto.Nombre, dto.CarreraId, dto.Anio);
         await materiaRepository.AgregarAsync(materia, cancellationToken);
 
         await auditoria.RegistrarAsync("Materia", materia.Id.ToString(), "CREAR",
@@ -30,8 +30,8 @@ public class CrearMateriaUseCase(
     }
 
     internal static MateriaDto ToDto(Materia m, string carreraNombre)
-        => new(m.Id, m.Codigo, m.Nombre, m.CarreraId, carreraNombre);
+        => new(m.Id, m.Codigo, m.Nombre, m.CarreraId, carreraNombre, m.Anio);
 
     internal static MateriaDto ToDtoConNavegacion(Materia m)
-        => new(m.Id, m.Codigo, m.Nombre, m.CarreraId, m.Carrera?.Nombre ?? string.Empty);
+        => new(m.Id, m.Codigo, m.Nombre, m.CarreraId, m.Carrera?.Nombre ?? string.Empty, m.Anio);
 }

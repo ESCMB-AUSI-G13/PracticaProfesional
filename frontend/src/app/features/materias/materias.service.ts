@@ -9,16 +9,19 @@ export interface Materia {
   nombre:       string;
   carreraId:    number;
   carreraNombre: string;
+  anio:         number;
 }
 
 export interface CrearMateriaRequest {
   nombre:    string;
   carreraId: number;
+  anio:      number;
 }
 
 export interface ModificarMateriaRequest {
   nombre:    string;
   carreraId: number;
+  anio:      number;
 }
 
 @Injectable({ providedIn: 'root' })

@@ -15,6 +15,7 @@ import { CarrerasService, Carrera } from '../../carreras/carreras.service';
 export class CrearMateriaComponent implements OnInit {
   nombre    = signal('');
   carreraId = signal<number | null>(null);
+  anio      = signal<number>(1);
   guardando = signal(false);
   error     = signal<string | null>(null);
 
@@ -40,7 +41,7 @@ export class CrearMateriaComponent implements OnInit {
     }
     this.guardando.set(true);
     this.error.set(null);
-    this.materiasService.crear({ nombre: this.nombre(), carreraId: this.carreraId()! }).subscribe({
+    this.materiasService.crear({ nombre: this.nombre(), carreraId: this.carreraId()!, anio: this.anio() }).subscribe({
       next: () => this.router.navigate(['/materias']),
       error: (e) => {
         this.error.set(e.error?.detail ?? 'Error al crear la materia.');

@@ -5,5 +5,6 @@ public record MateriaDto(
     string Codigo,
     string Nombre,
     int    CarreraId,
-    string CarreraNombre
+    string CarreraNombre,
+    byte   Anio
 );

@@ -1,4 +1,8 @@
-.page { padding: 2rem; font-family: sans-serif; max-width: 900px; margin: 0 auto; }
+.page { padding: 2rem; font-family: sans-serif; max-width: 960px; margin: 0 auto; }
+.filtros { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-end; margin-bottom: 1.5rem; padding: 1rem 1.25rem; background: #f8f9fa; border-radius: 6px; border: 1px solid #e9ecef; }
+.filtro-campo { display: flex; flex-direction: column; gap: 0.3rem; label { font-size: 0.78rem; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.04em; } select, input { padding: 0.4rem 0.6rem; border: 1px solid #ced4da; border-radius: 4px; font-size: 0.9rem; background: white; min-width: 180px; &:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 2px rgba(52,152,219,.15); } } &.filtro-busqueda input { min-width: 220px; } }
+.btn-limpiar { background: none; border: 1px solid #adb5bd; border-radius: 4px; color: #6c757d; cursor: pointer; font-size: 0.85rem; padding: 0.4rem 0.8rem; align-self: flex-end; &:hover { background: #f0f0f0; border-color: #6c757d; color: #495057; } }
+.resultado-count { font-size: 0.83rem; color: #888; margin-bottom: 0.6rem; }
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
 .header-left { display: flex; align-items: center; gap: 0.75rem; h1 { margin: 0; font-size: 1.5rem; } }
 .btn-back { background: none; border: none; color: #3498db; cursor: pointer; font-size: 0.9rem; padding: 0; &:hover { text-decoration: underline; } }

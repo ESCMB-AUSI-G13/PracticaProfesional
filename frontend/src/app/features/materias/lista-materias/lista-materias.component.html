@@ -1,4 +1,4 @@
-﻿<div class="page">
+<div class="page">
   <header class="page-header">
     <div class="header-left">
       <h1>Gestión de Materias</h1>
@@ -8,28 +8,65 @@
     </div>
   </header>
 
+  <div class="filtros">
+    <div class="filtro-campo">
+      <label>Carrera</label>
+      <select [ngModel]="filtroCarreraId()" (ngModelChange)="filtroCarreraId.set($event ? +$event : null)" name="filtroCarrera">
+        <option [ngValue]="null">Todas las carreras</option>
+        @for (c of carreras(); track c.id) {
+          <option [value]="c.id">{{ c.nombre }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filtro-campo">
+      <label>Año</label>
+      <select [ngModel]="filtroAnio()" (ngModelChange)="filtroAnio.set($event ? +$event : null)" name="filtroAnio">
+        <option [ngValue]="null">Todos los años</option>
+        @for (a of aniosDisponibles(); track a) {
+          <option [value]="a">{{ a }}° año</option>
+        }
+      </select>
+    </div>
+
+    <div class="filtro-campo filtro-busqueda">
+      <label>Buscar por nombre</label>
+      <input type="text" placeholder="Ej: Economía..."
+             [ngModel]="filtroBusqueda()" (ngModelChange)="filtroBusqueda.set($event)" name="busqueda" />
+    </div>
+
+    @if (hayFiltros()) {
+      <button class="btn-limpiar" (click)="limpiarFiltros()">✕ Limpiar filtros</button>
+    }
+  </div>
+
   @if (cargando()) {
     <p class="estado">Cargando...</p>
   } @else if (error()) {
     <p class="estado error">{{ error() }}</p>
-  } @else if (materias().length === 0) {
-    <p class="estado">No hay materias registradas.</p>
+  } @else if (materiasFiltradas().length === 0) {
+    <p class="estado">
+      {{ materias().length === 0 ? 'No hay materias registradas.' : 'Sin resultados para los filtros aplicados.' }}
+    </p>
   } @else {
+    <p class="resultado-count">{{ materiasFiltradas().length }} materia{{ materiasFiltradas().length !== 1 ? 's' : '' }} encontrada{{ materiasFiltradas().length !== 1 ? 's' : '' }}</p>
     <table class="tabla">
       <thead>
         <tr>
           <th>Código</th>
           <th>Nombre</th>
           <th>Carrera</th>
+          <th>Año</th>
           <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
-        @for (m of materias(); track m.id) {
+        @for (m of materiasFiltradas(); track m.id) {
           <tr>
             <td><code>{{ m.codigo }}</code></td>
             <td>{{ m.nombre }}</td>
             <td>{{ m.carreraNombre }}</td>
+            <td>{{ m.anio }}° año</td>
             <td class="acciones">
               <button class="btn btn-secondary btn-sm" (click)="irAEditar(m.id)">Editar</button>
             </td>

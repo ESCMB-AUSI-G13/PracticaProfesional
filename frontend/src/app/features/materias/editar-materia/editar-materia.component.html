@@ -27,6 +27,17 @@
           }
         </select>
       </div>
+      <div class="campo">
+        <label>Año del plan *</label>
+        <select [ngModel]="anio()" (ngModelChange)="anio.set(+$event)" name="anio">
+          <option [value]="1">1° año</option>
+          <option [value]="2">2° año</option>
+          <option [value]="3">3° año</option>
+          <option [value]="4">4° año</option>
+          <option [value]="5">5° año</option>
+          <option [value]="6">6° año</option>
+        </select>
+      </div>
 
       <div class="acciones">
         <button type="submit" class="btn btn-primary" [disabled]="guardando()">
