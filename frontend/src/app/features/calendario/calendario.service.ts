@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
 export interface EventoCalendario {
@@ -46,7 +47,7 @@ export function etiquetaTipo(tipo: string): string {
 
 @Injectable({ providedIn: 'root' })
 export class CalendarioService {
-  private readonly apiUrl = 'http://localhost:5000/api/calendario';
+  private readonly apiUrl = `${environment.apiUrl}/calendario`;
 
   constructor(private http: HttpClient) {}
 

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
 // ── Modelos RR-08 ────────────────────────────────────────────────────────────
@@ -129,7 +130,7 @@ export interface ReportePromediosCatedra {
 
 @Injectable({ providedIn: 'root' })
 export class ReportesService {
-  private readonly apiUrl = 'http://localhost:5000/api/reportes';
+  private readonly apiUrl = `${environment.apiUrl}/reportes`;
 
   constructor(private http: HttpClient) {}
 

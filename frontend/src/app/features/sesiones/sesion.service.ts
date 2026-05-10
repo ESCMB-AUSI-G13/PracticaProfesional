@@ -1,14 +1,15 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
 const HEARTBEAT_MS   = 30_000;
 const TOKEN_KEY      = 'auth_token';
-const CERRAR_URL     = 'http://localhost:5000/api/sesiones/heartbeat';
+const CERRAR_URL     = `${environment.apiUrl}/sesiones/heartbeat`;
 
 @Injectable({ providedIn: 'root' })
 export class SesionService implements OnDestroy {
-  private readonly apiUrl = 'http://localhost:5000/api/sesiones';
+  private readonly apiUrl = `${environment.apiUrl}/sesiones`;
   private intervalo: ReturnType<typeof setInterval> | null = null;
 
   // Referencia guardada para poder remover el listener exacto

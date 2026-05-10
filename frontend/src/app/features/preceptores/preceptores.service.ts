@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
 export interface Preceptor {
@@ -37,7 +38,7 @@ export interface ModificarPreceptorRequest {
 
 @Injectable({ providedIn: 'root' })
 export class PreceptoresService {
-  private readonly apiUrl = 'http://localhost:5000/api/preceptores';
+  private readonly apiUrl = `${environment.apiUrl}/preceptores`;
 
   constructor(private http: HttpClient) {}
 

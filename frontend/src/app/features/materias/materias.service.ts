@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
 export interface Materia {
@@ -22,7 +23,7 @@ export interface ModificarMateriaRequest {
 
 @Injectable({ providedIn: 'root' })
 export class MateriasService {
-  private readonly apiUrl = 'http://localhost:5000/api/materias';
+  private readonly apiUrl = `${environment.apiUrl}/materias`;
 
   constructor(private http: HttpClient) {}
 

@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
 export interface Curso {
@@ -28,7 +29,7 @@ export interface ModificarCursoRequest {
 
 @Injectable({ providedIn: 'root' })
 export class CursosService {
-  private readonly apiUrl = 'http://localhost:5000/api/cursos';
+  private readonly apiUrl = `${environment.apiUrl}/cursos`;
 
   constructor(private http: HttpClient) {}
 

@@ -31,7 +31,10 @@
       "Bash(Get-ChildItem -Path \"d:\\\\facum\\\\GITHUB TESIS\\\\PracticaProfesional\\\\backend\" -Directory)",
       "Bash(Select-Object Name)",
       "PowerShell(Select-String -Pattern \"estudiant|alumno\" -CaseSensitive:$false)",
-      "PowerShell(head -20)"
+      "PowerShell(head -20)",
+      "Bash(Get-ChildItem -Path \"d:\\\\Documents\\\\3A\\\\PRACTICA PROFESIONAL\\\\PracticaProfesional\" -Force)",
+      "Bash(Select-Object Name, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)"
     ]
   }
 }

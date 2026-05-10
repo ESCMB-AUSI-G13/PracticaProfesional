@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
 export interface AuditoriaLogDto {
@@ -34,7 +35,7 @@ export interface AuditoriaFiltros {
 
 @Injectable({ providedIn: 'root' })
 export class AuditoriaService {
-  private readonly apiUrl = 'http://localhost:5000/api/auditoria';
+  private readonly apiUrl = `${environment.apiUrl}/auditoria`;
 
   constructor(private http: HttpClient) {}
 

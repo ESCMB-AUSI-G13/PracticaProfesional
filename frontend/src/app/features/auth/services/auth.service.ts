@@ -1,5 +1,6 @@
 import { Injectable, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../../environments/environment';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
@@ -32,8 +33,8 @@ const ROL_VISTA_KEY = 'rol_vista';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:5000/api/auth';
-  private readonly auditoriaUrl = 'http://localhost:5000/api/auditoria';
+  private readonly apiUrl = `${environment.apiUrl}/auth`;
+  private readonly auditoriaUrl = `${environment.apiUrl}/auditoria`;
 
   private _usuario   = signal<AuthResponse | null>(this.cargarUsuarioGuardado());
   private _rolVista  = signal<string | null>(sessionStorage.getItem(ROL_VISTA_KEY));

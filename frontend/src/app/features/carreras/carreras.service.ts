@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
 export interface Carrera {
@@ -10,7 +11,7 @@ export interface Carrera {
 
 @Injectable({ providedIn: 'root' })
 export class CarrerasService {
-  private readonly apiUrl = 'http://localhost:5000/api/carreras';
+  private readonly apiUrl = `${environment.apiUrl}/carreras`;
 
   constructor(private http: HttpClient) {}
 

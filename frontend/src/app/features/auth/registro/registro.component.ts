@@ -1,5 +1,6 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { environment } from '../../../../environments/environment';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
@@ -60,7 +61,7 @@ export class RegistroComponent implements OnInit {
       fechaDeIngreso: new Date(this.form.value.fechaDeIngreso).toISOString()
     };
 
-    this.http.post('http://localhost:5000/api/auth/registro', payload).subscribe({
+    this.http.post(`${environment.apiUrl}/auth/registro`, payload).subscribe({
       next: () => {
         this.cargando.set(false);
         this.exitoso.set(true);

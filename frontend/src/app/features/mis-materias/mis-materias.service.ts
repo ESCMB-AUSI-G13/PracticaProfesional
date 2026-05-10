@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { InscripcionMateria, ComprobanteInscripcionMateria } from '../inscripciones-materia/inscripciones-materia.service';
 
@@ -22,7 +23,7 @@ export { InscripcionMateria, ComprobanteInscripcionMateria };
 
 @Injectable({ providedIn: 'root' })
 export class MisMateriasService {
-  private readonly apiUrl = 'http://localhost:5000/api/inscripciones';
+  private readonly apiUrl = `${environment.apiUrl}/inscripciones`;
 
   constructor(private http: HttpClient) {}
 
