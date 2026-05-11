@@ -39,11 +39,27 @@ export interface CambioNotaDto {
   timestamp:     string;
 }
 
+export interface ExamenResumen {
+  id:            number;
+  materiaId:     number;
+  materiaNombre: string;
+  fechaExamen:   string;
+  horario:       string;
+  cupo:          number;
+  tipoExamen:    string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class CalificacionesService {
-  private readonly apiUrl = `${environment.apiUrl}/calificaciones`;
+  private readonly apiUrl        = `${environment.apiUrl}/calificaciones`;
+  private readonly examenesUrl   = `${environment.apiUrl}/examenes`;
 
   constructor(private http: HttpClient) {}
+
+  /** Lista todos los exámenes accesibles para el docente autenticado. */
+  listarExamenes(): Observable<ExamenResumen[]> {
+    return this.http.get<ExamenResumen[]>(this.examenesUrl);
+  }
 
   /** Obtiene el acta de inscriptos a un examen con notas ya cargadas (si las hay). */
   listarInscripciones(examenId: number): Observable<InscripcionExamenDto[]> {

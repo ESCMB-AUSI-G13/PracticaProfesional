@@ -1,46 +1,105 @@
-﻿<div class="page">
+<div class="page">
   <header class="page-header">
     <div class="header-left">
       <h1>Carga de Calificaciones</h1>
     </div>
   </header>
 
-  <!-- Buscador de acta -->
+  <!-- ── Selector de examen ─────────────────────────────────────────────── -->
   <section class="filtros-panel">
-    <h2>Buscar acta de examen</h2>
+    <div class="filtros-panel-header">
+      <h2>Seleccionar acta de examen</h2>
+      @if (examenSeleccionado()) {
+        <button class="btn btn-secondary btn-sm" (click)="limpiar()">Limpiar selección</button>
+      }
+    </div>
+
+    <!-- Filtros de búsqueda -->
     <div class="filtros-grid">
       <div class="campo">
-        <label for="examenId">ID de Examen</label>
+        <label>Buscar por materia</label>
         <input
-          id="examenId"
-          type="number"
-          [ngModel]="examenId()"
-          (ngModelChange)="examenId.set($event || null)"
-          placeholder="Ej: 5"
-          min="1"
-          (keyup.enter)="buscarActa()"
+          type="text"
+          [ngModel]="filtroBusqueda()"
+          (ngModelChange)="filtroBusqueda.set($event)"
+          placeholder="Ej: Matemática, Economía..."
+        />
+      </div>
+      <div class="campo">
+        <label>Filtrar por fecha</label>
+        <input
+          type="date"
+          [ngModel]="filtroFecha()"
+          (ngModelChange)="filtroFecha.set($event)"
         />
       </div>
     </div>
-    <div class="filtros-acciones">
-      <button class="btn btn-primary" (click)="buscarActa()" [disabled]="cargando()">
-        {{ cargando() ? 'Buscando...' : 'Cargar acta' }}
-      </button>
-      <button class="btn btn-secondary" (click)="limpiar()">Limpiar</button>
-    </div>
+
+    <!-- Tabla de exámenes disponibles -->
+    @if (cargandoLista()) {
+      <p class="estado">Cargando exámenes disponibles...</p>
+    } @else if (examenes().length === 0) {
+      <p class="estado">No hay exámenes registrados.</p>
+    } @else if (examenesVisibles().length === 0) {
+      <p class="estado">No se encontraron exámenes con los filtros aplicados.</p>
+    } @else {
+      <div class="tabla-wrapper tabla-examenes-wrapper">
+        <table class="tabla tabla-examenes">
+          <thead>
+            <tr>
+              <th>Materia</th>
+              <th>Tipo</th>
+              <th>Fecha</th>
+              <th>Horario</th>
+              <th>Cupo</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (examen of examenesVisibles(); track examen.id) {
+              <tr
+                [class.fila-seleccionada]="examenSeleccionado()?.id === examen.id"
+                (click)="seleccionarExamen(examen)"
+                style="cursor: pointer;">
+                <td><strong>{{ examen.materiaNombre }}</strong></td>
+                <td>
+                  <span class="badge-tipo" [ngClass]="tipoBadgeClass(examen.tipoExamen)">
+                    {{ examen.tipoExamen }}
+                  </span>
+                </td>
+                <td>{{ examen.fechaExamen | date:'dd/MM/yyyy' }}</td>
+                <td>{{ examen.horario }}</td>
+                <td>{{ examen.cupo }}</td>
+                <td class="celda-accion-examen">
+                  @if (examenSeleccionado()?.id === examen.id) {
+                    <span class="badge-seleccionado">✓ Seleccionado</span>
+                  } @else {
+                    <button class="btn btn-primary btn-sm"
+                      (click)="seleccionarExamen(examen); $event.stopPropagation()">
+                      Ver acta
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
   </section>
 
   @if (error()) { <p class="estado error">{{ error() }}</p> }
   @if (cargando()) { <p class="estado">Cargando acta...</p> }
 
-  @if (buscado() && filas().length > 0) {
+  @if (buscado() && examenSeleccionado()) {
 
     <!-- Encabezado del acta -->
     <section class="acta-header">
       <div class="acta-info">
-        <span><strong>Examen ID:</strong> {{ examenId() }}</span>
-        <span><strong>Materia:</strong> {{ filas()[0].materiaNombre }}</span>
-        <span><strong>Tipo:</strong> {{ filas()[0].tipoExamen }}</span>
+        <span><strong>Materia:</strong> {{ examenSeleccionado()!.materiaNombre }}</span>
+        <span><strong>Tipo:</strong> {{ examenSeleccionado()!.tipoExamen }}</span>
+        <span><strong>Fecha:</strong> {{ examenSeleccionado()!.fechaExamen | date:'dd/MM/yyyy' }}</span>
+        <span><strong>Horario:</strong> {{ examenSeleccionado()!.horario }}</span>
       </div>
       <div class="resumen-pills">
         <span class="pill pill-pendiente">{{ pendientes }} pendientes</span>
@@ -48,174 +107,175 @@
       </div>
     </section>
 
-    <!-- Tabla del acta -->
-    <div class="tabla-wrapper">
-      <table class="tabla">
-        <thead>
-          <tr>
-            <th>Legajo</th>
-            <th>Alumno</th>
-            <th>Nota</th>
-            <th>Estado</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (fila of filas(); track fila.id) {
-            <!-- Fila principal -->
-            <tr [class.fila-pendiente]="fila.estado === 'Activa'"
-                [class.fila-aprobada]="fila.estado === 'Aprobada'"
-                [class.fila-desaprobada]="fila.estado === 'Desaprobada'">
-              <td>{{ fila.estudianteLegajo }}</td>
-              <td>{{ fila.estudianteNombreCompleto }}</td>
+    @if (filas().length === 0) {
+      <p class="estado">No hay alumnos inscriptos a este examen.</p>
+    } @else {
 
-              <td class="celda-nota">
-                @if (fila.notaValor !== null) {
-                  <span class="nota-valor" [class.aprobado]="fila.esAprobado" [class.desaprobado]="!fila.esAprobado">
-                    {{ fila.notaValor | number:'1.2-2' }}
-                  </span>
-                } @else {
-                  <span class="sin-nota">—</span>
-                }
-              </td>
-
-              <td>
-                <span class="badge"
-                  [class.badge-activa]="fila.estado === 'Activa'"
-                  [class.badge-aprobada]="fila.estado === 'Aprobada'"
-                  [class.badge-desaprobada]="fila.estado === 'Desaprobada'"
-                  [class.badge-baja]="fila.estado === 'Baja'">
-                  {{ estadoLabel(fila.estado) }}
-                </span>
-              </td>
-
-              <td class="celda-accion">
-                <!-- Pendiente: carga inicial -->
-                @if (fila.estado === 'Activa') {
-                  <div class="input-nota-wrapper">
-                    <input class="input-nota" type="number"
-                      [(ngModel)]="fila.notaInput"
-                      placeholder="1–10" min="1" max="10" step="0.01"
-                      [disabled]="fila.guardando"
-                      (keyup.enter)="guardarNota(fila)" />
-                    <button class="btn btn-guardar"
-                      (click)="guardarNota(fila)"
-                      [disabled]="fila.guardando || !fila.notaInput">
-                      {{ fila.guardando ? '...' : 'Guardar' }}
-                    </button>
-                  </div>
-                  @if (fila.errorFila) { <p class="error-fila">{{ fila.errorFila }}</p> }
-
-                <!-- Ya calificado: botones rectificar + historial -->
-                } @else if (fila.estado === 'Aprobada' || fila.estado === 'Desaprobada') {
-                  <div class="acciones-calificado">
-                    <button class="btn btn-rectificar"
-                      (click)="abrirRectificacion(fila)"
-                      [class.activo]="fila.rectificando">
-                      {{ fila.rectificando ? 'Cancelar' : 'Rectificar' }}
-                    </button>
-                    <button class="btn btn-historial"
-                      (click)="verHistorial(fila)"
-                      [class.activo]="historialFila()?.id === fila.id">
-                      Historial
-                    </button>
-                  </div>
-                  @if (fila.guardado) { <span class="guardado-ok">✓ Rectificado</span> }
-
-                } @else {
-                  <span class="ya-calificado">Baja</span>
-                }
-              </td>
+      <!-- Tabla del acta -->
+      <div class="tabla-wrapper">
+        <table class="tabla">
+          <thead>
+            <tr>
+              <th>Legajo</th>
+              <th>Alumno</th>
+              <th>Nota</th>
+              <th>Estado</th>
+              <th>Acciones</th>
             </tr>
+          </thead>
+          <tbody>
+            @for (fila of filas(); track fila.id) {
+              <!-- Fila principal -->
+              <tr [class.fila-pendiente]="fila.estado === 'Activa'"
+                  [class.fila-aprobada]="fila.estado === 'Aprobada'"
+                  [class.fila-desaprobada]="fila.estado === 'Desaprobada'">
+                <td>{{ fila.estudianteLegajo }}</td>
+                <td>{{ fila.estudianteNombreCompleto }}</td>
 
-            <!-- Fila de rectificación inline (expandible) -->
-            @if (fila.rectificando) {
-              <tr class="fila-rectificacion">
-                <td colspan="5">
-                  <div class="panel-rectificacion">
-                    <span class="panel-titulo">Rectificar nota — {{ fila.estudianteNombreCompleto }}</span>
-                    <div class="rectifica-campos">
-                      <div class="campo">
-                        <label>Nueva nota (1–10)</label>
-                        <input class="input-nota" type="number"
-                          [(ngModel)]="fila.rectificaInput"
-                          placeholder="Ej: 6.5" min="1" max="10" step="0.01"
-                          [disabled]="fila.guardando" />
-                      </div>
-                      <div class="campo campo-motivo">
-                        <label>Motivo de rectificación <span class="req">*</span></label>
-                        <input type="text"
-                          [(ngModel)]="fila.motivoInput"
-                          placeholder="Ej: Error de transcripción"
-                          maxlength="200"
-                          [disabled]="fila.guardando" />
-                      </div>
-                    </div>
-                    @if (fila.errorRectifica) { <p class="error-fila">{{ fila.errorRectifica }}</p> }
-                    <div class="rectifica-acciones">
+                <td class="celda-nota">
+                  @if (fila.notaValor !== null) {
+                    <span class="nota-valor" [class.aprobado]="fila.esAprobado" [class.desaprobado]="!fila.esAprobado">
+                      {{ fila.notaValor | number:'1.2-2' }}
+                    </span>
+                  } @else {
+                    <span class="sin-nota">—</span>
+                  }
+                </td>
+
+                <td>
+                  <span class="badge"
+                    [class.badge-activa]="fila.estado === 'Activa'"
+                    [class.badge-aprobada]="fila.estado === 'Aprobada'"
+                    [class.badge-desaprobada]="fila.estado === 'Desaprobada'"
+                    [class.badge-baja]="fila.estado === 'Baja'">
+                    {{ estadoLabel(fila.estado) }}
+                  </span>
+                </td>
+
+                <td class="celda-accion">
+                  @if (fila.estado === 'Activa') {
+                    <div class="input-nota-wrapper">
+                      <input class="input-nota" type="number"
+                        [(ngModel)]="fila.notaInput"
+                        placeholder="1–10" min="1" max="10" step="0.01"
+                        [disabled]="fila.guardando"
+                        (keyup.enter)="guardarNota(fila)" />
                       <button class="btn btn-guardar"
-                        (click)="confirmarRectificacion(fila)"
-                        [disabled]="fila.guardando || !fila.rectificaInput || !fila.motivoInput">
-                        {{ fila.guardando ? 'Guardando...' : 'Confirmar rectificación' }}
+                        (click)="guardarNota(fila)"
+                        [disabled]="fila.guardando || !fila.notaInput">
+                        {{ fila.guardando ? '...' : 'Guardar' }}
                       </button>
-                      <button class="btn btn-secondary" (click)="cancelarRectificacion(fila)">Cancelar</button>
                     </div>
-                  </div>
+                    @if (fila.errorFila) { <p class="error-fila">{{ fila.errorFila }}</p> }
+
+                  } @else if (fila.estado === 'Aprobada' || fila.estado === 'Desaprobada') {
+                    <div class="acciones-calificado">
+                      <button class="btn btn-rectificar"
+                        (click)="abrirRectificacion(fila)"
+                        [class.activo]="fila.rectificando">
+                        {{ fila.rectificando ? 'Cancelar' : 'Rectificar' }}
+                      </button>
+                      <button class="btn btn-historial"
+                        (click)="verHistorial(fila)"
+                        [class.activo]="historialFila()?.id === fila.id">
+                        Historial
+                      </button>
+                    </div>
+                    @if (fila.guardado) { <span class="guardado-ok">✓ Rectificado</span> }
+
+                  } @else {
+                    <span class="ya-calificado">Baja</span>
+                  }
                 </td>
               </tr>
-            }
-          }
-        </tbody>
-      </table>
-    </div>
 
-    <!-- Panel historial de cambios -->
-    @if (historialFila()) {
-      <section class="historial-panel">
-        <div class="historial-header">
-          <h2>Historial de cambios — {{ historialFila()!.estudianteNombreCompleto }}</h2>
-          <button class="btn-cerrar" (click)="cerrarHistorial()">✕ Cerrar</button>
-        </div>
-
-        @if (cargandoHistorial()) {
-          <p class="estado">Cargando historial...</p>
-        } @else if (historial().length === 0) {
-          <p class="estado">No hay registros de cambios para esta nota.</p>
-        } @else {
-          <div class="tabla-wrapper">
-            <table class="tabla tabla-historial">
-              <thead>
-                <tr>
-                  <th>Fecha y hora</th>
-                  <th>Acción</th>
-                  <th>Antes</th>
-                  <th>Después</th>
-                  <th>Ejecutor</th>
+              <!-- Fila de rectificación inline -->
+              @if (fila.rectificando) {
+                <tr class="fila-rectificacion">
+                  <td colspan="5">
+                    <div class="panel-rectificacion">
+                      <span class="panel-titulo">Rectificar nota — {{ fila.estudianteNombreCompleto }}</span>
+                      <div class="rectifica-campos">
+                        <div class="campo">
+                          <label>Nueva nota (1–10)</label>
+                          <input class="input-nota" type="number"
+                            [(ngModel)]="fila.rectificaInput"
+                            placeholder="Ej: 6.5" min="1" max="10" step="0.01"
+                            [disabled]="fila.guardando" />
+                        </div>
+                        <div class="campo campo-motivo">
+                          <label>Motivo de rectificación <span class="req">*</span></label>
+                          <input type="text"
+                            [(ngModel)]="fila.motivoInput"
+                            placeholder="Ej: Error de transcripción"
+                            maxlength="200"
+                            [disabled]="fila.guardando" />
+                        </div>
+                      </div>
+                      @if (fila.errorRectifica) { <p class="error-fila">{{ fila.errorRectifica }}</p> }
+                      <div class="rectifica-acciones">
+                        <button class="btn btn-guardar"
+                          (click)="confirmarRectificacion(fila)"
+                          [disabled]="fila.guardando || !fila.rectificaInput || !fila.motivoInput">
+                          {{ fila.guardando ? 'Guardando...' : 'Confirmar rectificación' }}
+                        </button>
+                        <button class="btn btn-secondary" (click)="cancelarRectificacion(fila)">Cancelar</button>
+                      </div>
+                    </div>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                @for (cambio of historial(); track cambio.id) {
-                  <tr>
-                    <td class="celda-fecha">{{ cambio.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
-                    <td>
-                      <span class="badge-accion" [class.accion-carga]="cambio.accion === 'CARGAR_NOTA'" [class.accion-rectifica]="cambio.accion === 'RECTIFICAR_NOTA'">
-                        {{ cambio.accion === 'CARGAR_NOTA' ? 'Carga inicial' : 'Rectificación' }}
-                      </span>
-                    </td>
-                    <td class="celda-json">{{ parsearJson(cambio.valorAnterior) }}</td>
-                    <td class="celda-json">{{ parsearJson(cambio.valorNuevo) }}</td>
-                    <td class="celda-ejecutor">{{ cambio.ejecutorEmail }}</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        }
-      </section>
-    }
-  }
+              }
+            }
+          </tbody>
+        </table>
+      </div>
 
-  @if (buscado() && filas().length === 0) {
-    <p class="estado">No hay alumnos inscriptos a este examen.</p>
+      <!-- Panel historial de cambios -->
+      @if (historialFila()) {
+        <section class="historial-panel">
+          <div class="historial-header">
+            <h2>Historial de cambios — {{ historialFila()!.estudianteNombreCompleto }}</h2>
+            <button class="btn-cerrar" (click)="cerrarHistorial()">✕ Cerrar</button>
+          </div>
+
+          @if (cargandoHistorial()) {
+            <p class="estado">Cargando historial...</p>
+          } @else if (historial().length === 0) {
+            <p class="estado">No hay registros de cambios para esta nota.</p>
+          } @else {
+            <div class="tabla-wrapper">
+              <table class="tabla tabla-historial">
+                <thead>
+                  <tr>
+                    <th>Fecha y hora</th>
+                    <th>Acción</th>
+                    <th>Antes</th>
+                    <th>Después</th>
+                    <th>Ejecutor</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (cambio of historial(); track cambio.id) {
+                    <tr>
+                      <td class="celda-fecha">{{ cambio.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                      <td>
+                        <span class="badge-accion"
+                          [class.accion-carga]="cambio.accion === 'CARGAR_NOTA'"
+                          [class.accion-rectifica]="cambio.accion === 'RECTIFICAR_NOTA'">
+                          {{ cambio.accion === 'CARGAR_NOTA' ? 'Carga inicial' : 'Rectificación' }}
+                        </span>
+                      </td>
+                      <td class="celda-json">{{ parsearJson(cambio.valorAnterior) }}</td>
+                      <td class="celda-json">{{ parsearJson(cambio.valorNuevo) }}</td>
+                      <td class="celda-ejecutor">{{ cambio.ejecutorEmail }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </section>
+      }
+    }
   }
 </div>

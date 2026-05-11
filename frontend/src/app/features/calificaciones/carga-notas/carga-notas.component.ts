@@ -1,9 +1,10 @@
-import { Component, signal } from '@angular/core';
+import { Component, OnInit, computed, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
   CalificacionesService,
+  ExamenResumen,
   InscripcionExamenDto,
   CambioNotaDto
 } from '../calificaciones.service';
@@ -13,7 +14,6 @@ interface FilaActa extends InscripcionExamenDto {
   guardando:       boolean;
   errorFila:       string | null;
   guardado:        boolean;
-  // Rectificación inline
   rectificando:    boolean;
   rectificaInput:  string;
   motivoInput:     string;
@@ -27,8 +27,25 @@ interface FilaActa extends InscripcionExamenDto {
   templateUrl: './carga-notas.component.html',
   styleUrl: './carga-notas.component.scss'
 })
-export class CargaNotasComponent {
-  examenId  = signal<number | null>(null);
+export class CargaNotasComponent implements OnInit {
+  // ── Lista de exámenes ────────────────────────────────────────────────────────
+  examenes          = signal<ExamenResumen[]>([]);
+  cargandoLista     = signal(false);
+  filtroBusqueda    = signal('');
+  filtroFecha       = signal('');
+  examenSeleccionado = signal<ExamenResumen | null>(null);
+
+  examenesVisibles = computed(() => {
+    const texto = this.filtroBusqueda().toLowerCase().trim();
+    const fecha = this.filtroFecha();
+    return this.examenes().filter(e => {
+      const matchNombre = !texto || e.materiaNombre.toLowerCase().includes(texto);
+      const matchFecha  = !fecha  || e.fechaExamen.substring(0, 10) === fecha;
+      return matchNombre && matchFecha;
+    });
+  });
+
+  // ── Acta del examen ──────────────────────────────────────────────────────────
   filas     = signal<FilaActa[]>([]);
   cargando  = signal(false);
   error     = signal<string | null>(null);
@@ -44,19 +61,42 @@ export class CargaNotasComponent {
     private router: Router
   ) {}
 
-  // ── Buscar acta ─────────────────────────────────────────────────────────────
+  ngOnInit(): void {
+    this.cargarExamenes();
+  }
 
-  buscarActa(): void {
-    const id = this.examenId();
-    if (!id || id <= 0) { this.error.set('Ingresá un ID de examen válido.'); return; }
+  // ── Listado de exámenes ──────────────────────────────────────────────────────
 
+  cargarExamenes(): void {
+    this.cargandoLista.set(true);
+    this.calificacionesService.listarExamenes().subscribe({
+      next: data => {
+        // Ordenar por fecha descendente
+        this.examenes.set(data.sort((a, b) =>
+          new Date(b.fechaExamen).getTime() - new Date(a.fechaExamen).getTime()
+        ));
+        this.cargandoLista.set(false);
+      },
+      error: () => this.cargandoLista.set(false)
+    });
+  }
+
+  seleccionarExamen(examen: ExamenResumen): void {
+    if (this.examenSeleccionado()?.id === examen.id) return;
+    this.examenSeleccionado.set(examen);
+    this.cargarActa(examen.id);
+  }
+
+  // ── Cargar acta ──────────────────────────────────────────────────────────────
+
+  private cargarActa(examenId: number): void {
     this.cargando.set(true);
     this.error.set(null);
     this.buscado.set(false);
     this.filas.set([]);
     this.cerrarHistorial();
 
-    this.calificacionesService.listarInscripciones(id).subscribe({
+    this.calificacionesService.listarInscripciones(examenId).subscribe({
       next: data => {
         this.filas.set(data.map(i => ({
           ...i,
@@ -67,7 +107,7 @@ export class CargaNotasComponent {
         this.cargando.set(false);
       },
       error: () => {
-        this.error.set('No se pudo obtener el acta. Verificá que el ID de examen sea correcto.');
+        this.error.set('No se pudo cargar el acta del examen seleccionado.');
         this.cargando.set(false);
       }
     });
@@ -103,7 +143,6 @@ export class CargaNotasComponent {
   // ── Rectificación ────────────────────────────────────────────────────────────
 
   abrirRectificacion(fila: FilaActa): void {
-    // Cerrar rectificación abierta en otra fila
     this.filas().forEach(f => {
       if (f !== fila) { f.rectificando = false; f.rectificaInput = ''; f.motivoInput = ''; f.errorRectifica = null; }
     });
@@ -136,7 +175,6 @@ export class CargaNotasComponent {
         fila.rectificaInput = '';
         fila.motivoInput    = '';
         fila.guardando      = false;
-        // Si el panel de historial estaba abierto para esta fila, recargar
         if (this.historialFila()?.id === fila.id) this.cargarHistorial(fila);
       },
       error: err => {
@@ -182,21 +220,23 @@ export class CargaNotasComponent {
     if (!json) return '—';
     try {
       const obj = JSON.parse(json);
-      return Object.entries(obj)
-        .map(([k, v]) => `${k}: ${v}`)
-        .join(' | ');
+      return Object.entries(obj).map(([k, v]) => `${k}: ${v}`).join(' | ');
     } catch { return json; }
   }
 
   limpiar(): void {
-    this.examenId.set(null);
+    this.examenSeleccionado.set(null);
+    this.filtroBusqueda.set('');
+    this.filtroFecha.set('');
     this.filas.set([]);
     this.buscado.set(false);
     this.error.set(null);
     this.cerrarHistorial();
   }
 
-  irAlDashboard(): void { this.router.navigate(['/dashboard']); }
+  tipoBadgeClass(tipo: string): string {
+    return { Parcial: 'tipo-parcial', Final: 'tipo-final', Recuperatorio: 'tipo-recuperatorio' }[tipo] ?? '';
+  }
 
   get pendientes(): number  { return this.filas().filter(f => f.estado === 'Activa').length; }
   get calificados(): number { return this.filas().filter(f => f.estado !== 'Activa' && f.estado !== 'Baja').length; }
