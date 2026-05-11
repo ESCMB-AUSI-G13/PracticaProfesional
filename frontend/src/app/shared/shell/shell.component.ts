@@ -112,6 +112,7 @@ export class ShellComponent {
   authService = inject(AuthService);
   private sanitizer = inject(DomSanitizer);
 
+  sidebarOpen = false;
   expandedGroups: string[] = ['Gestión de Entidades'];
 
   itemsVisibles = computed(() => {
@@ -142,6 +143,14 @@ export class ShellComponent {
     const idx = this.expandedGroups.indexOf(label);
     if (idx >= 0) this.expandedGroups.splice(idx, 1);
     else this.expandedGroups.push(label);
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpen = !this.sidebarOpen;
+  }
+
+  closeSidebar(): void {
+    this.sidebarOpen = false;
   }
 
   activarVista(event: Event): void {

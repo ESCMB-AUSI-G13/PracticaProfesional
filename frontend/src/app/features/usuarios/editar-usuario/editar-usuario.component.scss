@@ -113,3 +113,9 @@
   &.btn-secondary { background: #6c757d; color: white; }
   &:hover:not(:disabled) { opacity: 0.9; }
 }
+
+@media (max-width: 600px) {
+  .page { padding: 1rem; }
+  .card { padding: 1.25rem; }
+  .form-row { grid-template-columns: 1fr; }
+}

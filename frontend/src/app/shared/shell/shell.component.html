@@ -1,6 +1,8 @@
 <div class="shell-layout">
 
-  <aside class="sidebar">
+  <div class="sidebar-overlay" [class.active]="sidebarOpen" (click)="closeSidebar()"></div>
+
+  <aside class="sidebar" [class.open]="sidebarOpen">
 
     <div class="sidebar-header">
       <img src="assets/images/logo_instituto.png" alt="Logo" class="brand-logo" />
@@ -22,7 +24,8 @@
             class="nav-item"
             [routerLink]="item.ruta"
             routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: item.ruta === '/dashboard' }">
+            [routerLinkActiveOptions]="{ exact: item.ruta === '/dashboard' }"
+            (click)="closeSidebar()">
             <span class="nav-icon" [innerHTML]="getIcon(item.icon)"></span>
             <span class="nav-label">{{ item.label }}</span>
           </a>
@@ -38,7 +41,7 @@
             @if (isExpanded(item.label)) {
               <div class="nav-group-children">
                 @for (child of item.children; track child.ruta) {
-                  <a class="nav-item nav-child" [routerLink]="child.ruta" routerLinkActive="active">
+                  <a class="nav-item nav-child" [routerLink]="child.ruta" routerLinkActive="active" (click)="closeSidebar()">
                     <span class="nav-dot"></span>
                     <span class="nav-label">{{ child.label }}</span>
                   </a>
@@ -70,6 +73,16 @@
   </aside>
 
   <div class="shell-main">
+    <header class="mobile-topbar">
+      <button class="hamburger-btn" (click)="toggleSidebar()" aria-label="Abrir menú">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <line x1="3" y1="12" x2="21" y2="12"/>
+          <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+      </button>
+      <span class="mobile-app-title">Sistema Académico</span>
+    </header>
     <app-banner-vista-rol />
     <div class="shell-content">
       <router-outlet />

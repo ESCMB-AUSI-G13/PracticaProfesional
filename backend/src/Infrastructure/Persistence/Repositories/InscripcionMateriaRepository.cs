@@ -63,4 +63,7 @@ public class InscripcionMateriaRepository(AppDbContext context) : IInscripcionMa
 
     public async Task GuardarCambiosAsync(CancellationToken cancellationToken = default)
         => await context.SaveChangesAsync(cancellationToken);
+
+    public Task<bool> ExistePorMateriaIdAsync(int materiaId, CancellationToken cancellationToken = default)
+        => context.InscripcionesMateria.AnyAsync(i => i.MateriaId == materiaId, cancellationToken);
 }

@@ -150,6 +150,18 @@ export class ListaInscripcionesComponent implements OnInit {
 
   irAlDashboard(): void { this.router.navigate(['/dashboard']); }
 
+  darDeBaja(i: InscripcionMateria): void {
+    const confirmado = confirm(
+      `¿Dar de baja la inscripción de "${i.estudianteNombre}" en "${i.materiaNombre}"?\n\nEsta acción no se puede deshacer.`
+    );
+    if (!confirmado) return;
+
+    this.service.darDeBaja(i.id).subscribe({
+      next: () => this.service.listar().subscribe(list => this._todas.set(list)),
+      error: (e) => this.error.set(e.error?.detail ?? 'Error al dar de baja la inscripción.')
+    });
+  }
+
   estadoLabel(estado: string): string {
     const map: Record<string, string> = {
       'activa':      '● Activa',

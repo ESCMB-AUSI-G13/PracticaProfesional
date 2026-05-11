@@ -7,3 +7,7 @@
 .error { color: #c0392b; font-size: 0.9rem; margin: 0; }
 .estado { color: #555; padding: 1rem; }
 .btn { padding: 0.5rem 1.2rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; &.btn-primary { background: #3498db; color: white; } &.btn-secondary { background: #6c757d; color: white; } &:hover:not(:disabled) { opacity: 0.9; } &:disabled { opacity: 0.6; cursor: not-allowed; } }
+
+@media (max-width: 600px) {
+  .page { padding: 1rem; }
+}

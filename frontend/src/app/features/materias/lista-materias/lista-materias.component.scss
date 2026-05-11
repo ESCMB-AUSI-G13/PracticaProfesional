@@ -11,4 +11,11 @@
 .acciones { display: flex; gap: 0.5rem; }
 code { background: #f0f0f0; padding: 0.1rem 0.4rem; border-radius: 3px; font-size: 0.85rem; }
 .estado { padding: 1rem; color: #555; &.error { color: #c0392b; } }
-.btn { padding: 0.45rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; &.btn-primary { background: #3498db; color: white; } &.btn-secondary { background: #6c757d; color: white; } &.btn-sm { padding: 0.3rem 0.7rem; font-size: 0.8rem; } &:hover { opacity: 0.9; } }
+.btn { padding: 0.45rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; &.btn-primary { background: #3498db; color: white; } &.btn-secondary { background: #6c757d; color: white; } &.btn-danger { background: #e74c3c; color: white; } &.btn-sm { padding: 0.3rem 0.7rem; font-size: 0.8rem; } &:hover { opacity: 0.9; } }
+
+@media (max-width: 768px) {
+  .page { padding: 1rem; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .header-actions { flex-wrap: wrap; }
+  .tabla { display: block; overflow-x: auto; }
+}

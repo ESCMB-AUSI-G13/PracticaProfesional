@@ -18,6 +18,12 @@ code { background: #f0f0f0; padding: 0.1rem 0.4rem; border-radius: 3px; font-siz
   &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 
+@media (max-width: 768px) {
+  .page { padding: 1rem; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .tabla { display: block; overflow-x: auto; }
+}
+
 // ── Modal comprobante ─────────────────────────────────────────────────────────
 .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 .modal-comprobante { background: #fff; border-radius: 8px; width: 600px; max-width: 95vw; max-height: 90vh; overflow-y: auto; padding: 2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.18); }

@@ -34,7 +34,9 @@
       "PowerShell(head -20)",
       "Bash(Get-ChildItem -Path \"d:\\\\Documents\\\\3A\\\\PRACTICA PROFESIONAL\\\\PracticaProfesional\" -Force)",
       "Bash(Select-Object Name, PSIsContainer)",
-      "Bash(Format-Table -AutoSize)"
+      "Bash(Format-Table -AutoSize)",
+      "PowerShell(Stop-Process -Id 16728 -Force)",
+      "Bash(dotnet run *)"
     ]
   }
 }

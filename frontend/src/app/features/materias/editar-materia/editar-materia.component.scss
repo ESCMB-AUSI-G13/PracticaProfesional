@@ -35,6 +35,10 @@
 .corr-form { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1rem; }
 .corr-campos { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem; }
 
+@media (max-width: 600px) {
+  .page { padding: 1rem; }
+}
+
 @media (max-width: 540px) {
   .corr-campos { grid-template-columns: 1fr; }
 }

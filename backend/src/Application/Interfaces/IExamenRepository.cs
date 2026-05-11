@@ -9,4 +9,5 @@ public interface IExamenRepository
     Task AgregarAsync(Examen examen, CancellationToken cancellationToken = default);
     Task GuardarCambiosAsync(CancellationToken cancellationToken = default);
     Task EliminarAsync(int id, CancellationToken cancellationToken = default);
+    Task<bool> ExistePorMateriaIdAsync(int materiaId, CancellationToken cancellationToken = default);
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,14 +13,39 @@ import { MateriasService, Materia } from '../../materias/materias.service';
   styleUrl: './lista-examenes.component.scss'
 })
 export class ListaExamenesComponent implements OnInit {
-  examenes   = signal<Examen[]>([]);
-  materias   = signal<Materia[]>([]);
-  tiposExamen = TIPOS_EXAMEN;
+  _todos = signal<Examen[]>([]);
+  materias       = signal<Materia[]>([]);
+  tiposExamen    = TIPOS_EXAMEN;
 
   cargando    = signal(true);
   mostrarForm = signal(false);
   guardando   = signal(false);
   error       = signal<string | null>(null);
+
+  // Filtros
+  filtroBusqueda  = signal('');
+  filtroTipo      = signal('');
+  filtroFechaDesde = signal('');
+  filtroFechaHasta = signal('');
+
+  examenes = computed(() => {
+    let lista     = this._todos();
+    const texto   = this.filtroBusqueda().toLowerCase().trim();
+    const tipo    = this.filtroTipo();
+    const desde   = this.filtroFechaDesde();
+    const hasta   = this.filtroFechaHasta();
+
+    if (texto)  lista = lista.filter(e => e.materiaNombre.toLowerCase().includes(texto));
+    if (tipo)   lista = lista.filter(e => e.tipoExamen === tipo);
+    if (desde)  lista = lista.filter(e => e.fechaExamen >= desde);
+    if (hasta)  lista = lista.filter(e => e.fechaExamen <= hasta);
+
+    return lista;
+  });
+
+  hayFiltros = computed(() =>
+    !!this.filtroBusqueda() || !!this.filtroTipo() || !!this.filtroFechaDesde() || !!this.filtroFechaHasta()
+  );
 
   nuevoMateriaId  = signal<number | null>(null);
   nuevoFecha      = signal('');
@@ -40,7 +65,7 @@ export class ListaExamenesComponent implements OnInit {
       error: () => {}
     });
     this.service.listar().subscribe({
-      next: e => { this.examenes.set(e); this.cargando.set(false); },
+      next: e => { this._todos.set(e); this.cargando.set(false); },
       error: () => { this.error.set('Error al cargar exámenes.'); this.cargando.set(false); }
     });
   }
@@ -61,7 +86,7 @@ export class ListaExamenesComponent implements OnInit {
     };
     this.service.crear(dto).subscribe({
       next: ex => {
-        this.examenes.update(list => [ex, ...list]);
+        this._todos.update(list => [ex, ...list]);
         this.limpiarForm();
         this.guardando.set(false);
       },
@@ -85,9 +110,16 @@ export class ListaExamenesComponent implements OnInit {
     if (!confirmado) return;
 
     this.service.eliminar(ex.id).subscribe({
-      next: () => this.examenes.update(list => list.filter(e => e.id !== ex.id)),
+      next: () => this._todos.update(list => list.filter(e => e.id !== ex.id)),
       error: (e) => this.error.set(e.error?.detail ?? 'Error al eliminar el examen.')
     });
+  }
+
+  limpiarFiltros(): void {
+    this.filtroBusqueda.set('');
+    this.filtroTipo.set('');
+    this.filtroFechaDesde.set('');
+    this.filtroFechaHasta.set('');
   }
 
   irAlDashboard(): void { this.router.navigate(['/dashboard']); }

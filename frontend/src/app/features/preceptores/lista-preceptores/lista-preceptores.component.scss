@@ -8,3 +8,10 @@
 .estado { padding: 1rem; color: #555; &.error { color: #c0392b; } }
 .badge { padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; &.activo { background: #d4edda; color: #155724; } &.inactivo { background: #f8d7da; color: #721c24; } }
 .btn { padding: 0.45rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem; &.btn-primary { background: #3498db; color: white; } &.btn-secondary { background: #6c757d; color: white; } &.btn-danger { background: #e74c3c; color: white; } &.btn-success { background: #27ae60; color: white; } &.btn-sm { padding: 0.3rem 0.7rem; font-size: 0.8rem; } &:hover { opacity: 0.9; } }
+
+@media (max-width: 768px) {
+  .page { padding: 1rem; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .header-actions { flex-wrap: wrap; }
+  .tabla { display: block; overflow-x: auto; }
+}

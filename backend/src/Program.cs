@@ -101,6 +101,7 @@ builder.Services.AddScoped<InscribirseEnMateriaUseCase>();
 builder.Services.AddScoped<InscribirseEnMateriaAutogestUseCase>();
 builder.Services.AddScoped<ListarMisInscripcionesEstudianteUseCase>();
 builder.Services.AddScoped<ObtenerComprobanteInscripcionUseCase>();
+builder.Services.AddScoped<DarDeBajaInscripcionMateriaUseCase>();
 builder.Services.AddScoped<ObtenerComprobanteInscripcionExamenUseCase>();
 builder.Services.AddScoped<IInscripcionExamenRepository, InscripcionExamenRepository>();
 
@@ -125,6 +126,7 @@ builder.Services.AddScoped<CrearMateriaUseCase>();
 builder.Services.AddScoped<ListarMateriasUseCase>();
 builder.Services.AddScoped<ListarMateriasEstudianteUseCase>();
 builder.Services.AddScoped<ModificarMateriaUseCase>();
+builder.Services.AddScoped<EliminarMateriaUseCase>();
 
 // Correlatividades
 builder.Services.AddScoped<CrearCorrelativiadadUseCase>();

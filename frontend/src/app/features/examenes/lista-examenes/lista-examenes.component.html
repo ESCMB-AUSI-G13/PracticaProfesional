@@ -52,11 +52,42 @@
     </section>
   }
 
+  <div class="filtros">
+    <div class="filtro-campo filtro-busqueda">
+      <label>Buscar por materia</label>
+      <input type="text" placeholder="Ej: Inglés..."
+             [ngModel]="filtroBusqueda()" (ngModelChange)="filtroBusqueda.set($event)" />
+    </div>
+    <div class="filtro-campo">
+      <label>Tipo</label>
+      <select [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)">
+        <option value="">Todos</option>
+        @for (t of tiposExamen; track t) {
+          <option [value]="t">{{ t }}</option>
+        }
+      </select>
+    </div>
+    <div class="filtro-campo">
+      <label>Desde</label>
+      <input type="date" [ngModel]="filtroFechaDesde()" (ngModelChange)="filtroFechaDesde.set($event)" />
+    </div>
+    <div class="filtro-campo">
+      <label>Hasta</label>
+      <input type="date" [ngModel]="filtroFechaHasta()" (ngModelChange)="filtroFechaHasta.set($event)" />
+    </div>
+    @if (hayFiltros()) {
+      <button class="btn-limpiar" (click)="limpiarFiltros()">✕ Limpiar filtros</button>
+    }
+  </div>
+
   @if (cargando()) {
     <p class="estado">Cargando...</p>
-  } @else if (examenes().length === 0) {
+  } @else if (_todos().length === 0) {
     <p class="estado">No hay exámenes registrados.</p>
+  } @else if (examenes().length === 0) {
+    <p class="estado">Sin resultados para los filtros aplicados.</p>
   } @else {
+    <p class="resultado-count">{{ examenes().length }} examen{{ examenes().length !== 1 ? 'es' : '' }} encontrado{{ examenes().length !== 1 ? 's' : '' }}</p>
     <table class="tabla">
       <thead>
         <tr>

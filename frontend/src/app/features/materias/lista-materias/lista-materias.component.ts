@@ -74,4 +74,14 @@ export class ListaMateriasComponent implements OnInit {
   irACrear(): void          { this.router.navigate(['/materias/nueva']); }
   irAEditar(id: number): void { this.router.navigate(['/materias', id, 'editar']); }
   irAlDashboard(): void     { this.router.navigate(['/dashboard']); }
+
+  eliminar(m: Materia): void {
+    const confirmado = confirm(`¿Eliminar la materia "${m.nombre}" (${m.codigo})?\n\nEsta acción no se puede deshacer.`);
+    if (!confirmado) return;
+
+    this.materiasService.eliminar(m.id).subscribe({
+      next: () => this.materias.update(list => list.filter(x => x.id !== m.id)),
+      error: (e) => this.error.set(e.error?.detail ?? 'Error al eliminar la materia.')
+    });
+  }
 }

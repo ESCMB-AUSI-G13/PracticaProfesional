@@ -286,3 +286,4 @@ C:\Users\facum\AppData\Local\Temp\build-check\PracticaProfesional.deps.json
 C:\Users\facum\AppData\Local\Temp\build-check\PracticaProfesional.runtimeconfig.json
 C:\Users\facum\AppData\Local\Temp\build-check\PracticaProfesional.dll
 C:\Users\facum\AppData\Local\Temp\build-check\PracticaProfesional.pdb
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\appsettings.Production.json

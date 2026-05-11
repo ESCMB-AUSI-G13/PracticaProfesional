@@ -49,3 +49,8 @@
   color: #999;
   margin: 0;
 }
+
+@media (max-width: 600px) {
+  .inicio { padding: 1rem; }
+  .inicio-card { padding: 2rem 1.25rem; }
+}

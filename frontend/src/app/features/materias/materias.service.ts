@@ -45,4 +45,8 @@ export class MateriasService {
   modificar(id: number, dto: ModificarMateriaRequest): Observable<Materia> {
     return this.http.put<Materia>(`${this.apiUrl}/${id}`, dto);
   }
+
+  eliminar(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 }

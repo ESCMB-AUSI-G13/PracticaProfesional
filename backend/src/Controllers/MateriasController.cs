@@ -13,7 +13,8 @@ public class MateriasController(
     CrearMateriaUseCase crearMateria,
     ListarMateriasUseCase listarMaterias,
     ListarMateriasEstudianteUseCase listarMateriasEstudiante,
-    ModificarMateriaUseCase modificarMateria) : ControllerBase
+    ModificarMateriaUseCase modificarMateria,
+    EliminarMateriaUseCase eliminarMateria) : ControllerBase
 {
     [HttpGet]
     [Authorize(Roles = "Direccion")]
@@ -54,5 +55,15 @@ public class MateriasController(
     {
         var resultado = await modificarMateria.EjecutarAsync(id, dto, cancellationToken);
         return Ok(resultado);
+    }
+
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Direccion")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Eliminar(int id, CancellationToken cancellationToken)
+    {
+        await eliminarMateria.EjecutarAsync(id, cancellationToken);
+        return NoContent();
     }
 }

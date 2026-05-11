@@ -14,4 +14,5 @@ public interface IMateriaRepository
     Task GuardarCambiosAsync(CancellationToken cancellationToken = default);
     Task<int?> ObtenerCarreraIdAsync(int materiaId, CancellationToken cancellationToken = default);
     Task<int> ContarPorCarreraIdAsync(int carreraId, CancellationToken cancellationToken = default);
+    Task EliminarAsync(int id, CancellationToken cancellationToken = default);
 }

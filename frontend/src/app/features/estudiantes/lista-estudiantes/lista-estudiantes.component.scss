@@ -103,3 +103,10 @@
   &.btn-sm        { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
   &:hover         { opacity: 0.9; }
 }
+
+@media (max-width: 768px) {
+  .page { padding: 1rem; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .header-actions { flex-wrap: wrap; }
+  .tabla { display: block; overflow-x: auto; }
+}

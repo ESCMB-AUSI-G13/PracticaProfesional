@@ -23,4 +23,5 @@ public interface IHistorialAcademicoRepository
         int estudianteId,
         int carreraId,
         CancellationToken cancellationToken = default);
+    Task<bool> ExistePorMateriaIdAsync(int materiaId, CancellationToken cancellationToken = default);
 }

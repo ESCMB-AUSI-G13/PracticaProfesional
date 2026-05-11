@@ -106,7 +106,7 @@
             <th>Curso</th>
             <th>Estado</th>
             <th>Fecha</th>
-            <th>Comprobante</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -119,10 +119,11 @@
               <td>{{ i.cursoAnioLectivo }}° {{ i.cursoComision }}</td>
               <td><span class="badge" [class]="'badge-' + i.estado.toLowerCase()">{{ estadoLabel(i.estado) }}</span></td>
               <td>{{ i.fechaInscripcion | date:'dd/MM/yyyy' }}</td>
-              <td>
-                <button class="btn btn-comprobante" (click)="verComprobante(i.id)" [disabled]="cargandoComprobante()">
-                  Ver
-                </button>
+              <td class="td-acciones">
+                <button class="btn btn-comprobante" (click)="verComprobante(i.id)" [disabled]="cargandoComprobante()">Ver</button>
+                @if (i.estado.toLowerCase() === 'activa') {
+                  <button class="btn btn-danger btn-sm" (click)="darDeBaja(i)">Dar de baja</button>
+                }
               </td>
             </tr>
           }

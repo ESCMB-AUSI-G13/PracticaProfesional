@@ -64,4 +64,7 @@ public class ExamenRepository(AppDbContext db) : IExamenRepository
         db.Examenes.Remove(examen);
         await db.SaveChangesAsync(cancellationToken);
     }
+
+    public Task<bool> ExistePorMateriaIdAsync(int materiaId, CancellationToken cancellationToken = default)
+        => db.Examenes.AnyAsync(e => e.MateriaId == materiaId, cancellationToken);
 }

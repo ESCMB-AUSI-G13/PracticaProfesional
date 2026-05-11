@@ -71,4 +71,7 @@ public class HistorialAcademicoRepository(AppDbContext context) : IHistorialAcad
             .Select(h => h.MateriaId)
             .Distinct()
             .CountAsync(cancellationToken);
+
+    public Task<bool> ExistePorMateriaIdAsync(int materiaId, CancellationToken cancellationToken = default)
+        => context.HistorialAcademico.AnyAsync(h => h.MateriaId == materiaId, cancellationToken);
 }

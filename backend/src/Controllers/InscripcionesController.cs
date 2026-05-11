@@ -14,7 +14,8 @@ public class InscripcionesController(
     InscribirseEnMateriaUseCase inscribirseUseCase,
     ObtenerComprobanteInscripcionUseCase comprobanteUseCase,
     ListarMisInscripcionesEstudianteUseCase misInscripcionesUseCase,
-    InscribirseEnMateriaAutogestUseCase autogestUseCase) : ControllerBase
+    InscribirseEnMateriaAutogestUseCase autogestUseCase,
+    DarDeBajaInscripcionMateriaUseCase darDeBajaUseCase) : ControllerBase
 {
     // ── Dirección ─────────────────────────────────────────────────────────────
 
@@ -48,6 +49,17 @@ public class InscripcionesController(
     {
         var comprobante = await comprobanteUseCase.EjecutarAsync(id, cancellationToken);
         return Ok(comprobante);
+    }
+
+    [HttpDelete("materias/{id:int}")]
+    [Authorize(Roles = "Direccion")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DarDeBajaInscripcion(int id, CancellationToken cancellationToken)
+    {
+        await darDeBajaUseCase.EjecutarAsync(id, cancellationToken);
+        return NoContent();
     }
 
     // ── Estudiante (autogestionada) ───────────────────────────────────────────

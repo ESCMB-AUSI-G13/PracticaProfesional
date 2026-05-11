@@ -91,3 +91,8 @@
   &:disabled { opacity: 0.6; cursor: not-allowed; }
   &:hover:not(:disabled) { opacity: 0.9; }
 }
+
+@media (max-width: 600px) {
+  .page { padding: 1rem; }
+  .form-row { grid-template-columns: 1fr; }
+}

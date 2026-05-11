@@ -59,4 +59,12 @@ public class MateriaRepository(AppDbContext context) : IMateriaRepository
 
     public async Task<int> ContarPorCarreraIdAsync(int carreraId, CancellationToken cancellationToken = default)
         => await context.Materias.CountAsync(m => m.CarreraId == carreraId, cancellationToken);
+
+    public async Task EliminarAsync(int id, CancellationToken cancellationToken = default)
+    {
+        var materia = await context.Materias.FindAsync([id], cancellationToken)
+            ?? throw new KeyNotFoundException($"No se encontró la materia con Id {id}.");
+        context.Materias.Remove(materia);
+        await context.SaveChangesAsync(cancellationToken);
+    }
 }

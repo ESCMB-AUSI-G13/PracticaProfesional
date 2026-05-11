@@ -259,3 +259,69 @@ $sidebar-border: rgba(255, 255, 255, 0.1);
 .shell-content {
   flex: 1;
 }
+
+/* ── MOBILE OVERLAY ── */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 99;
+  cursor: pointer;
+
+  &.active { display: block; }
+}
+
+/* ── MOBILE TOP BAR ── */
+.mobile-topbar {
+  display: none;
+}
+
+.hamburger-btn {
+  display: none;
+}
+
+/* ── RESPONSIVE MOBILE ── */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+
+    &.open { transform: translateX(0); }
+  }
+
+  .mobile-topbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.6rem 1rem;
+    background: $sidebar-bg;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    flex-shrink: 0;
+  }
+
+  .hamburger-btn {
+    display: flex;
+    align-items: center;
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    padding: 0.2rem;
+    flex-shrink: 0;
+  }
+
+  .mobile-app-title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: white;
+  }
+}

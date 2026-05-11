@@ -129,6 +129,13 @@
   &.accion-rectifica { background: #fff3cd; color: #856404; }
 }
 
+@media (max-width: 768px) {
+  .page { padding: 1rem; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .acta-header { flex-direction: column; }
+  .acta-info { flex-direction: column; gap: 0.4rem; }
+}
+
 // Estados globales
 .estado { padding: 1rem; color: #555; &.error { color: #c0392b; } }
 
