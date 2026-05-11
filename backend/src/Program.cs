@@ -249,6 +249,7 @@ var app = builder.Build();
         await EstudiantesSeeder.SeedAsync(db, logger);
         await EstudiantesSeeder.FixNombresAsync(db, logger);
         await ExamenesSeeder.SeedAsync(db, logger);
+        await NotasExamenesSeeder.SeedAsync(db, logger);
     }
     catch (Exception ex)
     {
