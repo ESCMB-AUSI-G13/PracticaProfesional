@@ -1,0 +1,4 @@
+{
+    "appService.defaultWebAppToDeploy": "/subscriptions/0c48d58c-847d-434c-ac1e-6c9ce6a44efb/resourceGroups/tesis-escmb-rg/providers/Microsoft.Web/sites/escmb-practicaprof",
+    "appService.deploySubpath": "backend\\publish"
+}

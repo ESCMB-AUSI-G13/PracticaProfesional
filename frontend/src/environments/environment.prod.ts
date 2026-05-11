@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://PLACEHOLDER-APP-SERVICE.azurewebsites.net/api'
+  apiUrl: 'https://escmb-practicaprof.azurewebsites.net/api'
 };
