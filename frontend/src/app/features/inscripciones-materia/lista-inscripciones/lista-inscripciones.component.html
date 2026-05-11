@@ -1,4 +1,4 @@
-﻿<div class="page">
+<div class="page">
   <header class="page-header">
     <div class="header-left">
       <h1>Inscripciones a Materias</h1>
@@ -50,39 +50,85 @@
     </section>
   }
 
+  <!-- Barra de filtros -->
+  <div class="filtros-bar">
+    <input
+      class="filtro-input"
+      type="text"
+      placeholder="Buscar por nombre o legajo..."
+      [value]="filtroBusqueda()"
+      (input)="onBusqueda($any($event.target).value)"
+    />
+
+    <select class="filtro-select" [value]="filtroCarreraId() ?? ''" (change)="onCarrera($any($event.target).value)">
+      <option value="">Todas las carreras</option>
+      @for (c of carreras(); track c.id) {
+        <option [value]="c.id">{{ c.nombre }}</option>
+      }
+    </select>
+
+    <select class="filtro-select filtro-select--anio" [value]="filtroAnio() ?? ''" (change)="onAnio($any($event.target).value)">
+      <option value="">Todos los años</option>
+      @for (a of anios(); track a) {
+        <option [value]="a">{{ a }}° año</option>
+      }
+    </select>
+
+    <select class="filtro-select filtro-select--comision" [value]="filtroComision()" (change)="onComision($any($event.target).value)">
+      <option value="">Todas las comisiones</option>
+      @for (c of comisiones(); track c) {
+        <option [value]="c">Comisión {{ c }}</option>
+      }
+    </select>
+
+    @if (hayFiltrosActivos()) {
+      <button class="btn-limpiar" (click)="limpiarFiltros()">✕ Limpiar</button>
+    }
+  </div>
+
   @if (cargando()) {
     <p class="estado">Cargando...</p>
-  } @else if (inscripciones().length === 0) {
-    <p class="estado">No hay inscripciones registradas.</p>
   } @else {
-    <table class="tabla">
-      <thead>
-        <tr>
-          <th>Estudiante</th>
-          <th>Materia</th>
-          <th>Curso</th>
-          <th>Estado</th>
-          <th>Fecha</th>
-          <th>Comprobante</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (i of inscripciones(); track i.id) {
+    <p class="resultado-count">
+      Mostrando <strong>{{ inscripciones().length }}</strong> inscripción{{ inscripciones().length !== 1 ? 'es' : '' }}
+    </p>
+
+    @if (inscripciones().length === 0) {
+      <p class="estado">No se encontraron inscripciones con los filtros aplicados.</p>
+    } @else {
+      <table class="tabla">
+        <thead>
           <tr>
-            <td>{{ i.estudianteNombre }}</td>
-            <td><code>{{ i.materiaCodigo }}</code> {{ i.materiaNombre }}</td>
-            <td>{{ i.cursoAnio }}° {{ i.cursoComision }}</td>
-            <td><span class="badge" [class]="'badge-' + i.estado.toLowerCase()">{{ estadoLabel(i.estado) }}</span></td>
-            <td>{{ i.fechaInscripcion | date:'dd/MM/yyyy' }}</td>
-            <td>
-              <button class="btn btn-comprobante" (click)="verComprobante(i.id)" [disabled]="cargandoComprobante()">
-                Ver comprobante
-              </button>
-            </td>
+            <th>Estudiante</th>
+            <th>Legajo</th>
+            <th>Carrera</th>
+            <th>Materia</th>
+            <th>Curso</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th>Comprobante</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (i of inscripciones(); track i.id) {
+            <tr>
+              <td>{{ i.estudianteNombre }}</td>
+              <td><code>{{ i.estudianteLegajo }}</code></td>
+              <td class="td-carrera">{{ i.carreraNombre }}</td>
+              <td><code>{{ i.materiaCodigo }}</code> {{ i.materiaNombre }}</td>
+              <td>{{ i.cursoAnioLectivo }}° {{ i.cursoComision }}</td>
+              <td><span class="badge" [class]="'badge-' + i.estado.toLowerCase()">{{ estadoLabel(i.estado) }}</span></td>
+              <td>{{ i.fechaInscripcion | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <button class="btn btn-comprobante" (click)="verComprobante(i.id)" [disabled]="cargandoComprobante()">
+                  Ver
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
   }
 
   @if (comprobante(); as c) {

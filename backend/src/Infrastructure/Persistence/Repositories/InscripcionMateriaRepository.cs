@@ -10,6 +10,7 @@ public class InscripcionMateriaRepository(AppDbContext context) : IInscripcionMa
     public async Task<IEnumerable<InscripcionMateria>> ListarAsync(CancellationToken cancellationToken = default)
         => await context.InscripcionesMateria
             .Include(i => i.Estudiante).ThenInclude(e => e.Usuario)
+            .Include(i => i.Estudiante).ThenInclude(e => e.Carrera)
             .Include(i => i.Materia)
             .Include(i => i.Curso)
             .OrderByDescending(i => i.FechaInscripcion)

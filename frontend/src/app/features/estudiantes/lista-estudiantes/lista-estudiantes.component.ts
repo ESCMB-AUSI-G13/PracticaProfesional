@@ -1,19 +1,67 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { EstudiantesService, Estudiante } from '../estudiantes.service';
 
 @Component({
   selector: 'app-lista-estudiantes',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './lista-estudiantes.component.html',
   styleUrl: './lista-estudiantes.component.scss'
 })
 export class ListaEstudiantesComponent implements OnInit {
-  estudiantes = signal<Estudiante[]>([]);
+  private _todos = signal<Estudiante[]>([]);
   cargando = signal(true);
   error = signal<string | null>(null);
+
+  filtroBusqueda = signal('');
+  filtroCarreraId = signal<number | null>(null);
+  filtroAnio = signal<number | null>(null);
+  filtroCondicion = signal('');
+
+  readonly condiciones = ['Regular', 'Libre', 'Promocional', 'Egresado', 'Desertor'];
+
+  carreras = computed(() =>
+    [...new Map(this._todos().map(e => [e.carreraId, { id: e.carreraId, nombre: e.carreraNombre }])).values()]
+      .sort((a, b) => a.id - b.id)
+  );
+
+  anios = computed(() =>
+    [...new Set(this._todos().map(e => e.anio))].sort((a, b) => a - b)
+  );
+
+  estudiantes = computed(() => {
+    let lista = this._todos();
+    const texto = this.filtroBusqueda().toLowerCase().trim();
+    const carreraId = this.filtroCarreraId();
+    const anio = this.filtroAnio();
+    const condicion = this.filtroCondicion();
+
+    if (texto)
+      lista = lista.filter(e =>
+        e.nombre.toLowerCase().includes(texto) ||
+        e.apellido.toLowerCase().includes(texto) ||
+        e.legajo.toLowerCase().includes(texto) ||
+        e.dni.includes(texto)
+      );
+    if (carreraId !== null)
+      lista = lista.filter(e => e.carreraId === carreraId);
+    if (anio !== null)
+      lista = lista.filter(e => e.anio === anio);
+    if (condicion)
+      lista = lista.filter(e => e.condicion === condicion);
+
+    return lista;
+  });
+
+  hayFiltrosActivos = computed(() =>
+    !!this.filtroBusqueda() ||
+    this.filtroCarreraId() !== null ||
+    this.filtroAnio() !== null ||
+    !!this.filtroCondicion()
+  );
 
   constructor(
     private estudiantesService: EstudiantesService,
@@ -30,7 +78,7 @@ export class ListaEstudiantesComponent implements OnInit {
 
     this.estudiantesService.listar().subscribe({
       next: (data) => {
-        this.estudiantes.set(data);
+        this._todos.set(data);
         this.cargando.set(false);
       },
       error: () => {
@@ -38,6 +86,18 @@ export class ListaEstudiantesComponent implements OnInit {
         this.cargando.set(false);
       }
     });
+  }
+
+  onBusqueda(valor: string): void     { this.filtroBusqueda.set(valor); }
+  onCarrera(valor: string): void      { this.filtroCarreraId.set(valor ? +valor : null); }
+  onAnio(valor: string): void         { this.filtroAnio.set(valor ? +valor : null); }
+  onCondicion(valor: string): void    { this.filtroCondicion.set(valor); }
+
+  limpiarFiltros(): void {
+    this.filtroBusqueda.set('');
+    this.filtroCarreraId.set(null);
+    this.filtroAnio.set(null);
+    this.filtroCondicion.set('');
   }
 
   desactivar(usuarioId: number): void {
@@ -56,15 +116,6 @@ export class ListaEstudiantesComponent implements OnInit {
     });
   }
 
-  irACrear(): void {
-    this.router.navigate(['/estudiantes/nuevo']);
-  }
-
-  irAEditar(usuarioId: number): void {
-    this.router.navigate(['/estudiantes', usuarioId, 'editar']);
-  }
-
-  irAlDashboard(): void {
-    this.router.navigate(['/dashboard']);
-  }
+  irACrear(): void   { this.router.navigate(['/estudiantes/nuevo']); }
+  irAEditar(id: number): void { this.router.navigate(['/estudiantes', id, 'editar']); }
 }

@@ -1,4 +1,4 @@
-﻿<div class="page">
+<div class="page">
   <header class="page-header">
     <div class="header-left">
       <h1>Gestión de Estudiantes</h1>
@@ -8,55 +8,99 @@
     </div>
   </header>
 
+  <!-- Barra de filtros -->
+  <div class="filtros-bar">
+    <input
+      class="filtro-input"
+      type="text"
+      placeholder="Buscar por nombre, apellido, legajo o DNI..."
+      [value]="filtroBusqueda()"
+      (input)="onBusqueda($any($event.target).value)"
+    />
+
+    <select class="filtro-select" [value]="filtroCarreraId() ?? ''" (change)="onCarrera($any($event.target).value)">
+      <option value="">Todas las carreras</option>
+      @for (c of carreras(); track c.id) {
+        <option [value]="c.id">{{ c.nombre }}</option>
+      }
+    </select>
+
+    <select class="filtro-select filtro-select--anio" [value]="filtroAnio() ?? ''" (change)="onAnio($any($event.target).value)">
+      <option value="">Todos los años</option>
+      @for (a of anios(); track a) {
+        <option [value]="a">{{ a }}° año</option>
+      }
+    </select>
+
+    <select class="filtro-select filtro-select--condicion" [value]="filtroCondicion()" (change)="onCondicion($any($event.target).value)">
+      <option value="">Todas las condiciones</option>
+      @for (c of condiciones; track c) {
+        <option [value]="c">{{ c }}</option>
+      }
+    </select>
+
+    @if (hayFiltrosActivos()) {
+      <button class="btn-limpiar" (click)="limpiarFiltros()">✕ Limpiar</button>
+    }
+  </div>
+
   @if (cargando()) {
     <p class="estado">Cargando...</p>
   } @else if (error()) {
     <p class="estado error">{{ error() }}</p>
-  } @else if (estudiantes().length === 0) {
-    <p class="estado">No hay estudiantes registrados.</p>
   } @else {
-    <table class="tabla">
-      <thead>
-        <tr>
-          <th>Legajo</th>
-          <th>DNI</th>
-          <th>Nombre</th>
-          <th>Email</th>
-          <th>Carrera</th>
-          <th>Año</th>
-          <th>Condición</th>
-          <th>Ingreso</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (e of estudiantes(); track e.usuarioId) {
-          <tr [class.inactivo]="!e.activo">
-            <td>{{ e.legajo }}</td>
-            <td>{{ e.dni }}</td>
-            <td>{{ e.apellido }}, {{ e.nombre }}</td>
-            <td>{{ e.email }}</td>
-            <td>{{ e.carreraNombre }}</td>
-            <td>{{ e.anio }}°</td>
-            <td>{{ e.condicion }}</td>
-            <td>{{ e.fechaDeIngreso | date:'dd/MM/yyyy' }}</td>
-            <td>
-              <span [class]="e.activo ? 'badge activo' : 'badge inactivo'">
-                {{ e.activo ? 'Activo' : 'Inactivo' }}
-              </span>
-            </td>
-            <td class="acciones">
-              <button class="btn btn-secondary btn-sm" (click)="irAEditar(e.usuarioId)">Editar</button>
-              @if (e.activo) {
-                <button class="btn btn-danger btn-sm" (click)="desactivar(e.usuarioId)">Desactivar</button>
-              } @else {
-                <button class="btn btn-success btn-sm" (click)="reactivar(e.usuarioId)">Reactivar</button>
-              }
-            </td>
+    <p class="resultado-count">
+      Mostrando <strong>{{ estudiantes().length }}</strong> estudiante{{ estudiantes().length !== 1 ? 's' : '' }}
+    </p>
+
+    @if (estudiantes().length === 0) {
+      <p class="estado">No se encontraron estudiantes con los filtros aplicados.</p>
+    } @else {
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>Legajo</th>
+            <th>DNI</th>
+            <th>Nombre</th>
+            <th>Carrera</th>
+            <th>Año</th>
+            <th>Condición</th>
+            <th>Ingreso</th>
+            <th>Estado</th>
+            <th>Acciones</th>
           </tr>
-        }
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          @for (e of estudiantes(); track e.usuarioId) {
+            <tr [class.inactivo]="!e.activo">
+              <td>{{ e.legajo }}</td>
+              <td>{{ e.dni }}</td>
+              <td>{{ e.apellido }}, {{ e.nombre }}</td>
+              <td>{{ e.carreraNombre }}</td>
+              <td>{{ e.anio }}°</td>
+              <td>
+                <span class="badge-condicion badge-condicion--{{ e.condicion | lowercase }}">
+                  {{ e.condicion }}
+                </span>
+              </td>
+              <td>{{ e.fechaDeIngreso | date:'dd/MM/yyyy' }}</td>
+              <td>
+                <span [class]="e.activo ? 'badge activo' : 'badge inactivo'">
+                  {{ e.activo ? 'Activo' : 'Inactivo' }}
+                </span>
+              </td>
+              <td class="acciones">
+                <button class="btn btn-secondary btn-sm" (click)="irAEditar(e.usuarioId)">Editar</button>
+                @if (e.activo) {
+                  <button class="btn btn-danger btn-sm" (click)="desactivar(e.usuarioId)">Desactivar</button>
+                } @else {
+                  <button class="btn btn-success btn-sm" (click)="reactivar(e.usuarioId)">Reactivar</button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
   }
 </div>

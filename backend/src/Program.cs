@@ -244,6 +244,8 @@ var app = builder.Build();
 
         await CorrelativiadadesSeeder.SeedCarrera1Async(db, logger);
         await CorrelativiadadesSeeder.SeedCarrera2Async(db, logger);
+
+        await EstudiantesSeeder.SeedAsync(db, logger);
     }
     catch (Exception ex)
     {

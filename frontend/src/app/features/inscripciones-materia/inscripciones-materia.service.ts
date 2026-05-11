@@ -7,12 +7,16 @@ export interface InscripcionMateria {
   id:               number;
   estudianteId:     number;
   estudianteNombre: string;
+  estudianteLegajo: string;
+  carreraId:        number;
+  carreraNombre:    string;
   materiaId:        number;
   materiaCodigo:    string;
   materiaNombre:    string;
-  cursoId:          number;
-  cursoAnio:        number;
-  cursoComision:    string;
+  cursoId:           number;
+  cursoAnio:         number;
+  cursoAnioLectivo:  number;
+  cursoComision:     string;
   estado:           string;
   fechaInscripcion: string;
 }
