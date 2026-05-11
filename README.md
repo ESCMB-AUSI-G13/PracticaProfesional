@@ -88,6 +88,49 @@ docker-compose up --build -d
 
 ---
 
+## Deploy a Azure (primera vez)
+
+### Requisitos previos
+
+Instalar Azure CLI:
+```bash
+winget install Microsoft.AzureCLI
+```
+
+Instalar en VS Code las extensiones:
+- **Azure App Service** (Microsoft)
+- **Azure Storage** (Microsoft)
+
+Iniciar sesión en ambas extensiones con la cuenta de Azure.
+
+### Build
+
+```bash
+docker-compose up --build -d
+```
+
+### Deploy del backend
+
+En VS Code → panel Azure → App Services → click derecho en `escmb-practicaprof` → **Deploy to Web App** → seleccionar la carpeta `backend/publish`.
+
+### Deploy del frontend
+
+En VS Code → panel Azure → Storage Accounts → storage account → Blob Containers → `$web` → subir el contenido de `frontend/dist/practica-profesional/browser`.
+
+### URLs de producción
+
+| Servicio | URL |
+|---|---|
+| Frontend | https://escmbpracticaprof.z13.web.core.windows.net |
+| Backend API | https://escmb-practicaprof.azurewebsites.net |
+
+### Apagar/encender el backend para ahorrar créditos
+
+Portal Azure → `escmb-practicaprof` → botón **Detener** / **Iniciar**.
+El frontend (Storage) y la base de datos no necesitan apagarse.
+
+---
+
 ## Estructura del proyecto
 
 ```
