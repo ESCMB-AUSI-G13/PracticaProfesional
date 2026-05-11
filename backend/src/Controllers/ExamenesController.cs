@@ -14,6 +14,7 @@ namespace PracticaProfesional.Controllers;
 public class ExamenesController(
     CrearExamenUseCase crearExamen,
     ListarExamenesUseCase listarExamenes,
+    EliminarExamenUseCase eliminarExamen,
     ListarFinalesDisponiblesUseCase listarFinales,
     InscribirseEnExamenUseCase inscribirseEnExamen,
     ObtenerComprobanteInscripcionExamenUseCase comprobanteExamenUseCase) : ControllerBase
@@ -23,6 +24,16 @@ public class ExamenesController(
     [ProducesResponseType(typeof(IEnumerable<ExamenDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Listar(CancellationToken cancellationToken)
         => Ok(await listarExamenes.EjecutarAsync(cancellationToken));
+
+    [HttpDelete("{id:int}")]
+    [Authorize(Roles = "Direccion")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Eliminar(int id, CancellationToken cancellationToken)
+    {
+        await eliminarExamen.EjecutarAsync(id, cancellationToken);
+        return NoContent();
+    }
 
     /// <summary>GET api/examenes/mis-finales — finales disponibles para el estudiante autenticado.</summary>
     [HttpGet("mis-finales")]

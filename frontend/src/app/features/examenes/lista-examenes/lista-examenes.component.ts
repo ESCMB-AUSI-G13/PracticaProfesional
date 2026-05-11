@@ -78,5 +78,17 @@ export class ListaExamenesComponent implements OnInit {
     this.mostrarForm.set(false);
   }
 
+  eliminar(ex: Examen): void {
+    const confirmado = confirm(
+      `¿Eliminar el examen de "${ex.materiaNombre}" (${ex.tipoExamen} — ${new Date(ex.fechaExamen).toLocaleDateString('es-AR')})?\n\nSe eliminarán también todas las inscripciones asociadas.`
+    );
+    if (!confirmado) return;
+
+    this.service.eliminar(ex.id).subscribe({
+      next: () => this.examenes.update(list => list.filter(e => e.id !== ex.id)),
+      error: (e) => this.error.set(e.error?.detail ?? 'Error al eliminar el examen.')
+    });
+  }
+
   irAlDashboard(): void { this.router.navigate(['/dashboard']); }
 }

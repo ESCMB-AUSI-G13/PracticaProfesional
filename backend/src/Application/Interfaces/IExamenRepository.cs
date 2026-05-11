@@ -8,4 +8,5 @@ public interface IExamenRepository
     Task<Examen?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default);
     Task AgregarAsync(Examen examen, CancellationToken cancellationToken = default);
     Task GuardarCambiosAsync(CancellationToken cancellationToken = default);
+    Task EliminarAsync(int id, CancellationToken cancellationToken = default);
 }

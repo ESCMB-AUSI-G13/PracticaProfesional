@@ -12,12 +12,6 @@ public static class ExamenesSeeder
 
     public static async Task SeedAsync(AppDbContext db, ILogger logger, CancellationToken ct = default)
     {
-        if (await db.Examenes.AnyAsync(ct))
-        {
-            logger.LogInformation("ExamenesSeeder: ya existen exámenes, seed omitido.");
-            return;
-        }
-
         var materias = await db.Materias.AsNoTracking().ToListAsync(ct);
         if (materias.Count == 0)
         {
@@ -25,42 +19,69 @@ public static class ExamenesSeeder
             return;
         }
 
+        // Solo crear examen para materias que todavía no tienen ninguno
+        var materiasConExamen = (await db.Examenes
+            .Select(e => e.MateriaId)
+            .Distinct()
+            .ToListAsync(ct))
+            .ToHashSet();
+
+        var materiasSinExamen = materias
+            .Where(m => !materiasConExamen.Contains(m.Id))
+            .ToList();
+
+        if (materiasSinExamen.Count == 0)
+        {
+            logger.LogInformation("ExamenesSeeder: todas las materias ya tienen examen, seed omitido.");
+            return;
+        }
+
         var baseDate = DateTime.UtcNow.Date;
         var examenes = new List<Examen>();
 
-        for (int i = 0; i < materias.Count; i++)
+        for (int i = 0; i < materiasSinExamen.Count; i++)
         {
-            var fecha   = baseDate.AddDays(i % 5);       // distribuye en 5 días (hoy + 0..4)
+            var fecha   = baseDate.AddDays(i % 5);
             var horario = Horarios[i % Horarios.Length];
-            var examen  = Examen.Crear(materias[i].Id, fecha, horario, 30, TipoExamen.Parcial);
+            var examen  = Examen.Crear(materiasSinExamen[i].Id, fecha, horario, 30, TipoExamen.Parcial);
             db.Examenes.Add(examen);
             examenes.Add(examen);
         }
 
         await db.SaveChangesAsync(ct);
 
-        // Auto-inscripción: igual a lo que hace CrearExamenUseCase para Parcial
-        var inscripcionesActivas = await db.InscripcionesMateria
-            .Where(im => im.Estado == EstadoInscripcion.Activa)
-            .ToListAsync(ct);
-
+        // Auto-inscripción para los exámenes nuevos
         var materiaIdToExamenId = examenes.ToDictionary(e => e.MateriaId, e => e.Id);
 
-        var inscripcionesExamen = inscripcionesActivas
-            .Where(im => materiaIdToExamenId.ContainsKey(im.MateriaId))
+        var inscripcionesActivas = await db.InscripcionesMateria
+            .Where(im => im.Estado == EstadoInscripcion.Activa
+                      && materiaIdToExamenId.Keys.Contains(im.MateriaId))
+            .ToListAsync(ct);
+
+        // Evitar duplicados si ya hay inscripciones examen previas para estos exámenes
+        var examenIds = examenes.Select(e => e.Id).ToHashSet();
+        var yaInscritos = (await db.InscripcionesExamen
+            .Where(ie => examenIds.Contains(ie.ExamenId))
+            .Select(ie => new { ie.EstudianteId, ie.ExamenId })
+            .ToListAsync(ct))
+            .Select(x => (x.EstudianteId, x.ExamenId))
+            .ToHashSet();
+
+        var inscripcionesNuevas = inscripcionesActivas
             .Select(im => (im.EstudianteId, ExamenId: materiaIdToExamenId[im.MateriaId]))
             .DistinctBy(x => (x.EstudianteId, x.ExamenId))
+            .Where(x => !yaInscritos.Contains(x))
             .Select(x => InscripcionExamen.Crear(x.EstudianteId, x.ExamenId))
             .ToList();
 
-        if (inscripcionesExamen.Count > 0)
+        if (inscripcionesNuevas.Count > 0)
         {
-            db.InscripcionesExamen.AddRange(inscripcionesExamen);
+            db.InscripcionesExamen.AddRange(inscripcionesNuevas);
             await db.SaveChangesAsync(ct);
         }
 
         logger.LogInformation(
-            "ExamenesSeeder: {E} exámenes y {I} inscripciones de examen creados.",
-            examenes.Count, inscripcionesExamen.Count);
+            "ExamenesSeeder: {E} exámenes y {I} inscripciones creados.",
+            examenes.Count, inscripcionesNuevas.Count);
     }
 }

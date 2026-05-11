@@ -65,6 +65,7 @@
           <th>Fecha</th>
           <th>Horario</th>
           <th>Cupo</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -75,6 +76,9 @@
             <td>{{ ex.fechaExamen | date:'dd/MM/yyyy' }}</td>
             <td>{{ ex.horario }}</td>
             <td>{{ ex.cupo }}</td>
+            <td>
+              <button class="btn btn-danger btn-sm" (click)="eliminar(ex)">Eliminar</button>
+            </td>
           </tr>
         }
       </tbody>

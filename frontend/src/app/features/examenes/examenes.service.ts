@@ -55,4 +55,8 @@ export class ExamenesService {
   inscribirEstudiante(examenId: number, estudianteId: number): Observable<InscripcionExamenResult> {
     return this.http.post<InscripcionExamenResult>(`${this.apiUrl}/${examenId}/inscripciones`, { estudianteId });
   }
+
+  eliminar(examenId: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${examenId}`);
+  }
 }

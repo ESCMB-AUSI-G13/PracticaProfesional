@@ -155,6 +155,7 @@ builder.Services.AddScoped<EliminarEspacioCurricularUseCase>();
 builder.Services.AddScoped<IExamenRepository, ExamenRepository>();
 builder.Services.AddScoped<CrearExamenUseCase>();
 builder.Services.AddScoped<ListarExamenesUseCase>();
+builder.Services.AddScoped<EliminarExamenUseCase>();
 builder.Services.AddScoped<ListarFinalesDisponiblesUseCase>();
 builder.Services.AddScoped<InscribirseEnExamenUseCase>();
 
@@ -246,6 +247,7 @@ var app = builder.Build();
         await CorrelativiadadesSeeder.SeedCarrera2Async(db, logger);
 
         await EstudiantesSeeder.SeedAsync(db, logger);
+        await EstudiantesSeeder.FixNombresAsync(db, logger);
         await ExamenesSeeder.SeedAsync(db, logger);
     }
     catch (Exception ex)

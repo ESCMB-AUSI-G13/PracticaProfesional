@@ -75,15 +75,18 @@ public static class EstudiantesSeeder
             .ToListAsync(ct))
             .ToHashSet();
 
+        int globalIdx = 0;   // índice acumulado entre todos los grupos → nombres únicos
+
         foreach (var grupo in Grupos)
         {
             var prefijo = $"C{grupo.CarreraId}-{grupo.AnioEstudiante}{grupo.Comision}";
             var fechaIngreso = new DateTime(grupo.AnioIngreso, 3, 1);
 
-            for (int i = 1; i <= 30; i++)
+            for (int i = 1; i <= 30; i++, globalIdx++)
             {
-                var nombre   = Nombres[(i - 1) % Nombres.Length];
-                var apellido = Apellidos[(i - 1) % Apellidos.Length];
+                // Usar globalIdx para que la combinación nombre+apellido no se repita entre grupos
+                var nombre   = Nombres[globalIdx % Nombres.Length];
+                var apellido = Apellidos[(globalIdx / Nombres.Length) % Apellidos.Length];
                 var dni      = (dniBase++).ToString();
                 var legajo   = $"EST-{prefijo}-{i:D3}";
                 var email    = $"alu.{prefijo.ToLower().Replace("-", ".")}.{i:D3}@institucion.edu.ar";
@@ -128,5 +131,50 @@ public static class EstudiantesSeeder
         }
 
         logger.LogInformation("EstudiantesSeeder: {T} estudiantes creados en total.", totalInsertados);
+    }
+
+    /// <summary>
+    /// Corrige nombres duplicados entre alumnos del seed: asigna combinaciones únicas
+    /// usando un índice global. Solo modifica Nombre y Apellido; no toca legajos ni emails.
+    /// </summary>
+    public static async Task FixNombresAsync(AppDbContext db, ILogger logger, CancellationToken ct = default)
+    {
+        var usuarios = await db.Usuarios
+            .Where(u => u.Legajo.StartsWith("EST-"))
+            .OrderBy(u => u.Id)
+            .Select(u => new { u.Id, u.Nombre, u.Apellido })
+            .ToListAsync(ct);
+
+        if (usuarios.Count == 0) return;
+
+        // Detectar si hay duplicados
+        bool hayDuplicados = usuarios
+            .GroupBy(u => (u.Nombre, u.Apellido))
+            .Any(g => g.Count() > 1);
+
+        if (!hayDuplicados)
+        {
+            logger.LogInformation("EstudiantesSeeder.FixNombres: sin duplicados, nada que corregir.");
+            return;
+        }
+
+        logger.LogInformation("EstudiantesSeeder.FixNombres: corrigiendo nombres en {N} alumnos...", usuarios.Count);
+        int actualizados = 0;
+
+        for (int idx = 0; idx < usuarios.Count; idx++)
+        {
+            var nombre   = Nombres[idx % Nombres.Length];
+            var apellido = Apellidos[(idx / Nombres.Length) % Apellidos.Length];
+
+            if (usuarios[idx].Nombre == nombre && usuarios[idx].Apellido == apellido)
+                continue;
+
+            await db.Database.ExecuteSqlRawAsync(
+                "UPDATE Usuarios SET Nombre = {0}, Apellido = {1} WHERE Id = {2}",
+                nombre, apellido, usuarios[idx].Id);
+            actualizados++;
+        }
+
+        logger.LogInformation("EstudiantesSeeder.FixNombres: {A} registros actualizados.", actualizados);
     }
 }
