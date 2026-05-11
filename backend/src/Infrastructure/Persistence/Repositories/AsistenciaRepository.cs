@@ -85,4 +85,21 @@ public class AsistenciaRepository(AppDbContext context) : IAsistenciaRepository
             .OrderBy(a => a.Materia.Nombre)
             .ThenBy(a => a.Fecha)
             .ToListAsync(cancellationToken);
+
+    public Task<bool> ExistePorCursoMateriaFechaAsync(
+        int cursoId,
+        int materiaId,
+        DateTime fecha,
+        CancellationToken cancellationToken = default)
+        => context.Asistencias.AnyAsync(
+            a => a.CursoId == cursoId && a.MateriaId == materiaId && a.Fecha == fecha.Date,
+            cancellationToken);
+
+    public async Task RegistrarBulkAsync(
+        IEnumerable<Asistencia> asistencias,
+        CancellationToken cancellationToken = default)
+    {
+        await context.Asistencias.AddRangeAsync(asistencias, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+    }
 }

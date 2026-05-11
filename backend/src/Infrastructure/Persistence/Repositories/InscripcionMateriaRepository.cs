@@ -66,4 +66,14 @@ public class InscripcionMateriaRepository(AppDbContext context) : IInscripcionMa
 
     public Task<bool> ExistePorMateriaIdAsync(int materiaId, CancellationToken cancellationToken = default)
         => context.InscripcionesMateria.AnyAsync(i => i.MateriaId == materiaId, cancellationToken);
+
+    public async Task<IEnumerable<InscripcionMateria>> ListarActivasPorCursoYMateriaAsync(
+        int cursoId,
+        int materiaId,
+        CancellationToken cancellationToken = default)
+        => await context.InscripcionesMateria
+            .Include(i => i.Estudiante).ThenInclude(e => e.Usuario)
+            .Where(i => i.CursoId == cursoId && i.MateriaId == materiaId && i.Estado == EstadoInscripcion.Activa)
+            .OrderBy(i => i.Estudiante.Usuario.Apellido).ThenBy(i => i.Estudiante.Usuario.Nombre)
+            .ToListAsync(cancellationToken);
 }

@@ -17,6 +17,7 @@ using PracticaProfesional.Application.Correlatividades;
 using PracticaProfesional.Application.Calendario;
 using PracticaProfesional.Application.Cursos;
 using PracticaProfesional.Infrastructure.Seeding;
+using PracticaProfesional.Application.Asistencias;
 using PracticaProfesional.Application.EspaciosCurriculares;
 using PracticaProfesional.Application.Examenes;
 using PracticaProfesional.Infrastructure.Persistence.Repositories;
@@ -113,6 +114,11 @@ builder.Services.AddScoped<ObtenerHistorialNotasUseCase>();
 
 // Estado Académico
 builder.Services.AddScoped<ActualizarEstadoAcademicoUseCase>();
+
+// Asistencias
+builder.Services.AddScoped<ObtenerEspaciosPorDocenteUseCase>();
+builder.Services.AddScoped<ObtenerAlumnosPorEspacioUseCase>();
+builder.Services.AddScoped<RegistrarAsistenciasUseCase>();
 
 // Reportes Operativos (RR-08, RR-09)
 builder.Services.AddScoped<ReporteInasistenciasUseCase>();

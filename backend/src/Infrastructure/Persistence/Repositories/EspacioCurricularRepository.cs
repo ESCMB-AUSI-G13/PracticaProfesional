@@ -14,6 +14,14 @@ public class EspacioCurricularRepository(AppDbContext db) : IEspacioCurricularRe
             .OrderBy(ec => ec.Curso.AnioLectivo).ThenBy(ec => ec.Curso.Comision).ThenBy(ec => ec.Materia.Nombre)
             .ToListAsync(cancellationToken);
 
+    public async Task<IEnumerable<EspacioCurricular>> ListarPorDocenteIdAsync(int docenteId, CancellationToken cancellationToken = default)
+        => await db.EspaciosCurriculares
+            .Include(ec => ec.Materia)
+            .Include(ec => ec.Curso)
+            .Where(ec => ec.DocenteId == docenteId)
+            .OrderBy(ec => ec.Curso.AnioLectivo).ThenBy(ec => ec.Curso.Comision).ThenBy(ec => ec.Materia.Nombre)
+            .ToListAsync(cancellationToken);
+
     public async Task<EspacioCurricular?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default)
         => await db.EspaciosCurriculares
             .Include(ec => ec.Materia)

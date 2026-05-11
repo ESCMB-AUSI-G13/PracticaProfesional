@@ -1,0 +1,179 @@
+<div class="page">
+  <header class="page-header">
+    <div class="header-left">
+      <h1>Registrar Asistencias</h1>
+    </div>
+    @if (espacioSeleccionado() && !resumen()) {
+      <button class="btn btn-secondary btn-sm" (click)="nuevo()">Cambiar selección</button>
+    }
+    @if (resumen()) {
+      <button class="btn btn-primary btn-sm" (click)="nuevo()">Nuevo registro</button>
+    }
+  </header>
+
+  <!-- ── Resumen post-guardado ───────────────────────────────────────────── -->
+  @if (resumen(); as r) {
+    <section class="resumen-panel">
+      <div class="resumen-titulo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Asistencias registradas correctamente
+      </div>
+      <div class="resumen-info">
+        <span><strong>Materia:</strong> {{ r.materiaNombre }}</span>
+        <span><strong>Año:</strong> {{ r.anioLectivo }} — Comisión {{ r.cursoComision }}</span>
+        <span><strong>Fecha:</strong> {{ r.fecha | date:'dd/MM/yyyy' }}</span>
+      </div>
+      <div class="resumen-pills">
+        <span class="pill pill-presente">{{ r.presentes }} presentes</span>
+        <span class="pill pill-injust">{{ r.ausentesInjustificados }} ausentes injustificados</span>
+        <span class="pill pill-just">{{ r.ausentesJustificados }} ausentes justificados</span>
+      </div>
+
+      @if (r.ausentes.length > 0) {
+        <div class="tabla-wrapper">
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>Legajo</th>
+                <th>Alumno</th>
+                <th>Tipo de ausencia</th>
+                <th>Motivo</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (a of r.ausentes; track a.legajo) {
+                <tr>
+                  <td>{{ a.legajo }}</td>
+                  <td>{{ a.nombreCompleto }}</td>
+                  <td>
+                    <span class="badge" [class.badge-injust]="a.tipoAusencia === 'Injustificada'" [class.badge-just]="a.tipoAusencia === 'Justificada'">
+                      {{ a.tipoAusencia }}
+                    </span>
+                  </td>
+                  <td>{{ a.motivo ?? '—' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else {
+        <p class="estado">Sin ausencias — todos presentes.</p>
+      }
+    </section>
+  }
+
+  <!-- ── Selector de espacio curricular ─────────────────────────────────── -->
+  @if (!resumen()) {
+    <section class="filtros-panel">
+      <h2>Seleccionar materia y curso</h2>
+
+      @if (cargandoEspacios()) {
+        <p class="estado">Cargando tus cátedras...</p>
+      } @else if (espacios().length === 0) {
+        <p class="estado">No tenés cátedras asignadas. Contactá a Dirección.</p>
+      } @else if (!espacioSeleccionado()) {
+        <div class="espacios-grid">
+          @for (espacio of espacios(); track espacio.espacioCurricularId) {
+            <button class="espacio-card" (click)="seleccionarEspacio(espacio)">
+              <span class="espacio-materia">{{ espacio.materiaNombre }}</span>
+              <span class="espacio-curso">Año {{ espacio.anioLectivo }} · Comisión {{ espacio.comision }}</span>
+            </button>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- ── Lista de alumnos ──────────────────────────────────────────────── -->
+    @if (espacioSeleccionado()) {
+      <section class="acta-header">
+        <div class="acta-info">
+          <span><strong>Materia:</strong> {{ espacioSeleccionado()!.materiaNombre }}</span>
+          <span><strong>Año:</strong> {{ espacioSeleccionado()!.anioLectivo }} — Comisión {{ espacioSeleccionado()!.comision }}</span>
+        </div>
+        <div class="fecha-field">
+          <label>Fecha de clase</label>
+          <input type="date" [ngModel]="fecha()" (ngModelChange)="fecha.set($event)" [max]="fecha()" />
+        </div>
+      </section>
+
+      @if (cargandoLista()) {
+        <p class="estado">Cargando alumnos...</p>
+      } @else if (filas().length === 0) {
+        <p class="estado">No hay alumnos inscriptos en esta materia y curso.</p>
+      } @else {
+        <div class="contadores">
+          <span class="pill pill-presente">{{ presentesCount() }} presentes</span>
+          <span class="pill pill-injust">{{ ausentesCount() }} ausentes marcados</span>
+        </div>
+
+        <div class="tabla-wrapper">
+          <table class="tabla tabla-alumnos">
+            <thead>
+              <tr>
+                <th class="col-check">Ausente</th>
+                <th>Legajo</th>
+                <th>Alumno</th>
+                <th>Tipo</th>
+                <th>Motivo</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (fila of filas(); track fila.estudianteId) {
+                <tr [class.fila-ausente]="fila.ausente">
+                  <td class="col-check">
+                    <button
+                      class="check-btn"
+                      [class.check-btn--activo]="fila.ausente"
+                      (click)="toggleAusente(fila)"
+                      title="{{ fila.ausente ? 'Marcar presente' : 'Marcar ausente' }}">
+                      @if (fila.ausente) {
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                      }
+                    </button>
+                  </td>
+                  <td>{{ fila.legajo }}</td>
+                  <td>{{ fila.nombreCompleto }}</td>
+                  <td class="col-tipo">
+                    @if (fila.ausente) {
+                      <select [(ngModel)]="fila.tipoAusencia" class="select-tipo">
+                        <option value="Injustificada">Injustificada</option>
+                        <option value="Justificada">Justificada</option>
+                      </select>
+                    } @else {
+                      <span class="badge badge-presente">Presente</span>
+                    }
+                  </td>
+                  <td class="col-motivo">
+                    @if (fila.ausente && fila.tipoAusencia === 'Justificada') {
+                      <input
+                        type="text"
+                        [(ngModel)]="fila.motivo"
+                        placeholder="Motivo obligatorio"
+                        maxlength="200"
+                        class="input-motivo" />
+                    } @else {
+                      <span class="texto-vacio">—</span>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (error()) {
+          <p class="error-global">{{ error() }}</p>
+        }
+
+        <div class="acciones">
+          <button
+            class="btn btn-primary btn-registrar"
+            (click)="registrar()"
+            [disabled]="guardando()">
+            {{ guardando() ? 'Registrando...' : 'Registrar asistencias' }}
+          </button>
+        </div>
+      }
+    }
+  }
+</div>

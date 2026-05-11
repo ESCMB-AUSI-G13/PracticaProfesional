@@ -166,6 +166,15 @@ export const routes: Routes = [
             .then(m => m.CargaNotasComponent)
       },
 
+      // Asistencias — solo Docente
+      {
+        path: 'asistencias/registrar',
+        canActivate: [roleGuard('Docente')],
+        loadComponent: () =>
+          import('./features/asistencias/registrar-asistencias/registrar-asistencias.component')
+            .then(m => m.RegistrarAsistenciasComponent)
+      },
+
       // Materias — solo Dirección
       {
         path: 'materias',

@@ -18,4 +18,5 @@ public interface IInscripcionMateriaRepository
     Task AgregarAsync(InscripcionMateria inscripcion, CancellationToken cancellationToken = default);
     Task GuardarCambiosAsync(CancellationToken cancellationToken = default);
     Task<bool> ExistePorMateriaIdAsync(int materiaId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<InscripcionMateria>> ListarActivasPorCursoYMateriaAsync(int cursoId, int materiaId, CancellationToken cancellationToken = default);
 }

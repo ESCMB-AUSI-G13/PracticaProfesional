@@ -44,4 +44,14 @@ public interface IAsistenciaRepository
     Task<IEnumerable<Asistencia>> ObtenerPorEstudianteAsync(
         int estudianteId,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Verifica si ya existen registros de asistencia para un curso/materia en una fecha dada.
+    /// </summary>
+    Task<bool> ExistePorCursoMateriaFechaAsync(int cursoId, int materiaId, DateTime fecha, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Inserta múltiples registros de asistencia en un único guardado.
+    /// </summary>
+    Task RegistrarBulkAsync(IEnumerable<Asistencia> asistencias, CancellationToken cancellationToken = default);
 }
