@@ -52,7 +52,10 @@ export class RegistrarAsistenciasComponent implements OnInit {
     this.cargandoEspacios.set(true);
     this.service.obtenerMisEspacios().subscribe({
       next: data => { this.espacios.set(data); this.cargandoEspacios.set(false); },
-      error: ()  => this.cargandoEspacios.set(false)
+      error: (err) => {
+        this.error.set(err?.error?.detail ?? err?.error?.title ?? 'No se pudieron cargar las cátedras. Verificá tu sesión.');
+        this.cargandoEspacios.set(false);
+      }
     });
   }
 
@@ -144,7 +147,7 @@ export class RegistrarAsistenciasComponent implements OnInit {
 
   // ── Helpers ──────────────────────────────────────────────────────────────────
 
-  private hoyISO(): string {
+  hoyISO(): string {
     return new Date().toISOString().substring(0, 10);
   }
 

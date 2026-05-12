@@ -166,13 +166,20 @@ export const routes: Routes = [
             .then(m => m.CargaNotasComponent)
       },
 
-      // Asistencias — solo Docente
+      // Asistencias — Docente registra, todos los roles pueden rectificar
       {
         path: 'asistencias/registrar',
         canActivate: [roleGuard('Docente')],
         loadComponent: () =>
           import('./features/asistencias/registrar-asistencias/registrar-asistencias.component')
             .then(m => m.RegistrarAsistenciasComponent)
+      },
+      {
+        path: 'asistencias/rectificar',
+        canActivate: [roleGuard('Docente', 'Preceptor')],
+        loadComponent: () =>
+          import('./features/asistencias/rectificar-asistencias/rectificar-asistencias.component')
+            .then(m => m.RectificarAsistenciasComponent)
       },
 
       // Materias — solo Dirección

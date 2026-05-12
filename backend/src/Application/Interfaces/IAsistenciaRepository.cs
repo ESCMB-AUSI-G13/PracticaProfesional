@@ -54,4 +54,16 @@ public interface IAsistenciaRepository
     /// Inserta múltiples registros de asistencia en un único guardado.
     /// </summary>
     Task RegistrarBulkAsync(IEnumerable<Asistencia> asistencias, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Devuelve todos los registros de asistencia de un curso/materia en una fecha dada,
+    /// con navegación de Estudiante→Usuario cargada.
+    /// </summary>
+    Task<IEnumerable<Asistencia>> ObtenerPorEspacioYFechaAsync(
+        int cursoId, int materiaId, DateTime fecha, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Persiste cambios pendientes en el contexto (rectificaciones).
+    /// </summary>
+    Task GuardarCambiosAsync(CancellationToken cancellationToken = default);
 }

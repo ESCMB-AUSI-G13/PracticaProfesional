@@ -1,0 +1,151 @@
+<div class="page">
+  <header class="page-header">
+    <div class="header-left">
+      <h1>Rectificar Asistencias</h1>
+    </div>
+    @if (espacioSeleccionado()) {
+      <button class="btn btn-secondary btn-sm" (click)="nuevaBusqueda()">← Cambiar cátedra</button>
+    }
+  </header>
+
+  <!-- ── Selector de espacio curricular ───────────────────────────────────── -->
+  @if (!espacioSeleccionado()) {
+    <section class="filtros-panel">
+      <h2>1. Seleccioná la cátedra</h2>
+
+      @if (cargandoEspacios()) {
+        <p class="estado">Cargando cátedras...</p>
+      } @else if (error() && espacios().length === 0) {
+        <p class="estado error-inline">{{ error() }}</p>
+      } @else if (espacios().length === 0) {
+        <p class="estado">No hay cátedras disponibles.</p>
+      } @else {
+        <div class="espacios-grid">
+
+          @if (esDocente()) {
+            @for (e of espacios(); track comoDocente(e).espacioCurricularId) {
+              <button class="espacio-card"
+                (click)="seleccionarEspacio(comoDocente(e).espacioCurricularId,
+                  comoDocente(e).materiaNombre + ' — Año ' + comoDocente(e).anioLectivo + ' Com. ' + comoDocente(e).comision)">
+                <span class="espacio-materia">{{ comoDocente(e).materiaNombre }}</span>
+                <span class="espacio-curso">Año {{ comoDocente(e).anioLectivo }} · Comisión {{ comoDocente(e).comision }}</span>
+              </button>
+            }
+          } @else {
+            @for (e of espacios(); track comoDireccion(e).id) {
+              <button class="espacio-card"
+                (click)="seleccionarEspacio(comoDireccion(e).id,
+                  comoDireccion(e).materiaNombre + ' — Año ' + comoDireccion(e).cursoAnioLectivo + ' Com. ' + comoDireccion(e).cursoComision)">
+                <span class="espacio-materia">{{ comoDireccion(e).materiaNombre }}</span>
+                <span class="espacio-curso">{{ comoDireccion(e).docenteNombre }}</span>
+                <span class="espacio-curso">Año {{ comoDireccion(e).cursoAnioLectivo }} · Comisión {{ comoDireccion(e).cursoComision }}</span>
+              </button>
+            }
+          }
+
+        </div>
+      }
+    </section>
+  }
+
+  <!-- ── Selector de fecha + botón buscar ─────────────────────────────────── -->
+  @if (espacioSeleccionado()) {
+    <section class="acta-header">
+      <div class="acta-info">
+        <span><strong>Cátedra:</strong> {{ espacioSeleccionado()!.label }}</span>
+      </div>
+      <div class="fecha-busqueda">
+        <div class="fecha-field">
+          <label>Fecha del registro</label>
+          <input type="date" [ngModel]="fecha()" (ngModelChange)="fecha.set($event)"
+                 [max]="hoyISO()" (change)="limpiarRegistro()" />
+        </div>
+        <button class="btn btn-primary" (click)="cargarRegistro()" [disabled]="cargandoRegistro()">
+          {{ cargandoRegistro() ? 'Buscando...' : 'Buscar registro' }}
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Error de búsqueda ─────────────────────────────────────────────── -->
+    @if (error() && !registroCargado()) {
+      <p class="error-global">{{ error() }}</p>
+    }
+
+    <!-- ── Tabla de rectificación ────────────────────────────────────────── -->
+    @if (registroCargado()) {
+      @if (exito()) {
+        <div class="exito-banner">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+               stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Rectificación guardada correctamente.
+        </div>
+      }
+
+      <div class="tabla-wrapper">
+        <table class="tabla tabla-alumnos">
+          <thead>
+            <tr>
+              <th>Legajo</th>
+              <th>Alumno</th>
+              <th>Estado original</th>
+              <th>Nuevo estado</th>
+              <th>Motivo</th>
+              <th class="col-mod">Modificado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (fila of filas(); track fila.asistenciaId) {
+              <tr [class.fila-modificada]="fila.modificado">
+                <td>{{ fila.legajo }}</td>
+                <td>{{ fila.nombreCompleto }}</td>
+                <td>
+                  <span class="badge"
+                    [class.badge-presente]="fila.estado === 'Presente'"
+                    [class.badge-injust]="fila.estado === 'Ausente'"
+                    [class.badge-just]="fila.estado === 'AusenteJustificado'">
+                    {{ etiquetaEstado(fila.estado) }}
+                  </span>
+                </td>
+                <td class="col-tipo">
+                  <select class="select-tipo" [(ngModel)]="fila.estadoEditado" (ngModelChange)="onEstadoChange(fila)">
+                    <option value="Presente">Presente</option>
+                    <option value="Ausente">Ausente injustificado</option>
+                    <option value="AusenteJustificado">Ausente justificado</option>
+                  </select>
+                </td>
+                <td class="col-motivo">
+                  @if (fila.estadoEditado === 'AusenteJustificado') {
+                    <input type="text" class="input-motivo" [(ngModel)]="fila.motivoEditado"
+                           (ngModelChange)="onMotivoChange(fila)"
+                           placeholder="Motivo obligatorio" maxlength="200" />
+                  } @else {
+                    <span class="texto-vacio">—</span>
+                  }
+                </td>
+                <td class="col-mod">
+                  @if (fila.modificado) {
+                    <span class="badge-mod">✎</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (error() && registroCargado()) {
+        <p class="error-global">{{ error() }}</p>
+      }
+
+      <div class="acciones">
+        <button class="btn btn-primary btn-registrar"
+                (click)="guardar()"
+                [disabled]="guardando() || !hayModificaciones()">
+          {{ guardando() ? 'Guardando...' : 'Guardar cambios' }}
+        </button>
+      </div>
+    }
+  }
+</div>

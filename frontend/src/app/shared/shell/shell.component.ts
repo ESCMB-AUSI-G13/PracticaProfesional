@@ -54,9 +54,12 @@ const NAV: NavItem[] = [
   },
   {
     label: 'Asistencias',
-    ruta: '/asistencias/registrar',
     icon: 'asistencias',
-    roles: ['Docente']
+    roles: ['Docente', 'Preceptor'],
+    children: [
+      { label: 'Registrar',  ruta: '/asistencias/registrar',  icon: '', roles: ['Docente'] },
+      { label: 'Rectificar', ruta: '/asistencias/rectificar', icon: '', roles: ['Docente', 'Preceptor'] },
+    ]
   },
   {
     label: 'Exámenes',

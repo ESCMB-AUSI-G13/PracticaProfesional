@@ -69,6 +69,8 @@
 
       @if (cargandoEspacios()) {
         <p class="estado">Cargando tus cátedras...</p>
+      } @else if (error() && espacios().length === 0) {
+        <p class="estado error">{{ error() }}</p>
       } @else if (espacios().length === 0) {
         <p class="estado">No tenés cátedras asignadas. Contactá a Dirección.</p>
       } @else if (!espacioSeleccionado()) {
@@ -92,7 +94,7 @@
         </div>
         <div class="fecha-field">
           <label>Fecha de clase</label>
-          <input type="date" [ngModel]="fecha()" (ngModelChange)="fecha.set($event)" [max]="fecha()" />
+          <input type="date" [ngModel]="fecha()" (ngModelChange)="fecha.set($event)" [max]="hoyISO()" />
         </div>
       </section>
 

@@ -102,4 +102,19 @@ public class AsistenciaRepository(AppDbContext context) : IAsistenciaRepository
         await context.Asistencias.AddRangeAsync(asistencias, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
     }
+
+    public async Task<IEnumerable<Asistencia>> ObtenerPorEspacioYFechaAsync(
+        int cursoId,
+        int materiaId,
+        DateTime fecha,
+        CancellationToken cancellationToken = default)
+        => await context.Asistencias
+            .Include(a => a.Estudiante).ThenInclude(e => e.Usuario)
+            .Where(a => a.CursoId == cursoId && a.MateriaId == materiaId && a.Fecha == fecha.Date)
+            .OrderBy(a => a.Estudiante.Usuario.Apellido)
+            .ThenBy(a => a.Estudiante.Usuario.Nombre)
+            .ToListAsync(cancellationToken);
+
+    public async Task GuardarCambiosAsync(CancellationToken cancellationToken = default)
+        => await context.SaveChangesAsync(cancellationToken);
 }

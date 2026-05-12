@@ -1,0 +1,89 @@
+.page { padding: 2rem; font-family: sans-serif; max-width: 1200px; margin: 0 auto; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; h1 { margin: 0; font-size: 1.5rem; } }
+
+.btn {
+  padding: 0.4rem 0.85rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.85rem;
+  &.btn-primary   { background: #3498db; color: white; }
+  &.btn-secondary { background: #6c757d; color: white; }
+  &.btn-sm        { padding: 0.25rem 0.6rem; font-size: 0.8rem; }
+  &:hover:not(:disabled) { opacity: 0.9; }
+  &:disabled { opacity: 0.55; cursor: not-allowed; }
+}
+.btn-registrar { padding: 0.55rem 1.4rem; font-size: 0.95rem; font-weight: 600; }
+
+.filtros-panel {
+  background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1.25rem; margin-bottom: 1.5rem;
+  h2 { margin: 0 0 1rem; font-size: 1rem; color: #444; }
+}
+.espacios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.75rem; }
+.espacio-card {
+  display: flex; flex-direction: column; gap: 0.25rem; text-align: left;
+  background: white; border: 1px solid #d0e8f8; border-radius: 6px; padding: 0.9rem 1rem;
+  cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s;
+  &:hover { border-color: #3498db; box-shadow: 0 2px 8px rgba(52,152,219,.15); }
+}
+.espacio-materia { font-weight: 600; font-size: 0.9rem; color: #2c3e50; }
+.espacio-curso   { font-size: 0.8rem; color: #666; }
+
+.acta-header {
+  display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 0.75rem;
+  background: #eaf4fb; border: 1px solid #b3d9f0; border-radius: 6px; padding: 0.9rem 1.25rem; margin-bottom: 1.25rem;
+}
+.acta-info { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: 0.9rem; span { color: #2c3e50; } }
+.fecha-busqueda { display: flex; align-items: flex-end; gap: 0.75rem; }
+.fecha-field {
+  display: flex; flex-direction: column; gap: 0.25rem;
+  label { font-size: 0.8rem; font-weight: 600; color: #555; }
+  input { padding: 0.35rem 0.55rem; border: 1px solid #b3d9f0; border-radius: 4px; font-size: 0.9rem; background: white; }
+}
+
+.tabla-wrapper { overflow-x: auto; margin-bottom: 1.25rem; }
+.tabla {
+  width: 100%; border-collapse: collapse; font-size: 0.9rem;
+  th, td { padding: 0.6rem 0.75rem; border: 1px solid #e0e0e0; text-align: left; vertical-align: middle; }
+  th { background: #f5f5f5; font-weight: 600; }
+}
+.tabla-alumnos {
+  .col-tipo   { width: 200px; }
+  .col-motivo { min-width: 200px; }
+  .col-mod    { width: 90px; text-align: center; }
+}
+.fila-modificada { background: #fffbea; }
+
+.select-tipo {
+  padding: 0.3rem 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem;
+  background: white; width: 100%;
+}
+.input-motivo {
+  width: 100%; padding: 0.3rem 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; box-sizing: border-box;
+  &:focus { outline: 2px solid #3498db; border-color: transparent; }
+}
+.texto-vacio { color: #bbb; }
+
+.badge {
+  display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-size: 0.78rem; font-weight: 600;
+  &.badge-presente { background: #d4edda; color: #155724; }
+  &.badge-injust   { background: #f8d7da; color: #721c24; }
+  &.badge-just     { background: #fff3cd; color: #856404; }
+}
+.badge-mod { color: #e67e22; font-size: 1rem; font-weight: 700; }
+
+.exito-banner {
+  display: flex; align-items: center; gap: 0.5rem;
+  background: #d4edda; border: 1px solid #b2dfdb; border-radius: 6px;
+  padding: 0.75rem 1rem; margin-bottom: 1rem; color: #1a7a4a; font-weight: 600; font-size: 0.9rem;
+  svg { stroke: #1a7a4a; flex-shrink: 0; }
+}
+
+.error-global { color: #c0392b; font-size: 0.88rem; margin: 0 0 1rem; padding: 0.6rem 1rem; background: #fdf2f2; border: 1px solid #f5c6cb; border-radius: 4px; }
+.error-inline { color: #c0392b; }
+.estado { padding: 1rem; color: #555; }
+.acciones { display: flex; justify-content: flex-end; margin-top: 0.5rem; }
+
+@media (max-width: 768px) {
+  .page { padding: 1rem; }
+  .page-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .acta-header { flex-direction: column; }
+  .fecha-busqueda { flex-direction: column; align-items: stretch; }
+  .acciones { justify-content: stretch; button { width: 100%; } }
+}

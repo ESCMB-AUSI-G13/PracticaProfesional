@@ -120,6 +120,8 @@ builder.Services.AddScoped<ActualizarEstadoAcademicoUseCase>();
 builder.Services.AddScoped<ObtenerEspaciosPorDocenteUseCase>();
 builder.Services.AddScoped<ObtenerAlumnosPorEspacioUseCase>();
 builder.Services.AddScoped<RegistrarAsistenciasUseCase>();
+builder.Services.AddScoped<ObtenerRegistroDelDiaUseCase>();
+builder.Services.AddScoped<RectificarAsistenciaUseCase>();
 
 // Reportes Operativos (RR-08, RR-09)
 builder.Services.AddScoped<ReporteInasistenciasUseCase>();

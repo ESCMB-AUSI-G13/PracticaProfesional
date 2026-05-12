@@ -82,7 +82,7 @@ public class ReportesRendimientoController(
         var rol = User.FindFirstValue(ClaimTypes.Role);
         if (rol != "Docente") return null;
 
-        var usuarioIdStr = User.FindFirstValue(JwtRegisteredClaimNames.Sub);
+        var usuarioIdStr = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(usuarioIdStr, out var usuarioId)) return null;
 
         var docente = await docenteRepository.ObtenerPorUsuarioIdAsync(usuarioId, ct);

@@ -49,6 +49,38 @@ export interface ResumenAsistencias {
   ausentes:               DetalleAusencia[];
 }
 
+export interface AsistenciaDetalle {
+  asistenciaId:   number;
+  estudianteId:   number;
+  nombreCompleto: string;
+  legajo:         string;
+  estado:         string;
+  motivo:         string | null;
+}
+
+export interface RegistroDelDia {
+  espacioCurricularId: number;
+  cursoId:             number;
+  materiaId:           number;
+  materiaNombre:       string;
+  anioLectivo:         number;
+  comision:            string;
+  fecha:               string;
+  alumnos:             AsistenciaDetalle[];
+}
+
+export interface CambioAsistenciaItem {
+  asistenciaId: number;
+  nuevoEstado:  string;
+  motivo?:      string;
+}
+
+export interface RectificarAsistenciasCommand {
+  espacioCurricularId: number;
+  fecha:               string;
+  cambios:             CambioAsistenciaItem[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class AsistenciasService {
   private readonly base = `${environment.apiUrl}/asistencias`;
@@ -65,5 +97,13 @@ export class AsistenciasService {
 
   registrarAsistencias(command: RegistrarAsistenciasCommand): Observable<ResumenAsistencias> {
     return this.http.post<ResumenAsistencias>(this.base, command);
+  }
+
+  obtenerRegistroDelDia(espacioCurricularId: number, fecha: string): Observable<RegistroDelDia> {
+    return this.http.get<RegistroDelDia>(`${this.base}/espacios/${espacioCurricularId}/fecha/${fecha}`);
+  }
+
+  rectificarAsistencias(command: RectificarAsistenciasCommand): Observable<void> {
+    return this.http.put<void>(`${this.base}/rectificar`, command);
   }
 }
