@@ -407,3 +407,10 @@ D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\buildcheck\
 D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\buildcheck\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
 D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\buildcheck\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll
 D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\buildcheck\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
+D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\appsettings.Development.example.json
+D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\appsettings.Development.json
+D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\appsettings.json
+D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\appsettings.Production.json
+D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\PracticaProfesional.deps.json
+D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\PracticaProfesional.runtimeconfig.json
+D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\PracticaProfesional.staticwebassets.endpoints.json

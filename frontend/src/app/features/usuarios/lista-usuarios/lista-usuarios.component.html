@@ -1,4 +1,4 @@
-﻿<div class="page">
+<div class="page">
   <header class="page-header">
     <div class="header-left">
       <h1>Gestión de Usuarios</h1>
@@ -9,21 +9,33 @@
   </header>
 
   <div class="filtros">
-    <label for="filtroRol">Filtrar por rol:</label>
-    <select id="filtroRol" (change)="filtrarPorRol($event)">
-      <option value="">Todos</option>
-      @for (rol of roles; track rol) {
-        <option [value]="rol">{{ rol }}</option>
-      }
-    </select>
+    <div class="filtro-item">
+      <label for="filtroRol">Filtrar por rol:</label>
+      <select id="filtroRol" (change)="onFiltroRol($event)">
+        <option value="">Todos</option>
+        @for (rol of roles; track rol) {
+          <option [value]="rol">{{ rol }}</option>
+        }
+      </select>
+    </div>
+
+    <div class="filtro-busqueda">
+      <input
+        #inputBusqueda
+        type="text"
+        placeholder="Buscar por nombre, legajo, email, DNI…"
+        (input)="onBusqueda(inputBusqueda.value)">
+    </div>
   </div>
 
   @if (cargando()) {
     <p class="estado">Cargando...</p>
   } @else if (error()) {
     <p class="estado error">{{ error() }}</p>
-  } @else if (usuarios().length === 0) {
+  } @else if (!hayUsuariosEnBD()) {
     <p class="estado">No hay usuarios registrados.</p>
+  } @else if (usuarios().length === 0) {
+    <p class="estado">No se encontraron usuarios con ese criterio.</p>
   } @else {
     <table class="tabla">
       <thead>

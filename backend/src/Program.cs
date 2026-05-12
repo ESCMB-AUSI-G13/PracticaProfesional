@@ -81,6 +81,7 @@ builder.Services.AddScoped<ListarUsuariosUseCase>();
 builder.Services.AddScoped<ModificarUsuarioUseCase>();
 builder.Services.AddScoped<DesactivarUsuarioUseCase>();
 builder.Services.AddScoped<ReactivarUsuarioUseCase>();
+builder.Services.AddScoped<CambiarClaveUseCase>();
 
 // Docentes
 builder.Services.AddScoped<CrearDocenteUseCase>();

@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { UsuariosService, Usuario } from '../usuarios.service';
@@ -15,10 +15,29 @@ const POLL_SESIONES_MS = 30_000;
   styleUrl: './lista-usuarios.component.scss'
 })
 export class ListaUsuariosComponent implements OnInit, OnDestroy {
-  usuarios       = signal<Usuario[]>([]);
-  cargando       = signal(true);
-  error          = signal<string | null>(null);
+  private todosLosUsuarios = signal<Usuario[]>([]);
+  cargando        = signal(true);
+  error           = signal<string | null>(null);
   sesionesActivas = signal<Set<number>>(new Set());
+  filtroRol       = signal('');
+  busqueda        = signal('');
+
+  usuarios = computed(() => {
+    const todos  = this.todosLosUsuarios();
+    const rol    = this.filtroRol().toLowerCase();
+    const texto  = this.busqueda().toLowerCase().trim();
+
+    return todos.filter(u => {
+      const cumpleRol = !rol || u.rol.toLowerCase() === rol;
+      const cumpleBusqueda = !texto ||
+        u.nombre.toLowerCase().includes(texto)   ||
+        u.apellido.toLowerCase().includes(texto) ||
+        u.legajo.toLowerCase().includes(texto)   ||
+        u.email.toLowerCase().includes(texto)    ||
+        (u.dni ?? '').toLowerCase().includes(texto);
+      return cumpleRol && cumpleBusqueda;
+    });
+  });
 
   readonly roles = ['Estudiante', 'Docente', 'Preceptor', 'Direccion'];
 
@@ -34,7 +53,6 @@ export class ListaUsuariosComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.cargarUsuarios();
     this.cargarSesiones();
-    // Actualiza el indicador de presencia cada 30 s
     this.pollIntervalo = setInterval(() => this.cargarSesiones(), POLL_SESIONES_MS);
   }
 
@@ -42,11 +60,11 @@ export class ListaUsuariosComponent implements OnInit, OnDestroy {
     if (this.pollIntervalo !== null) clearInterval(this.pollIntervalo);
   }
 
-  cargarUsuarios(rol?: string): void {
+  cargarUsuarios(): void {
     this.cargando.set(true);
     this.error.set(null);
-    this.usuariosService.listar(rol).subscribe({
-      next: (data) => { this.usuarios.set(data); this.cargando.set(false); },
+    this.usuariosService.listar().subscribe({
+      next: (data) => { this.todosLosUsuarios.set(data); this.cargando.set(false); },
       error: () => { this.error.set('Error al cargar usuarios.'); this.cargando.set(false); }
     });
   }
@@ -62,9 +80,16 @@ export class ListaUsuariosComponent implements OnInit, OnDestroy {
     return this.sesionesActivas().has(id);
   }
 
-  filtrarPorRol(event: Event): void {
-    const rol = (event.target as HTMLSelectElement).value;
-    this.cargarUsuarios(rol || undefined);
+  onFiltroRol(event: Event): void {
+    this.filtroRol.set((event.target as HTMLSelectElement).value);
+  }
+
+  onBusqueda(texto: string): void {
+    this.busqueda.set(texto);
+  }
+
+  hayUsuariosEnBD(): boolean {
+    return this.todosLosUsuarios().length > 0;
   }
 
   desactivar(id: number): void {
@@ -83,7 +108,6 @@ export class ListaUsuariosComponent implements OnInit, OnDestroy {
     });
   }
 
-  irAlDashboard(): void { this.router.navigate(['/dashboard']); }
   irACrear(): void       { this.router.navigate(['/usuarios/nuevo']); }
   irAEditar(id: number): void { this.router.navigate(['/usuarios', id, 'editar']); }
   logout(): void         { this.authService.logout(); }

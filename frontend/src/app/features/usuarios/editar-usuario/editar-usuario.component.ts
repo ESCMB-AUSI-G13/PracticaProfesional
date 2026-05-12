@@ -1,6 +1,9 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule, FormBuilder, FormGroup,
+  Validators, AbstractControl, ValidationErrors
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UsuariosService } from '../usuarios.service';
 
@@ -13,9 +16,9 @@ import { UsuariosService } from '../usuarios.service';
 })
 export class EditarUsuarioComponent implements OnInit {
   form: FormGroup;
-  cargando = signal(false);
+  cargando      = signal(false);
   cargandoDatos = signal(true);
-  error = signal<string | null>(null);
+  error         = signal<string | null>(null);
   usuarioId!: number;
 
   readonly roles = ['Estudiante', 'Docente', 'Preceptor', 'Direccion'];
@@ -27,11 +30,22 @@ export class EditarUsuarioComponent implements OnInit {
     private router: Router
   ) {
     this.form = this.fb.group({
-      nombre: ['', [Validators.required, Validators.maxLength(100)]],
-      apellido: ['', [Validators.required, Validators.maxLength(100)]],
-      email: ['', [Validators.required, Validators.email]],
-      rol: ['', Validators.required]
-    });
+      nombre:         ['', [Validators.required, Validators.maxLength(100)]],
+      apellido:       ['', [Validators.required, Validators.maxLength(100)]],
+      email:          ['', [Validators.required, Validators.email]],
+      rol:            ['', Validators.required],
+      nuevaClave:     [''],
+      confirmarClave: ['']
+    }, { validators: this.validarClave });
+  }
+
+  private validarClave(group: AbstractControl): ValidationErrors | null {
+    const nueva     = group.get('nuevaClave')?.value as string;
+    const confirmar = group.get('confirmarClave')?.value as string;
+    if (!nueva) return null;
+    if (nueva.length < 6) return { claveCorta: true };
+    if (nueva !== confirmar) return { claveNoCoincide: true };
+    return null;
   }
 
   ngOnInit(): void {
@@ -46,10 +60,10 @@ export class EditarUsuarioComponent implements OnInit {
           return;
         }
         this.form.patchValue({
-          nombre: usuario.nombre,
+          nombre:   usuario.nombre,
           apellido: usuario.apellido,
-          email: usuario.email,
-          rol: usuario.rol
+          email:    usuario.email,
+          rol:      usuario.rol
         });
         this.cargandoDatos.set(false);
       },
@@ -66,10 +80,22 @@ export class EditarUsuarioComponent implements OnInit {
     this.error.set(null);
     this.cargando.set(true);
 
-    this.usuariosService.modificar(this.usuarioId, this.form.value).subscribe({
+    const { nombre, apellido, email, rol, nuevaClave } = this.form.value;
+
+    this.usuariosService.modificar(this.usuarioId, { nombre, apellido, email, rol }).subscribe({
       next: () => {
-        this.cargando.set(false);
-        this.router.navigate(['/usuarios']);
+        if (nuevaClave) {
+          this.usuariosService.cambiarClave(this.usuarioId, nuevaClave).subscribe({
+            next: () => { this.cargando.set(false); this.router.navigate(['/usuarios']); },
+            error: (err) => {
+              this.cargando.set(false);
+              this.error.set(err?.error?.detail ?? 'Error al cambiar la clave.');
+            }
+          });
+        } else {
+          this.cargando.set(false);
+          this.router.navigate(['/usuarios']);
+        }
       },
       error: (err) => {
         this.cargando.set(false);

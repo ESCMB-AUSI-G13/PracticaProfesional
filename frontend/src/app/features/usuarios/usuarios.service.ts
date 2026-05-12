@@ -60,4 +60,8 @@ export class UsuariosService {
   reactivar(id: number): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/${id}/reactivar`, {});
   }
+
+  cambiarClave(id: number, nuevaClave: string): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/${id}/clave`, { nuevaClave });
+  }
 }

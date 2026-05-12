@@ -13,7 +13,8 @@ public class UsuariosController(
     ListarUsuariosUseCase listarUsuarios,
     ModificarUsuarioUseCase modificarUsuario,
     DesactivarUsuarioUseCase desactivarUsuario,
-    ReactivarUsuarioUseCase reactivarUsuario) : ControllerBase
+    ReactivarUsuarioUseCase reactivarUsuario,
+    CambiarClaveUseCase cambiarClave) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<UsuarioDto>), StatusCodes.Status200OK)]
@@ -58,6 +59,16 @@ public class UsuariosController(
     public async Task<IActionResult> Reactivar(int id, CancellationToken cancellationToken)
     {
         await reactivarUsuario.EjecutarAsync(id, cancellationToken);
+        return NoContent();
+    }
+
+    [HttpPatch("{id:int}/clave")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> CambiarClave(int id, [FromBody] CambiarClaveDto dto, CancellationToken cancellationToken)
+    {
+        await cambiarClave.EjecutarAsync(id, dto, cancellationToken);
         return NoContent();
     }
 }
