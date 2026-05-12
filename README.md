@@ -1,13 +1,30 @@
 # Sistema Académico Integral
 **Instituto Superior del Profesorado en Ciencias Económicas y Jurídicas "Dr. José A. Ortiz y Herrera"**
 
+![Angular](https://img.shields.io/badge/Angular-19-DD0031?logo=angular&logoColor=white)
+![.NET](https://img.shields.io/badge/.NET-8-512BD4?logo=dotnet&logoColor=white)
+![Azure SQL](https://img.shields.io/badge/Azure_SQL-Database-0078D4?logo=microsoftazure&logoColor=white)
+![Azure](https://img.shields.io/badge/Deploy-Azure-0078D4?logo=microsoftazure&logoColor=white)
+
+---
+
+## ¿Qué es este sistema?
+
+Plataforma web de gestión académica desarrollada para centralizar y automatizar los procesos administrativos del instituto. Reemplaza planillas dispersas y correos manuales con un sistema integral que cubre:
+
+- **Gestión de usuarios** con roles diferenciados: Administrador, Docente, Preceptor y Estudiante
+- **Inscripciones** a materias y exámenes con validación automática de correlatividades
+- **Calificaciones** con historial, rectificación y registro de auditoría inmutable
+- **Reportes** para dirección: inasistencias, evolución de notas, comparativo por comisión y cátedra
+- **Calendario académico** y seguimiento de estado académico por estudiante
+
 ---
 
 ## Requisitos
 
 - [.NET 8 SDK](https://dotnet.microsoft.com/download)
 - [Node.js + Angular CLI](https://angular.io/cli)
-- Acceso a la base de datos Azure SQL (pedirle la password a Pablo)
+- Acceso a la base de datos Azure SQL (credenciales por fuera del repositorio)
 
 ---
 
