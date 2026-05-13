@@ -105,6 +105,12 @@
             <canvas #barrasCanvas></canvas>
           </div>
         </div>
+        <div class="grafico-card grafico-full">
+          <h3>Inasistencias por materia</h3>
+          <div class="canvas-wrapper" [style.height.px]="chartMateriaHeight()">
+            <canvas #materiasCanvas></canvas>
+          </div>
+        </div>
       </section>
     }
 

@@ -33,6 +33,7 @@
 .canvas-wrapper { position: relative; }
 .dona-wrapper   { height: 230px; }
 .barras-wrapper { height: 230px; }
+.grafico-full   { grid-column: 1 / -1; }
 
 .tabla-wrapper { overflow-x: auto; }
 .tabla { width: 100%; border-collapse: collapse; font-size: 0.9rem; th, td { padding: 0.6rem 0.75rem; border: 1px solid #e0e0e0; text-align: left; } th { background: #f5f5f5; font-weight: 600; } }

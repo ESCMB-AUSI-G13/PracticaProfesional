@@ -3,6 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
+export interface EstudianteBusqueda {
+  id:       number;
+  nombre:   string;
+  apellido: string;
+  legajo:   string;
+}
+
 export interface Estudiante {
   id:            number;
   usuarioId:     number;
@@ -49,6 +56,10 @@ export class EstudiantesService {
 
   listar(): Observable<Estudiante[]> {
     return this.http.get<Estudiante[]>(this.apiUrl);
+  }
+
+  buscarParaAutocompletar(): Observable<EstudianteBusqueda[]> {
+    return this.http.get<EstudianteBusqueda[]>(`${this.apiUrl}/buscar`);
   }
 
   crear(dto: CrearEstudianteRequest): Observable<Estudiante> {

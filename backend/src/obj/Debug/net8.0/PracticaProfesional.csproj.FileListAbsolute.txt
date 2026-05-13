@@ -414,3 +414,10 @@ D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\buildchec
 D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\PracticaProfesional.deps.json
 D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\PracticaProfesional.runtimeconfig.json
 D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\PracticaProfesional.staticwebassets.endpoints.json
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\appsettings.Development.example.json
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\appsettings.Development.json
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\appsettings.json
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\appsettings.Production.json
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\PracticaProfesional.deps.json
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\PracticaProfesional.runtimeconfig.json
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\PracticaProfesional.staticwebassets.endpoints.json

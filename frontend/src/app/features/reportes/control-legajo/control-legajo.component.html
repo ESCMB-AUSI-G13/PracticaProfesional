@@ -1,4 +1,4 @@
-﻿<div class="page">
+<div class="page">
   <header class="page-header">
     <div class="header-left">
       <h1>Control Individual por Legajo</h1>
@@ -7,19 +7,43 @@
 
   <!-- Buscador -->
   <section class="buscador">
-    <input
-      type="text"
-      [ngModel]="legajoBusqueda()"
-      (ngModelChange)="legajoBusqueda.set($event)"
-      placeholder="Ingresá el legajo del estudiante (ej: EST-2024-001)"
-      class="input-legajo"
-      (keyup.enter)="buscar()"
-    />
-    <button class="btn btn-primary" (click)="buscar()" [disabled]="cargando() || !legajoBusqueda().trim()">
-      {{ cargando() ? 'Buscando...' : 'Buscar' }}
-    </button>
-    @if (resultado()) {
-      <button class="btn btn-secondary" (click)="limpiar()">Nueva búsqueda</button>
+    <div class="buscador-row">
+      <div class="input-wrapper">
+        <input
+          type="text"
+          [ngModel]="busquedaTexto()"
+          (ngModelChange)="busquedaTexto.set($event)"
+          (keyup.enter)="buscarManual()"
+          placeholder="Buscá por nombre o ingresá el legajo directamente..."
+          class="input-busqueda"
+          [class.input-con-lista]="sugerencias().length > 0"
+        />
+        @if (sugerencias().length > 0) {
+          <div class="sugerencias" (mousedown)="$event.preventDefault()">
+            @for (e of sugerencias(); track e.id) {
+              <button class="sugerencia-item" (click)="seleccionarEstudiante(e)">
+                <span class="sug-nombre">{{ e.apellido }}, {{ e.nombre }}</span>
+                <span class="sug-legajo">{{ e.legajo }}</span>
+              </button>
+            }
+          </div>
+        }
+      </div>
+      <button class="btn btn-primary" (click)="buscarManual()" [disabled]="cargando() || !busquedaTexto().trim()">
+        {{ cargando() ? 'Buscando...' : 'Buscar' }}
+      </button>
+      @if (resultado()) {
+        <button class="btn btn-secondary" (click)="limpiar()">Nueva búsqueda</button>
+      }
+    </div>
+    @if (cargandoEstudiantes()) {
+      <p class="buscador-hint">Cargando lista de alumnos...</p>
+    } @else if (errorEstudiantes()) {
+      <p class="buscador-hint error-hint">{{ errorEstudiantes() }}</p>
+    } @else if (estudiantes().length > 0) {
+      <p class="buscador-hint">Escribí al menos 2 letras para ver sugerencias, o ingresá el legajo directamente.</p>
+    } @else {
+      <p class="buscador-hint">Ingresá el legajo del estudiante para buscar.</p>
     }
   </section>
 
@@ -80,6 +104,21 @@
         <span class="metrica-label">Regularidad perdida</span>
       </div>
     </section>
+
+    <!-- Gráfico de asistencia por materia -->
+    @if (r.asistenciasPorMateria.length > 0) {
+      <div class="chart-card">
+        <h2 class="seccion-titulo">Asistencia por materia</h2>
+        <div class="canvas-wrapper" [style.height.px]="chartHeight()">
+          <canvas #asistenciaCanvas></canvas>
+        </div>
+        <div class="chart-leyenda">
+          <span class="leyenda-item leyenda-ok">■ Regular</span>
+          <span class="leyenda-item leyenda-riesgo">■ En riesgo</span>
+          <span class="leyenda-item leyenda-critico">■ Regularidad perdida</span>
+        </div>
+      </div>
+    }
 
     <!-- Tabla por materia -->
     @if (r.asistenciasPorMateria.length === 0) {

@@ -83,6 +83,12 @@ export class PanelCatedrasComponent implements OnInit, OnDestroy {
     this.chart?.destroy();
   }
 
+  private colorAprobacion(pct: number): string {
+    if (pct >= 70) return 'rgba(39, 174, 96, 0.85)';
+    if (pct >= 50) return 'rgba(243, 156, 18, 0.85)';
+    return 'rgba(231, 76, 60, 0.85)';
+  }
+
   private initChart(): void {
     if (!this.canvasRef) return;
     this.chart?.destroy();
@@ -92,24 +98,39 @@ export class PanelCatedrasComponent implements OnInit, OnDestroy {
     this.chart = new Chart(this.canvasRef.nativeElement, {
       type: 'bar',
       data: {
-        labels: catedras.map(c => c.materiaNombre),
+        labels: catedras.map(c => `${c.materiaNombre} (${c.comision})`),
         datasets: [
           {
             label: '% Aprobación',
             data: catedras.map(c => c.porcentajeAprobacion),
-            backgroundColor: 'rgba(52, 152, 219, 0.85)',
+            backgroundColor: catedras.map(c => this.colorAprobacion(c.porcentajeAprobacion)),
+            borderRadius: 4,
           },
           {
-            label: 'Promedio',
-            data: catedras.map(c => c.promedioGeneral ?? 0),
-            backgroundColor: 'rgba(189, 195, 199, 0.85)',
+            label: 'Promedio (×10)',
+            data: catedras.map(c => (c.promedioGeneral ?? 0) * 10),
+            backgroundColor: 'rgba(189, 195, 199, 0.7)',
+            borderRadius: 4,
           }
         ]
       },
       options: {
         indexAxis: 'y',
         responsive: true,
-        plugins: { legend: { position: 'bottom' } },
+        plugins: {
+          legend: { position: 'bottom' },
+          tooltip: {
+            callbacks: {
+              label: ctx => {
+                if (ctx.datasetIndex === 1) {
+                  const real = (ctx.raw as number) / 10;
+                  return ` Promedio: ${real.toFixed(2)}`;
+                }
+                return ` % Aprobación: ${(ctx.raw as number).toFixed(1)}%`;
+              }
+            }
+          }
+        },
         scales: { x: { min: 0, max: 100, title: { display: true, text: 'Valor' } } }
       }
     });

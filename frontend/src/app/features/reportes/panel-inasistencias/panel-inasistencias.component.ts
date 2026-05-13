@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, signal, Injector, afterNextRender } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, signal, computed, Injector, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -32,11 +32,13 @@ Chart.register(DoughnutController, ArcElement, Tooltip, Legend, BarController, C
   styleUrl: './panel-inasistencias.component.scss'
 })
 export class PanelInasistenciasComponent implements OnInit, OnDestroy {
-  @ViewChild('donaCanvas')   donaCanvas!:   ElementRef<HTMLCanvasElement>;
-  @ViewChild('barrasCanvas') barrasCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('donaCanvas')    donaCanvas!:    ElementRef<HTMLCanvasElement>;
+  @ViewChild('barrasCanvas')  barrasCanvas!:  ElementRef<HTMLCanvasElement>;
+  @ViewChild('materiasCanvas') materiasCanvas?: ElementRef<HTMLCanvasElement>;
 
-  private donaChart:   Chart | null = null;
-  private barrasChart: Chart | null = null;
+  private donaChart:    Chart | null = null;
+  private barrasChart:  Chart | null = null;
+  private materiasChart: Chart | null = null;
 
   // ── Opciones para selects ──────────────────────────────────────────────────
   cursos    = signal<Curso[]>([]);
@@ -54,6 +56,13 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
   cargando = signal(false);
   error    = signal<string | null>(null);
   buscado  = signal(false);
+
+  chartMateriaHeight = computed(() => {
+    const r = this.reporte();
+    if (!r) return 180;
+    const count = new Set(r.registros.map(reg => reg.materia)).size;
+    return Math.max(180, count * 40 + 50);
+  });
 
   constructor(
     private injector: Injector,
@@ -78,6 +87,7 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.donaChart?.destroy();
     this.barrasChart?.destroy();
+    this.materiasChart?.destroy();
   }
 
   buscar(): void {
@@ -97,7 +107,6 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
       next: data => {
         this.reporte.set(data);
         this.cargando.set(false);
-        // esperar al próximo render de Angular para que los canvas del @if existan en el DOM
         afterNextRender(() => this.renderCharts(), { injector: this.injector });
       },
       error: () => {
@@ -113,6 +122,7 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
 
     this.donaChart?.destroy();
     this.barrasChart?.destroy();
+    this.materiasChart?.destroy();
 
     // ── Dona: justificadas vs injustificadas ─────────────────────────────────
     this.donaChart = new Chart(this.donaCanvas.nativeElement, {
@@ -145,13 +155,11 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
     });
 
     // ── Barras horizontales: top 10 alumnos ─────────────────────────────────
-    const conteo = new Map<string, number>();
+    const conteoAlumnos = new Map<string, number>();
     for (const reg of r.registros) {
-      conteo.set(reg.nombreCompleto, (conteo.get(reg.nombreCompleto) ?? 0) + 1);
+      conteoAlumnos.set(reg.nombreCompleto, (conteoAlumnos.get(reg.nombreCompleto) ?? 0) + 1);
     }
-    const top = [...conteo.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 10);
+    const top = [...conteoAlumnos.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
 
     this.barrasChart = new Chart(this.barrasCanvas.nativeElement, {
       type: 'bar',
@@ -161,6 +169,38 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
           label: 'Inasistencias',
           data: top.map(([, count]) => count),
           backgroundColor: '#3498db',
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f0f0f0' } },
+          y: { ticks: { font: { size: 11 } } }
+        }
+      }
+    });
+
+    // ── Barras horizontales: inasistencias por materia ───────────────────────
+    if (!this.materiasCanvas) return;
+
+    const conteoMaterias = new Map<string, number>();
+    for (const reg of r.registros) {
+      conteoMaterias.set(reg.materia, (conteoMaterias.get(reg.materia) ?? 0) + 1);
+    }
+    const topMaterias = [...conteoMaterias.entries()].sort((a, b) => b[1] - a[1]);
+
+    this.materiasChart = new Chart(this.materiasCanvas.nativeElement, {
+      type: 'bar',
+      data: {
+        labels: topMaterias.map(([name]) => name),
+        datasets: [{
+          label: 'Inasistencias',
+          data: topMaterias.map(([, count]) => count),
+          backgroundColor: '#8e44ad',
           borderRadius: 4,
         }]
       },
@@ -188,8 +228,10 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
     this.error.set(null);
     this.donaChart?.destroy();
     this.barrasChart?.destroy();
-    this.donaChart   = null;
-    this.barrasChart = null;
+    this.materiasChart?.destroy();
+    this.donaChart    = null;
+    this.barrasChart  = null;
+    this.materiasChart = null;
   }
 
   irAlDashboard(): void {

@@ -7,7 +7,7 @@ namespace PracticaProfesional.Controllers;
 
 [ApiController]
 [Route("api/estudiantes")]
-[Authorize(Roles = "Direccion")]
+[Authorize]
 public class EstudiantesController(
     CrearEstudianteUseCase crearEstudiante,
     ListarEstudiantesUseCase listarEstudiantes,
@@ -16,6 +16,7 @@ public class EstudiantesController(
     ReactivarEstudianteUseCase reactivarEstudiante) : ControllerBase
 {
     [HttpGet]
+    [Authorize(Roles = "Direccion")]
     [ProducesResponseType(typeof(IEnumerable<EstudianteDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Listar(CancellationToken cancellationToken)
     {
@@ -23,7 +24,18 @@ public class EstudiantesController(
         return Ok(resultado);
     }
 
+    [HttpGet("buscar")]
+    [Authorize(Roles = "Direccion,Preceptor")]
+    [ProducesResponseType(typeof(IEnumerable<EstudianteBusquedaDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> Buscar(CancellationToken cancellationToken)
+    {
+        var estudiantes = await listarEstudiantes.EjecutarAsync(cancellationToken);
+        var resultado = estudiantes.Select(e => new EstudianteBusquedaDto(e.Id, e.Nombre, e.Apellido, e.Legajo));
+        return Ok(resultado);
+    }
+
     [HttpPost]
+    [Authorize(Roles = "Direccion")]
     [ProducesResponseType(typeof(EstudianteDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -34,6 +46,7 @@ public class EstudiantesController(
     }
 
     [HttpPut("{usuarioId:int}")]
+    [Authorize(Roles = "Direccion")]
     [ProducesResponseType(typeof(EstudianteDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
@@ -44,6 +57,7 @@ public class EstudiantesController(
     }
 
     [HttpDelete("{usuarioId:int}")]
+    [Authorize(Roles = "Direccion")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Desactivar(int usuarioId, CancellationToken cancellationToken)
@@ -53,6 +67,7 @@ public class EstudiantesController(
     }
 
     [HttpPatch("{usuarioId:int}/reactivar")]
+    [Authorize(Roles = "Direccion")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Reactivar(int usuarioId, CancellationToken cancellationToken)
