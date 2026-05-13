@@ -3,6 +3,15 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 
+export const MOTIVOS_INASISTENCIA = [
+  'Enfermedad',
+  'Certificado médico',
+  'Fallecimiento familiar',
+  'Trámite personal',
+  'Representación institucional',
+  'Otro',
+];
+
 export interface EspacioAsistencia {
   espacioCurricularId: number;
   cursoId:             number;

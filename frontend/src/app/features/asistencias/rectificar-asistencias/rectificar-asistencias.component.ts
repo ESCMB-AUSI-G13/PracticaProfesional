@@ -7,13 +7,15 @@ import {
   EspacioAsistencia,
   RegistroDelDia,
   AsistenciaDetalle,
+  MOTIVOS_INASISTENCIA,
 } from '../asistencias.service';
 import { EspaciosCurricularesService, EspacioCurricular } from '../../espacios-curriculares/espacios-curriculares.service';
 
 interface FilaRectificacion extends AsistenciaDetalle {
   estadoEditado: string;
-  motivoEditado: string;
-  modificado: boolean;
+  motivoOpcion:  string;
+  motivoTexto:   string;
+  modificado:    boolean;
 }
 
 @Component({
@@ -46,6 +48,8 @@ export class RectificarAsistenciasComponent implements OnInit {
   exito     = signal(false);
 
   hayModificaciones = computed(() => this.filas().some(f => f.modificado));
+
+  readonly motivos = MOTIVOS_INASISTENCIA;
 
   constructor(
     private authService: AuthService,
@@ -99,12 +103,19 @@ export class RectificarAsistenciasComponent implements OnInit {
 
     this.asistenciasService.obtenerRegistroDelDia(espacio.id, this.fecha()).subscribe({
       next: (registro: RegistroDelDia) => {
-        this.filas.set(registro.alumnos.map(a => ({
-          ...a,
-          estadoEditado: a.estado,
-          motivoEditado: a.motivo ?? '',
-          modificado: false
-        })));
+        this.filas.set(registro.alumnos.map(a => {
+          const motivoGuardado = a.motivo ?? '';
+          const motivoOpcion = !motivoGuardado ? ''
+            : MOTIVOS_INASISTENCIA.slice(0, -1).includes(motivoGuardado) ? motivoGuardado
+            : 'Otro';
+          return {
+            ...a,
+            estadoEditado: a.estado,
+            motivoOpcion,
+            motivoTexto: motivoOpcion === 'Otro' ? motivoGuardado : '',
+            modificado: false,
+          };
+        }));
         this.registroCargado.set(true);
         this.cargandoRegistro.set(false);
       },
@@ -118,14 +129,24 @@ export class RectificarAsistenciasComponent implements OnInit {
 
   // ── Lógica de edición ────────────────────────────────────────────────────────
 
+  private motivoFinal(fila: FilaRectificacion): string {
+    if (fila.estadoEditado !== 'AusenteJustificado') return '';
+    return fila.motivoOpcion === 'Otro'
+      ? (fila.motivoTexto.trim() || 'Otro')
+      : fila.motivoOpcion;
+  }
+
   onEstadoChange(fila: FilaRectificacion): void {
-    if (fila.estadoEditado !== 'AusenteJustificado') fila.motivoEditado = '';
-    fila.modificado = fila.estadoEditado !== fila.estado || fila.motivoEditado !== (fila.motivo ?? '');
+    if (fila.estadoEditado !== 'AusenteJustificado') {
+      fila.motivoOpcion = '';
+      fila.motivoTexto = '';
+    }
+    fila.modificado = fila.estadoEditado !== fila.estado || this.motivoFinal(fila) !== (fila.motivo ?? '');
     this.filas.set([...this.filas()]);
   }
 
   onMotivoChange(fila: FilaRectificacion): void {
-    fila.modificado = fila.estadoEditado !== fila.estado || fila.motivoEditado !== (fila.motivo ?? '');
+    fila.modificado = fila.estadoEditado !== fila.estado || this.motivoFinal(fila) !== (fila.motivo ?? '');
     this.filas.set([...this.filas()]);
   }
 
@@ -136,8 +157,8 @@ export class RectificarAsistenciasComponent implements OnInit {
     if (!espacio) return;
 
     for (const fila of this.filas()) {
-      if (fila.estadoEditado === 'AusenteJustificado' && !fila.motivoEditado.trim()) {
-        this.error.set('Completá el motivo para todas las ausencias justificadas.');
+      if (fila.estadoEditado === 'AusenteJustificado' && !fila.motivoOpcion) {
+        this.error.set('Seleccioná el motivo para todas las ausencias justificadas.');
         return;
       }
     }
@@ -150,7 +171,7 @@ export class RectificarAsistenciasComponent implements OnInit {
       .map(f => ({
         asistenciaId: f.asistenciaId,
         nuevoEstado: f.estadoEditado,
-        motivo: f.motivoEditado.trim() || undefined
+        motivo: this.motivoFinal(f) || undefined,
       }));
 
     this.asistenciasService.rectificarAsistencias({
@@ -162,8 +183,8 @@ export class RectificarAsistenciasComponent implements OnInit {
         this.filas.update(filas => filas.map(f => ({
           ...f,
           estado: f.estadoEditado,
-          motivo: f.motivoEditado || null,
-          modificado: false
+          motivo: this.motivoFinal(f) || null,
+          modificado: false,
         })));
         this.exito.set(true);
         this.guardando.set(false);

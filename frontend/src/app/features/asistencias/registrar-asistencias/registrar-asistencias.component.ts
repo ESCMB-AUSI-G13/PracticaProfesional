@@ -6,12 +6,14 @@ import {
   EspacioAsistencia,
   AlumnoParaAsistencia,
   ResumenAsistencias,
+  MOTIVOS_INASISTENCIA,
 } from '../asistencias.service';
 
 interface FilaAlumno extends AlumnoParaAsistencia {
   ausente:      boolean;
   tipoAusencia: 'Injustificada' | 'Justificada';
-  motivo:       string;
+  motivoOpcion: string;
+  motivoTexto:  string;
 }
 
 @Component({
@@ -39,6 +41,8 @@ export class RegistrarAsistenciasComponent implements OnInit {
   guardando  = signal(false);
   error      = signal<string | null>(null);
   resumen    = signal<ResumenAsistencias | null>(null);
+
+  readonly motivos = MOTIVOS_INASISTENCIA;
 
   constructor(private service: AsistenciasService) {}
 
@@ -78,7 +82,8 @@ export class RegistrarAsistenciasComponent implements OnInit {
           ...a,
           ausente: false,
           tipoAusencia: 'Injustificada',
-          motivo: ''
+          motivoOpcion: '',
+          motivoTexto: '',
         })));
         this.cargandoLista.set(false);
       },
@@ -90,7 +95,8 @@ export class RegistrarAsistenciasComponent implements OnInit {
     fila.ausente = !fila.ausente;
     if (!fila.ausente) {
       fila.tipoAusencia = 'Injustificada';
-      fila.motivo = '';
+      fila.motivoOpcion = '';
+      fila.motivoTexto = '';
     }
     this.filas.set([...this.filas()]);
   }
@@ -102,8 +108,8 @@ export class RegistrarAsistenciasComponent implements OnInit {
     if (!espacio || this.filas().length === 0) return;
 
     for (const fila of this.filas()) {
-      if (fila.ausente && fila.tipoAusencia === 'Justificada' && !fila.motivo.trim()) {
-        this.error.set('Completá el motivo para todas las ausencias justificadas.');
+      if (fila.ausente && fila.tipoAusencia === 'Justificada' && !fila.motivoOpcion) {
+        this.error.set('Seleccioná el motivo para todas las ausencias justificadas.');
         return;
       }
     }
@@ -116,7 +122,9 @@ export class RegistrarAsistenciasComponent implements OnInit {
       .map(f => ({
         estudianteId: f.estudianteId,
         tipoAusencia: f.tipoAusencia,
-        motivo: f.motivo.trim() || undefined
+        motivo: f.tipoAusencia === 'Justificada'
+          ? (f.motivoOpcion === 'Otro' ? (f.motivoTexto.trim() || 'Otro') : f.motivoOpcion)
+          : undefined,
       }));
 
     this.service.registrarAsistencias({

@@ -147,12 +147,20 @@
                   </td>
                   <td class="col-motivo">
                     @if (fila.ausente && fila.tipoAusencia === 'Justificada') {
-                      <input
-                        type="text"
-                        [(ngModel)]="fila.motivo"
-                        placeholder="Motivo obligatorio"
-                        maxlength="200"
-                        class="input-motivo" />
+                      <select [(ngModel)]="fila.motivoOpcion" class="select-motivo">
+                        <option value="">Seleccioná un motivo...</option>
+                        @for (m of motivos; track m) {
+                          <option [value]="m">{{ m }}</option>
+                        }
+                      </select>
+                      @if (fila.motivoOpcion === 'Otro') {
+                        <input
+                          type="text"
+                          [(ngModel)]="fila.motivoTexto"
+                          placeholder="Detalle (opcional)"
+                          maxlength="200"
+                          class="input-motivo-otro" />
+                      }
                     } @else {
                       <span class="texto-vacio">—</span>
                     }

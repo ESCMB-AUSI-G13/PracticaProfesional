@@ -17,6 +17,23 @@
 .card-valor { font-size: 2rem; font-weight: 700; color: #2c3e50; }
 .card-label { font-size: 0.8rem; color: #777; margin-top: 0.2rem; }
 
+.graficos-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+.grafico-card {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  h3 { margin: 0 0 0.75rem; font-size: 0.88rem; font-weight: 600; color: #444; text-transform: uppercase; letter-spacing: 0.03em; }
+}
+.canvas-wrapper { position: relative; }
+.dona-wrapper   { height: 230px; }
+.barras-wrapper { height: 230px; }
+
 .tabla-wrapper { overflow-x: auto; }
 .tabla { width: 100%; border-collapse: collapse; font-size: 0.9rem; th, td { padding: 0.6rem 0.75rem; border: 1px solid #e0e0e0; text-align: left; } th { background: #f5f5f5; font-weight: 600; } }
 .motivo { color: #666; font-style: italic; max-width: 200px; }
@@ -32,4 +49,6 @@
   .page { padding: 1rem; }
   .page-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
   .card { min-width: unset; flex: 1 1 120px; }
+  .graficos-grid { grid-template-columns: 1fr; }
+  .dona-wrapper, .barras-wrapper { height: 200px; }
 }

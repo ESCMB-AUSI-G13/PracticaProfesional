@@ -50,12 +50,17 @@
 }
 .fila-modificada { background: #fffbea; }
 
-.select-tipo {
+.select-tipo, .select-motivo {
   padding: 0.3rem 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem;
   background: white; width: 100%;
 }
 .input-motivo {
   width: 100%; padding: 0.3rem 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; box-sizing: border-box;
+  &:focus { outline: 2px solid #3498db; border-color: transparent; }
+}
+.input-motivo-otro {
+  width: 100%; margin-top: 0.35rem; padding: 0.3rem 0.5rem; border: 1px solid #ccc; border-radius: 4px;
+  font-size: 0.85rem; box-sizing: border-box;
   &:focus { outline: 2px solid #3498db; border-color: transparent; }
 }
 .texto-vacio { color: #bbb; }

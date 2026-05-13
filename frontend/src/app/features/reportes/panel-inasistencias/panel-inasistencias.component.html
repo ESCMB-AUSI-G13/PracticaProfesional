@@ -90,6 +90,24 @@
       </div>
     </section>
 
+    <!-- Gráficos -->
+    @if (reporte()!.registros.length > 0) {
+      <section class="graficos-grid">
+        <div class="grafico-card">
+          <h3>Tipo de ausencias</h3>
+          <div class="canvas-wrapper dona-wrapper">
+            <canvas #donaCanvas></canvas>
+          </div>
+        </div>
+        <div class="grafico-card">
+          <h3>Top alumnos con más inasistencias</h3>
+          <div class="canvas-wrapper barras-wrapper">
+            <canvas #barrasCanvas></canvas>
+          </div>
+        </div>
+      </section>
+    }
+
     <!-- Tabla de registros -->
     @if (reporte()!.registros.length === 0) {
       <p class="estado">No se encontraron registros con los filtros aplicados.</p>
