@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Reportes.DTOs;
+using PracticaProfesional.Domain.Enums;
 
 namespace PracticaProfesional.Infrastructure.Persistence.Repositories;
 
@@ -95,7 +96,9 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
     // RR-06: Evolución de notas en el tiempo (agrupado por año-mes de examen)
     // ─────────────────────────────────────────────────────────────────────────
     public async Task<IEnumerable<PuntoEvolucionNotaDto>> ObtenerEvolucionNotasAsync(
-        int? materiaId, int? anio, int? docenteId, CancellationToken ct = default)
+        int? materiaId, int? anio, int? docenteId,
+        int? cuatrimestre, byte? anioCarrera, TipoExamen? tipoExamen,
+        CancellationToken ct = default)
     {
         var materiaIdsDocente = docenteId.HasValue
             ? await db.EspaciosCurriculares
@@ -105,14 +108,28 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
                 .ToListAsync(ct)
             : null;
 
+        var mesDesde = cuatrimestre.HasValue ? (cuatrimestre.Value == 1 ? 1 : 7)  : (int?)null;
+        var mesHasta = cuatrimestre.HasValue ? (cuatrimestre.Value == 1 ? 6 : 12) : (int?)null;
+
         var notasRaw = await (
             from ie in db.InscripcionesExamen
             where ie.NotaValor.HasValue
-            join e in db.Examenes on ie.ExamenId equals e.Id
-            where (!materiaId.HasValue || e.MateriaId == materiaId.Value)
-               && (!anio.HasValue || e.FechaExamen.Year == anio.Value)
+            join e  in db.Examenes on ie.ExamenId equals e.Id
+            join m  in db.Materias on e.MateriaId equals m.Id
+            join c  in db.Carreras on m.CarreraId equals c.Id
+            where (!materiaId.HasValue   || e.MateriaId        == materiaId.Value)
+               && (!anio.HasValue        || e.FechaExamen.Year  == anio.Value)
+               && (!mesDesde.HasValue    || (e.FechaExamen.Month >= mesDesde.Value && e.FechaExamen.Month <= mesHasta!.Value))
+               && (!anioCarrera.HasValue || m.Anio              == anioCarrera.Value)
+               && (!tipoExamen.HasValue  || e.TipoExamen        == tipoExamen.Value)
                && (materiaIdsDocente == null || materiaIdsDocente.Contains(e.MateriaId))
-            select new { e.FechaExamen.Year, e.FechaExamen.Month, ie.NotaValor }
+            select new {
+                e.FechaExamen.Year,
+                e.FechaExamen.Month,
+                ie.NotaValor,
+                CarreraId     = c.Id,
+                CarreraNombre = c.Nombre,
+            }
         ).ToListAsync(ct);
 
         return notasRaw
@@ -127,13 +144,31 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
                 var promedio     = total > 0 ? (decimal?)notas.Average() : null;
                 var pct          = total > 0 ? aprobados * 100m / total : 0m;
 
+                var porCarrera = g
+                    .GroupBy(x => new { x.CarreraId, x.CarreraNombre })
+                    .OrderBy(cg => cg.Key.CarreraId)
+                    .Select(cg =>
+                    {
+                        var cn  = cg.Select(x => x.NotaValor!.Value).ToList();
+                        var ca  = cn.Count(n => n >= 4);
+                        var ct2 = cn.Count;
+                        return new DetalleCarreraEvolucionDto(
+                            CarreraId:            cg.Key.CarreraId,
+                            CarreraNombre:        cg.Key.CarreraNombre,
+                            Promedio:             ct2 > 0 ? (decimal?)Math.Round(cn.Average(), 2) : null,
+                            PorcentajeAprobacion: ct2 > 0 ? Math.Round(ca * 100m / ct2, 2) : 0m,
+                            TotalEvaluados:       ct2);
+                    })
+                    .ToList();
+
                 return new PuntoEvolucionNotaDto(
                     Periodo:              $"{g.Key.Year}-{g.Key.Month:D2}",
                     TotalEvaluados:       total,
                     Aprobados:            aprobados,
                     Desaprobados:         desaprobados,
                     PromedioGeneral:      promedio.HasValue ? Math.Round(promedio.Value, 2) : null,
-                    PorcentajeAprobacion: Math.Round(pct, 2));
+                    PorcentajeAprobacion: Math.Round(pct, 2),
+                    PorCarrera:           porCarrera);
             })
             .ToList();
     }

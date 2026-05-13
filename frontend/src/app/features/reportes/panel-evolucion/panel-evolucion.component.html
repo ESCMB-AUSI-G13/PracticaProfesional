@@ -10,7 +10,7 @@
     <div class="filtros-grid">
       <div class="campo">
         <label>Materia</label>
-        <select [ngModel]="materiaId()" (ngModelChange)="materiaId.set($event ? +$event : null)">
+        <select [ngModel]="materiaId()" (ngModelChange)="onMateriaChange($event ? +$event : null)">
           <option [value]="null">— Todas —</option>
           @for (m of materias(); track m.id) {
             <option [value]="m.id">{{ m.codigo }} · {{ m.nombre }}</option>
@@ -20,6 +20,35 @@
       <div class="campo">
         <label>Año académico</label>
         <input type="number" [ngModel]="anio()" (ngModelChange)="anio.set($event || null)" placeholder="Ej: 2025" min="2000" />
+      </div>
+      <div class="campo">
+        <label>Período</label>
+        <select [ngModel]="cuatrimestre()" (ngModelChange)="cuatrimestre.set($event ? +$event : null)">
+          <option [value]="null">— Todos —</option>
+          <option [value]="1">1° Cuatrimestre</option>
+          <option [value]="2">2° Cuatrimestre</option>
+        </select>
+      </div>
+      <div class="campo">
+        <label>Año del plan</label>
+        <select [ngModel]="anioCarrera()" (ngModelChange)="anioCarrera.set($event ? +$event : null)">
+          <option [value]="null">— Todos —</option>
+          @for (y of [1,2,3,4]; track y) {
+            <option [value]="y"
+                    [disabled]="anioMateriaSeleccionada() !== null && anioMateriaSeleccionada() !== y">
+              {{ y }}° año
+            </option>
+          }
+        </select>
+      </div>
+      <div class="campo">
+        <label>Tipo de instancia</label>
+        <select [ngModel]="tipoExamen()" (ngModelChange)="tipoExamen.set($event ? +$event : null)">
+          <option [value]="null">— Todas —</option>
+          <option [value]="1">Parcial</option>
+          <option [value]="2">Final</option>
+          <option [value]="3">Recuperatorio</option>
+        </select>
       </div>
     </div>
     <div class="filtros-acciones">

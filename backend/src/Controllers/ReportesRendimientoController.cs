@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Reportes;
 using PracticaProfesional.Application.Reportes.DTOs;
+using PracticaProfesional.Domain.Enums;
 
 namespace PracticaProfesional.Controllers;
 
@@ -46,13 +47,16 @@ public class ReportesRendimientoController(
     [HttpGet("evolucion")]
     [ProducesResponseType(typeof(ReporteEvolucionNotasDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> EvolucionNotas(
-        [FromQuery] int? materiaId,
-        [FromQuery] int? anio,
+        [FromQuery] int?       materiaId,
+        [FromQuery] int?       anio,
+        [FromQuery] int?       cuatrimestre,
+        [FromQuery] byte?      anioCarrera,
+        [FromQuery] TipoExamen? tipoExamen,
         CancellationToken cancellationToken)
     {
         var docenteId = await ResolverDocenteIdSiAplicaAsync(cancellationToken);
 
-        var filtro = new FiltroEvolucionNotasDto(materiaId, anio, docenteId);
+        var filtro = new FiltroEvolucionNotasDto(materiaId, anio, docenteId, cuatrimestre, anioCarrera, tipoExamen);
         var resultado = await evolucionUseCase.EjecutarAsync(filtro, cancellationToken);
         return Ok(resultado);
     }

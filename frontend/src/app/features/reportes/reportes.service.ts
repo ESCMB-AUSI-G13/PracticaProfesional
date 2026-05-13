@@ -91,6 +91,14 @@ export interface ReporteComparativoComisiones {
 
 // ── Modelos RR-06 ────────────────────────────────────────────────────────────
 
+export interface DetalleCarreraEvolucion {
+  carreraId:            number;
+  carreraNombre:        string;
+  promedio:             number | null;
+  porcentajeAprobacion: number;
+  totalEvaluados:       number;
+}
+
 export interface PuntoEvolucionNota {
   periodo:              string;
   totalEvaluados:       number;
@@ -98,6 +106,7 @@ export interface PuntoEvolucionNota {
   desaprobados:         number;
   promedioGeneral:      number | null;
   porcentajeAprobacion: number;
+  porCarrera:           DetalleCarreraEvolucion[];
 }
 
 export interface ReporteEvolucionNotas {
@@ -156,10 +165,19 @@ export class ReportesService {
   }
 
   /** RR-06: Evolución de notas en el tiempo. */
-  obtenerEvolucionNotas(materiaId?: number, anio?: number): Observable<ReporteEvolucionNotas> {
+  obtenerEvolucionNotas(
+    materiaId?:    number,
+    anio?:         number,
+    cuatrimestre?: number,
+    anioCarrera?:  number,
+    tipoExamen?:   number,
+  ): Observable<ReporteEvolucionNotas> {
     const params: Record<string, string> = {};
-    if (materiaId) params['materiaId'] = String(materiaId);
-    if (anio)      params['anio']      = String(anio);
+    if (materiaId)    params['materiaId']    = String(materiaId);
+    if (anio)         params['anio']         = String(anio);
+    if (cuatrimestre) params['cuatrimestre'] = String(cuatrimestre);
+    if (anioCarrera)  params['anioCarrera']  = String(anioCarrera);
+    if (tipoExamen)   params['tipoExamen']   = String(tipoExamen);
     return this.http.get<ReporteEvolucionNotas>(`${this.apiUrl}/rendimiento/evolucion`, { params });
   }
 
