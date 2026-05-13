@@ -1,26 +1,29 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Reportes;
 using PracticaProfesional.Application.Reportes.DTOs;
+using System.Security.Claims;
 
 namespace PracticaProfesional.Controllers;
 
 /// <summary>
 /// Reportes operativos de inasistencias (RR-08, RR-09).
-/// Accesible para Preceptores y Dirección.
+/// Accesible para Preceptores, Dirección y Docentes.
+/// Los Docentes solo ven las inasistencias de sus propios espacios curriculares.
 /// </summary>
 [ApiController]
 [Route("api/reportes")]
-[Authorize(Roles = "Preceptor,Direccion")]
+[Authorize(Roles = "Preceptor,Direccion,Docente")]
 public class ReportesOperativosController(
     ReporteInasistenciasUseCase reporteInasistencias,
-    ControlIndividualPorLegajoUseCase controlPorLegajo) : ControllerBase
+    ControlIndividualPorLegajoUseCase controlPorLegajo,
+    IDocenteRepository docenteRepository,
+    IEspacioCurricularRepository espacioCurricularRepository) : ControllerBase
 {
     /// <summary>
     /// RR-08: Reporte detallado de inasistencias.
-    ///
-    /// Devuelve el listado de ausencias (justificadas e injustificadas) con información
-    /// del estudiante, materia, curso, fecha y motivo. Admite filtros opcionales.
+    /// Si el llamante es Docente, se restringe automáticamente a sus espacios curriculares.
     /// </summary>
     [HttpPost("inasistencias")]
     [ProducesResponseType(typeof(ReporteInasistenciasDto), StatusCodes.Status200OK)]
@@ -29,7 +32,20 @@ public class ReportesOperativosController(
         [FromBody] FiltroInasistenciasDto filtro,
         CancellationToken cancellationToken)
     {
-        var resultado = await reporteInasistencias.EjecutarAsync(filtro, cancellationToken);
+        IReadOnlyList<(int MateriaId, int CursoId)>? espaciosDocente = null;
+
+        if (User.IsInRole("Docente"))
+        {
+            var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var docente   = await docenteRepository.ObtenerPorUsuarioIdAsync(usuarioId, cancellationToken);
+            if (docente is not null)
+            {
+                var espacios = await espacioCurricularRepository.ListarPorDocenteIdAsync(docente.Id, cancellationToken);
+                espaciosDocente = espacios.Select(e => (e.MateriaId, e.CursoId)).ToList();
+            }
+        }
+
+        var resultado = await reporteInasistencias.EjecutarAsync(filtro, espaciosDocente, cancellationToken);
         return Ok(resultado);
     }
 

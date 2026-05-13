@@ -160,6 +160,7 @@ builder.Services.AddScoped<ReactivarCursoUseCase>();
 builder.Services.AddScoped<IEspacioCurricularRepository, EspacioCurricularRepository>();
 builder.Services.AddScoped<CrearEspacioCurricularUseCase>();
 builder.Services.AddScoped<ListarEspaciosCurricularesUseCase>();
+builder.Services.AddScoped<ListarEspaciosDocenteUseCase>();
 builder.Services.AddScoped<EliminarEspacioCurricularUseCase>();
 
 // Exámenes
@@ -259,6 +260,7 @@ var app = builder.Build();
 
         await EstudiantesSeeder.SeedAsync(db, logger);
         await EstudiantesSeeder.FixNombresAsync(db, logger);
+        await EstudiantesSeeder.PatchJustificacionesAsync(db, logger);
         await ExamenesSeeder.SeedAsync(db, logger);
         await NotasExamenesSeeder.SeedAsync(db, logger);
     }

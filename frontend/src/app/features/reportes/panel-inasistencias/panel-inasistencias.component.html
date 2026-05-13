@@ -10,21 +10,33 @@
     <h2>Filtros</h2>
     <div class="filtros-grid">
       <div class="campo">
-        <label>Curso</label>
-        <select [ngModel]="cursoId()" (ngModelChange)="cursoId.set($event ? +$event : null)">
-          <option [value]="null">— Todos —</option>
-          @for (c of cursos(); track c.id) {
-            <option [value]="c.id">{{ c.anio }} · {{ c.anioLectivo }}° año · Com. {{ c.comision }}</option>
+        <label>Materia</label>
+        <select [ngModel]="materiaId()" (ngModelChange)="onMateriaChange($event ? +$event : null)">
+          <option [value]="null">— Todas —</option>
+          @for (m of materias(); track m.id) {
+            <option [value]="m.id">{{ m.codigo }} · {{ m.nombre }}</option>
           }
         </select>
       </div>
 
       <div class="campo">
-        <label>Materia</label>
-        <select [ngModel]="materiaId()" (ngModelChange)="materiaId.set($event ? +$event : null)">
-          <option [value]="null">— Todas —</option>
-          @for (m of materias(); track m.id) {
-            <option [value]="m.id">{{ m.codigo }} · {{ m.nombre }}</option>
+        <label>Año</label>
+        <select [ngModel]="anioLectivoFiltro()" (ngModelChange)="anioLectivoFiltro.set($event ? +$event : null)">
+          <option [value]="null">— Todos —</option>
+          @for (a of aniosDisponibles(); track a) {
+            <option [value]="a" [disabled]="anioFijadoPorMateria() !== null && anioFijadoPorMateria() !== a">
+              {{ a }}° año
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Comisión</label>
+        <select [ngModel]="comisionFiltro()" (ngModelChange)="comisionFiltro.set($event)">
+          <option value="">— Todas —</option>
+          @for (com of comisionesDisponibles(); track com) {
+            <option [value]="com">Com. {{ com }}</option>
           }
         </select>
       </div>
@@ -88,13 +100,19 @@
         <span class="card-valor">{{ reporte()!.totalAusentesJustificados }}</span>
         <span class="card-label">Ausentes justificados</span>
       </div>
+      @if (reporte()!.totalPresentes > 0) {
+        <div class="card card-presente">
+          <span class="card-valor">{{ reporte()!.totalPresentes }}</span>
+          <span class="card-label">Presentes</span>
+        </div>
+      }
     </section>
 
     <!-- Gráficos -->
     @if (reporte()!.registros.length > 0) {
       <section class="graficos-grid">
         <div class="grafico-card">
-          <h3>Tipo de ausencias</h3>
+          <h3>{{ reporte()!.totalPresentes > 0 ? 'Distribución de asistencias' : 'Tipo de ausencias' }}</h3>
           <div class="canvas-wrapper dona-wrapper">
             <canvas #donaCanvas></canvas>
           </div>
@@ -118,38 +136,87 @@
     @if (reporte()!.registros.length === 0) {
       <p class="estado">No se encontraron registros con los filtros aplicados.</p>
     } @else {
+      <div class="tabla-toolbar">
+        <input
+          type="text"
+          class="buscador-tabla"
+          placeholder="Buscar por nombre..."
+          [ngModel]="busquedaNombre()"
+          (ngModelChange)="onBusquedaChange($event)"
+        />
+        <span class="tabla-conteo">
+          {{ registrosFiltrados().length }} de {{ reporte()!.registros.length }} registros
+        </span>
+      </div>
+
       <div class="tabla-wrapper">
         <table class="tabla">
           <thead>
             <tr>
               <th>Legajo</th>
-              <th>Alumno</th>
-              <th>Materia</th>
-              <th>Curso</th>
-              <th>Fecha</th>
+              <th class="th-sort" (click)="ordenarPor('nombreCompleto')">
+                Alumno
+                <span class="sort-icon">
+                  {{ sortColumna() === 'nombreCompleto' ? (sortDireccion() === 'asc' ? '▲' : '▼') : '⇅' }}
+                </span>
+              </th>
+              <th class="th-sort" (click)="ordenarPor('materia')">
+                Materia
+                <span class="sort-icon">
+                  {{ sortColumna() === 'materia' ? (sortDireccion() === 'asc' ? '▲' : '▼') : '⇅' }}
+                </span>
+              </th>
+              <th class="th-sort" (click)="ordenarPor('curso')">
+                Curso
+                <span class="sort-icon">
+                  {{ sortColumna() === 'curso' ? (sortDireccion() === 'asc' ? '▲' : '▼') : '⇅' }}
+                </span>
+              </th>
+              <th class="th-sort" (click)="ordenarPor('fecha')">
+                Fecha
+                <span class="sort-icon">
+                  {{ sortColumna() === 'fecha' ? (sortDireccion() === 'asc' ? '▲' : '▼') : '⇅' }}
+                </span>
+              </th>
               <th>Tipo</th>
               <th>Motivo</th>
             </tr>
           </thead>
           <tbody>
-            @for (r of reporte()!.registros; track r.estudianteId + r.fecha + r.materia) {
-              <tr>
-                <td>{{ r.legajo }}</td>
-                <td>{{ r.nombreCompleto }}</td>
-                <td>{{ r.materia }}</td>
-                <td>{{ r.curso }}</td>
-                <td>{{ r.fecha | date:'dd/MM/yyyy' }}</td>
-                <td>
-                  <span [class]="r.tipoAsistencia === 'Ausente' ? 'badge ausente' : 'badge justificado'">
-                    {{ r.tipoAsistencia === 'Ausente' ? 'Injustificado' : 'Justificado' }}
-                  </span>
-                </td>
-                <td class="motivo">{{ r.motivo ?? '—' }}</td>
-              </tr>
+            @if (registrosFiltrados().length === 0) {
+              <tr><td colspan="7" class="sin-resultados">No hay coincidencias para "{{ busquedaNombre() }}"</td></tr>
+            } @else {
+              @for (r of registrosPaginados(); track r.estudianteId + r.fecha + r.materia) {
+                <tr>
+                  <td>{{ r.legajo }}</td>
+                  <td>{{ r.nombreCompleto }}</td>
+                  <td>{{ r.materia }}</td>
+                  <td>{{ r.curso }}</td>
+                  <td>{{ r.fecha | date:'dd/MM/yyyy' }}</td>
+                  <td>
+                    @if (r.tipoAsistencia === 'Presente') {
+                      <span class="badge presente">Presente</span>
+                    } @else if (r.tipoAsistencia === 'AusenteJustificado') {
+                      <span class="badge justificado">Justificado</span>
+                    } @else {
+                      <span class="badge ausente">Injustificado</span>
+                    }
+                  </td>
+                  <td class="motivo">{{ r.motivo ?? '—' }}</td>
+                </tr>
+              }
             }
           </tbody>
         </table>
       </div>
+      <div class="paginacion">
+        <button class="btn-pag" (click)="irPagina(1)" [disabled]="paginaActual() === 1">««</button>
+        <button class="btn-pag" (click)="irPagina(paginaActual() - 1)" [disabled]="paginaActual() === 1">‹</button>
+        <span class="pag-info">Página {{ paginaActual() }} de {{ totalPaginas() }}</span>
+        <button class="btn-pag" (click)="irPagina(paginaActual() + 1)" [disabled]="paginaActual() === totalPaginas()">›</button>
+        <button class="btn-pag" (click)="irPagina(totalPaginas())" [disabled]="paginaActual() === totalPaginas()">»»</button>
+      </div>
+
       <p class="generado-en">Reporte generado: {{ reporte()!.generadoEn | date:'dd/MM/yyyy HH:mm' }}</p>
     }
   }

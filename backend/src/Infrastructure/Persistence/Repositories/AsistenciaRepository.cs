@@ -45,6 +45,9 @@ public class AsistenciaRepository(AppDbContext context) : IAsistenciaRepository
         DateTime? fechaDesde,
         DateTime? fechaHasta,
         bool soloAusencias,
+        string? comision = null,
+        int? anioLectivo = null,
+        IReadOnlyList<(int MateriaId, int CursoId)>? espaciosDocente = null,
         CancellationToken cancellationToken = default)
     {
         var query = context.Asistencias
@@ -64,6 +67,19 @@ public class AsistenciaRepository(AppDbContext context) : IAsistenciaRepository
 
         if (fechaHasta.HasValue)
             query = query.Where(a => a.Fecha <= fechaHasta.Value.Date);
+
+        if (!string.IsNullOrWhiteSpace(comision))
+            query = query.Where(a => a.Curso.Comision == comision.ToUpperInvariant());
+
+        if (anioLectivo.HasValue)
+            query = query.Where(a => a.Curso.AnioLectivo == anioLectivo.Value);
+
+        if (espaciosDocente is { Count: > 0 })
+        {
+            var materiaIds = espaciosDocente.Select(e => e.MateriaId).Distinct().ToList();
+            var cursoIds   = espaciosDocente.Select(e => e.CursoId).Distinct().ToList();
+            query = query.Where(a => materiaIds.Contains(a.MateriaId) && cursoIds.Contains(a.CursoId));
+        }
 
         if (soloAusencias)
             query = query.Where(a => a.Estado != EstadoAsistencia.Presente);

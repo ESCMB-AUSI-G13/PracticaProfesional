@@ -35,6 +35,10 @@ export class EspaciosCurricularesService {
     return this.http.get<EspacioCurricular[]>(this.apiUrl);
   }
 
+  listarMisEspacios(): Observable<EspacioCurricular[]> {
+    return this.http.get<EspacioCurricular[]>(`${this.apiUrl}/mis-espacios`);
+  }
+
   crear(dto: CrearEspacioCurricularRequest): Observable<EspacioCurricular> {
     return this.http.post<EspacioCurricular>(this.apiUrl, dto);
   }

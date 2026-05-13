@@ -6,10 +6,12 @@ import { Observable } from 'rxjs';
 // ── Modelos RR-08 ────────────────────────────────────────────────────────────
 
 export interface FiltroInasistencias {
-  cursoId?:    number;
-  materiaId?:  number;
-  fechaDesde?: string;
-  fechaHasta?: string;
+  cursoId?:      number;
+  anioLectivo?:  number;
+  materiaId?:    number;
+  fechaDesde?:   string;
+  fechaHasta?:   string;
+  comision?:     string;
   soloAusencias: boolean;
 }
 
@@ -29,6 +31,7 @@ export interface ReporteInasistencias {
   totalRegistros:            number;
   totalAusentes:             number;
   totalAusentesJustificados: number;
+  totalPresentes:            number;
   registros:                 RegistroInasistencia[];
 }
 

@@ -12,6 +12,7 @@ public class ReporteInasistenciasDto
     public int TotalRegistros { get; set; }
     public int TotalAusentes { get; set; }
     public int TotalAusentesJustificados { get; set; }
+    public int TotalPresentes { get; set; }
 
     public IEnumerable<RegistroInasistenciaDto> Registros { get; set; } =
         Enumerable.Empty<RegistroInasistenciaDto>();

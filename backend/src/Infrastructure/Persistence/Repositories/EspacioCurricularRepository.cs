@@ -16,7 +16,8 @@ public class EspacioCurricularRepository(AppDbContext db) : IEspacioCurricularRe
 
     public async Task<IEnumerable<EspacioCurricular>> ListarPorDocenteIdAsync(int docenteId, CancellationToken cancellationToken = default)
         => await db.EspaciosCurriculares
-            .Include(ec => ec.Materia)
+            .Include(ec => ec.Materia).ThenInclude(m => m.Carrera)
+            .Include(ec => ec.Docente).ThenInclude(d => d.Usuario)
             .Include(ec => ec.Curso)
             .Where(ec => ec.DocenteId == docenteId)
             .OrderBy(ec => ec.Curso.AnioLectivo).ThenBy(ec => ec.Curso.Comision).ThenBy(ec => ec.Materia.Nombre)

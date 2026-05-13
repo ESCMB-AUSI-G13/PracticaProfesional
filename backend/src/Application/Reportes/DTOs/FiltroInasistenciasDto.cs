@@ -9,6 +9,9 @@ public class FiltroInasistenciasDto
     /// <summary>Filtra por curso específico.</summary>
     public int? CursoId { get; set; }
 
+    /// <summary>Filtra por año lectivo del plan (1, 2, 3, 4).</summary>
+    public int? AnioLectivo { get; set; }
+
     /// <summary>Filtra por materia específica.</summary>
     public int? MateriaId { get; set; }
 
@@ -17,6 +20,9 @@ public class FiltroInasistenciasDto
 
     /// <summary>Fecha de fin del rango (inclusive). Se ignora la hora.</summary>
     public DateTime? FechaHasta { get; set; }
+
+    /// <summary>Filtra por comisión (ej. "A" o "B"). Insensible a mayúsculas.</summary>
+    public string? Comision { get; set; }
 
     /// <summary>
     /// Si es <c>true</c> (valor por defecto), devuelve sólo ausencias (justificadas e injustificadas).

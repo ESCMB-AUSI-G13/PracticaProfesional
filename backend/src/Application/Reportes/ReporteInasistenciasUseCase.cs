@@ -15,6 +15,7 @@ public class ReporteInasistenciasUseCase(IAsistenciaRepository asistenciaReposit
 {
     public async Task<ReporteInasistenciasDto> EjecutarAsync(
         FiltroInasistenciasDto filtro,
+        IReadOnlyList<(int MateriaId, int CursoId)>? espaciosDocente = null,
         CancellationToken cancellationToken = default)
     {
         var registros = await asistenciaRepository.ObtenerConDetalleAsync(
@@ -23,6 +24,9 @@ public class ReporteInasistenciasUseCase(IAsistenciaRepository asistenciaReposit
             filtro.FechaDesde,
             filtro.FechaHasta,
             filtro.SoloAusencias,
+            filtro.Comision,
+            filtro.AnioLectivo,
+            espaciosDocente,
             cancellationToken);
 
         var items = registros.Select(a => new RegistroInasistenciaDto
@@ -31,7 +35,7 @@ public class ReporteInasistenciasUseCase(IAsistenciaRepository asistenciaReposit
             Legajo        = a.Estudiante.Usuario.Legajo,
             NombreCompleto = $"{a.Estudiante.Usuario.Apellido}, {a.Estudiante.Usuario.Nombre}",
             Materia       = a.Materia.Nombre,
-            Curso         = $"{a.Curso.Anio} – {a.Curso.Comision}",
+            Curso         = $"{a.Curso.AnioLectivo}° {a.Curso.Comision}",
             Fecha         = a.Fecha,
             TipoAsistencia = a.Estado.ToString(),
             Motivo        = a.Motivo
@@ -43,6 +47,7 @@ public class ReporteInasistenciasUseCase(IAsistenciaRepository asistenciaReposit
             TotalRegistros            = items.Count,
             TotalAusentes             = items.Count(r => r.TipoAsistencia == EstadoAsistencia.Ausente.ToString()),
             TotalAusentesJustificados = items.Count(r => r.TipoAsistencia == EstadoAsistencia.AusenteJustificado.ToString()),
+            TotalPresentes            = items.Count(r => r.TipoAsistencia == EstadoAsistencia.Presente.ToString()),
             Registros                 = items
         };
     }

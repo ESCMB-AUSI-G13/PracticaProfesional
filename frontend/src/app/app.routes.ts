@@ -265,7 +265,7 @@ export const routes: Routes = [
       // Reportes — Preceptor y Dirección
       {
         path: 'reportes/inasistencias',
-        canActivate: [roleGuard('Preceptor', 'Direccion')],
+        canActivate: [roleGuard('Preceptor', 'Direccion', 'Docente')],
         loadComponent: () =>
           import('./features/reportes/panel-inasistencias/panel-inasistencias.component')
             .then(m => m.PanelInasistenciasComponent)
