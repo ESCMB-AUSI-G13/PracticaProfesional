@@ -10,10 +10,20 @@
     <h2>Filtros</h2>
     <div class="filtros-grid">
       <div class="campo">
+        <label>Carrera</label>
+        <select [ngModel]="carreraFiltro()" (ngModelChange)="onCarreraChange($event)">
+          <option value="">— Todas —</option>
+          @for (c of carrerasDisponibles(); track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="campo">
         <label>Materia</label>
         <select [ngModel]="materiaId()" (ngModelChange)="onMateriaChange($event ? +$event : null)">
           <option [value]="null">— Todas —</option>
-          @for (m of materias(); track m.id) {
+          @for (m of materiasFiltradas(); track m.id) {
             <option [value]="m.id">{{ m.codigo }} · {{ m.nombre }}</option>
           }
         </select>

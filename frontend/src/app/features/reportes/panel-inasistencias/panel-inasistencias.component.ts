@@ -54,6 +54,19 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
   soloAusencias     = signal(true);
   comisionFiltro    = signal<string>('');
 
+  carreraFiltro = signal<string>('');
+
+  carrerasDisponibles = computed(() =>
+    [...new Set(this.materias().map(m => m.carreraNombre))].sort()
+  );
+
+  materiasFiltradas = computed(() => {
+    const carrera = this.carreraFiltro();
+    return carrera
+      ? this.materias().filter(m => m.carreraNombre === carrera)
+      : this.materias();
+  });
+
   comisionesDisponibles = computed(() =>
     [...new Set(this.cursos().map(c => c.comision))].sort()
   );
@@ -116,8 +129,12 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
   chartMateriaHeight = computed(() => {
     const r = this.reporte();
     if (!r) return 180;
-    const count = new Set(r.registros.map(reg => reg.materia)).size;
-    return Math.max(180, count * 40 + 50);
+    const materiaCount = new Set(r.registros.map(reg => reg.materia)).size;
+    const comisionCount = new Set(r.registros.map(reg => {
+      const parts = reg.curso.trim().split(/\s+/);
+      return parts[parts.length - 1];
+    })).size;
+    return Math.max(180, materiaCount * (comisionCount * 26 + 12) + 60);
   });
 
   constructor(
@@ -276,31 +293,58 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
       }
     });
 
-    // ── Barras horizontales: inasistencias por materia ───────────────────────
+    // ── Barras agrupadas: inasistencias por materia comparando comisiones ────
     if (!this.materiasCanvas) return;
 
-    const conteoMaterias = new Map<string, number>();
+    const extraerComision = (curso: string): string => {
+      const parts = curso.trim().split(/\s+/);
+      return parts[parts.length - 1] || curso;
+    };
+
+    const comisionesMap = new Map<string, Map<string, number>>(); // materia → comision → count
+    const comisionesSet = new Set<string>();
+
     for (const reg of r.registros) {
-      conteoMaterias.set(reg.materia, (conteoMaterias.get(reg.materia) ?? 0) + 1);
+      const com = extraerComision(reg.curso);
+      comisionesSet.add(com);
+      if (!comisionesMap.has(reg.materia)) comisionesMap.set(reg.materia, new Map());
+      const inner = comisionesMap.get(reg.materia)!;
+      inner.set(com, (inner.get(com) ?? 0) + 1);
     }
-    const topMaterias = [...conteoMaterias.entries()].sort((a, b) => b[1] - a[1]);
+
+    const materiasOrdenadas = [...comisionesMap.keys()].sort((a, b) => {
+      const totalA = [...(comisionesMap.get(a)?.values() ?? [])].reduce((s, v) => s + v, 0);
+      const totalB = [...(comisionesMap.get(b)?.values() ?? [])].reduce((s, v) => s + v, 0);
+      return totalB - totalA;
+    });
+
+    const comisiones = [...comisionesSet].sort();
+    const coloresComision = ['#8e44ad', '#3498db', '#e67e22', '#2ecc71', '#e74c3c'];
+
+    const datasetsMateria = comisiones.map((com, i) => ({
+      label: `Com. ${com}`,
+      data: materiasOrdenadas.map(m => comisionesMap.get(m)?.get(com) ?? 0),
+      backgroundColor: coloresComision[i % coloresComision.length],
+      borderRadius: 4,
+    }));
 
     this.materiasChart = new Chart(this.materiasCanvas.nativeElement, {
       type: 'bar',
       data: {
-        labels: topMaterias.map(([name]) => name),
-        datasets: [{
-          label: 'Inasistencias',
-          data: topMaterias.map(([, count]) => count),
-          backgroundColor: '#8e44ad',
-          borderRadius: 4,
-        }]
+        labels: materiasOrdenadas,
+        datasets: datasetsMateria,
       },
       options: {
         indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        plugins: {
+          legend: {
+            display: true,
+            position: 'top',
+            labels: { font: { size: 12 }, padding: 10 }
+          }
+        },
         scales: {
           x: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f0f0f0' } },
           y: { ticks: { font: { size: 11 } } }
@@ -332,6 +376,18 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
     if (n >= 1 && n <= total) this.paginaActual.set(n);
   }
 
+  onCarreraChange(carrera: string): void {
+    this.carreraFiltro.set(carrera);
+    const mid = this.materiaId();
+    if (mid) {
+      const materia = this.materias().find(m => m.id === mid);
+      if (materia && carrera && materia.carreraNombre !== carrera) {
+        this.materiaId.set(null);
+        this.anioLectivoFiltro.set(null);
+      }
+    }
+  }
+
   onMateriaChange(id: number | null): void {
     this.materiaId.set(id);
     const anio = id ? (this.materias().find(m => m.id === id)?.anio ?? null) : null;
@@ -339,6 +395,7 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
   }
 
   limpiar(): void {
+    this.carreraFiltro.set('');
     this.anioLectivoFiltro.set(null);
     this.materiaId.set(null);
     this.fechaDesde.set('');
