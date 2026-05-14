@@ -116,6 +116,40 @@ backend/
 - **Frontend:** `cd frontend && ng serve` (Puerto 4200)
 - **Base de Datos:** SQL Server
 
+## Deploy a Azure
+
+### Flujo correcto de deploy
+
+**Frontend** — siempre buildear antes de deployar:
+```bash
+cd frontend && npm run build
+```
+Luego deployar desde la extensión Azure Storage en VS Code. El script `build` ya tiene `--configuration production` configurado en `package.json`.
+
+**Backend** — deployar directamente desde la extensión Azure App Service en VS Code (seleccionar `backend/publish`).
+
+### Variables de entorno en Azure App Service
+
+Las secrets del backend NO van en archivos JSON — se configuran en el portal de Azure → App Service → Configuration → Application Settings. El separador de jerarquía es `__` (doble guión bajo):
+
+| Variable | Mapea a |
+|---|---|
+| `ConnectionStrings__DefaultConnection` | `ConnectionStrings:DefaultConnection` |
+| `Jwt__Key` | `Jwt:Key` |
+| `AzureCommunication__ConnectionString` | `AzureCommunication:ConnectionString` |
+| `AzureCommunication__Remitente` | `AzureCommunication:Remitente` |
+
+El archivo `appsettings.Development.json` solo se usa en local — en producción el entorno es `Production` y las variables de Azure sobreescriben `appsettings.json`.
+
+### Problemas frecuentes de deploy
+
+- **El frontend llama a `localhost:5000` en producción:** significa que se deployó sin buildear con `--configuration production`. Solución: correr `npm run build` y volver a deployar.
+- **El backend no responde (preflight CORS falla con `net::ERR_`):** el App Service puede estar caído. Revisar Log Stream en el portal de Azure.
+- **Login funciona en local pero no en Azure:** verificar que en Azure SQL Server → Networking esté activado "Allow Azure services and resources to access this server".
+- **404 al refrescar rutas en el frontend:** configurar el campo "Error document path" en Storage Account → Static website apuntando a `index.html`.
+
+---
+
 ## Protocolo de Git
 1. `git status`
 2. `git checkout -b feature/[nombre-breve]`

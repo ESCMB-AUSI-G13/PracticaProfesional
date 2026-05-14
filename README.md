@@ -120,19 +120,18 @@ Instalar en VS Code las extensiones:
 
 Iniciar sesión en ambas extensiones con la cuenta de Azure.
 
-### Build
-
-```bash
-docker-compose up --build -d
-```
-
 ### Deploy del backend
 
 En VS Code → panel Azure → App Services → click derecho en `escmb-practicaprof` → **Deploy to Web App** → seleccionar la carpeta `backend/publish`.
 
 ### Deploy del frontend
 
-En VS Code → panel Azure → Storage Accounts → storage account → Blob Containers → `$web` → subir el contenido de `frontend/dist/practica-profesional/browser`.
+1. Buildear en modo producción:
+```bash
+cd frontend && npm run build
+```
+
+2. En VS Code → panel Azure → Storage Accounts → storage account → Blob Containers → `$web` → subir el contenido de `frontend/dist/practica-profesional/browser`.
 
 ### URLs de producción
 
