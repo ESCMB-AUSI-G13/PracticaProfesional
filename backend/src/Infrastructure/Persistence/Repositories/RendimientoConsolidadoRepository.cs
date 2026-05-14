@@ -98,6 +98,7 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
     public async Task<IEnumerable<PuntoEvolucionNotaDto>> ObtenerEvolucionNotasAsync(
         int? materiaId, int? anio, int? docenteId,
         int? cuatrimestre, byte? anioCarrera, TipoExamen? tipoExamen,
+        string granularidad = "mensual",
         CancellationToken ct = default)
     {
         var materiaIdsDocente = docenteId.HasValue
@@ -132,9 +133,29 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
             }
         ).ToListAsync(ct);
 
-        return notasRaw
-            .GroupBy(n => new { n.Year, n.Month })
-            .OrderBy(g => g.Key.Year).ThenBy(g => g.Key.Month)
+        // Proyectar cada nota con su período y clave de ordenamiento según granularidad
+        var notasConClave = notasRaw.Select(n => new
+        {
+            n.NotaValor,
+            n.CarreraId,
+            n.CarreraNombre,
+            Periodo = granularidad switch
+            {
+                "anual"         => $"{n.Year}",
+                "cuatrimestral" => $"{n.Year}-C{(n.Month <= 6 ? 1 : 2)}",
+                _               => $"{n.Year}-{n.Month:D2}",
+            },
+            SortKey = granularidad switch
+            {
+                "anual"         => n.Year * 100,
+                "cuatrimestral" => n.Year * 100 + (n.Month <= 6 ? 1 : 2),
+                _               => n.Year * 100 + n.Month,
+            },
+        });
+
+        return notasConClave
+            .GroupBy(n => new { n.Periodo, n.SortKey })
+            .OrderBy(g => g.Key.SortKey)
             .Select(g =>
             {
                 var notas        = g.Select(x => x.NotaValor!.Value).ToList();
@@ -149,26 +170,31 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
                     .OrderBy(cg => cg.Key.CarreraId)
                     .Select(cg =>
                     {
-                        var cn  = cg.Select(x => x.NotaValor!.Value).ToList();
-                        var ca  = cn.Count(n => n >= 4);
-                        var ct2 = cn.Count;
+                        var cn    = cg.Select(x => x.NotaValor!.Value).ToList();
+                        var ca    = cn.Count(n => n >= 4);
+                        var count = cn.Count;
                         return new DetalleCarreraEvolucionDto(
                             CarreraId:            cg.Key.CarreraId,
                             CarreraNombre:        cg.Key.CarreraNombre,
-                            Promedio:             ct2 > 0 ? (decimal?)Math.Round(cn.Average(), 2) : null,
-                            PorcentajeAprobacion: ct2 > 0 ? Math.Round(ca * 100m / ct2, 2) : 0m,
-                            TotalEvaluados:       ct2);
+                            Promedio:             count > 0 ? (decimal?)Math.Round(cn.Average(), 2) : null,
+                            PorcentajeAprobacion: count > 0 ? Math.Round(ca * 100m / count, 2) : 0m,
+                            TotalEvaluados:       count);
                     })
                     .ToList();
 
+                var distribucion = Enumerable.Range(1, 10)
+                    .Select(n => new DistribucionNotaItemDto(n, notas.Count(x => (int)Math.Round(x) == n)))
+                    .ToList();
+
                 return new PuntoEvolucionNotaDto(
-                    Periodo:              $"{g.Key.Year}-{g.Key.Month:D2}",
+                    Periodo:              g.Key.Periodo,
                     TotalEvaluados:       total,
                     Aprobados:            aprobados,
                     Desaprobados:         desaprobados,
                     PromedioGeneral:      promedio.HasValue ? Math.Round(promedio.Value, 2) : null,
                     PorcentajeAprobacion: Math.Round(pct, 2),
-                    PorCarrera:           porCarrera);
+                    PorCarrera:           porCarrera,
+                    DistribucionNotas:    distribucion);
             })
             .ToList();
     }

@@ -11,6 +11,7 @@ public interface IRendimientoConsolidadoRepository
     Task<IEnumerable<PuntoEvolucionNotaDto>> ObtenerEvolucionNotasAsync(
         int? materiaId, int? anio, int? docenteId,
         int? cuatrimestre, byte? anioCarrera, TipoExamen? tipoExamen,
+        string granularidad = "mensual",
         CancellationToken ct = default);
 
     Task<IEnumerable<FilaPromedioCatedraDto>> ObtenerPromediosCatedraAsync(

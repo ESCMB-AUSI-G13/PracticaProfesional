@@ -7,5 +7,6 @@ public record PuntoEvolucionNotaDto(
     int      Desaprobados,
     decimal? PromedioGeneral,
     decimal  PorcentajeAprobacion,
-    IEnumerable<DetalleCarreraEvolucionDto> PorCarrera
+    IEnumerable<DetalleCarreraEvolucionDto> PorCarrera,
+    IEnumerable<DistribucionNotaItemDto>    DistribucionNotas
 );

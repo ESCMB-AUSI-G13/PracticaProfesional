@@ -50,6 +50,14 @@
           <option [value]="3">Recuperatorio</option>
         </select>
       </div>
+      <div class="campo">
+        <label>Granularidad</label>
+        <select [ngModel]="granularidad()" (ngModelChange)="granularidad.set($event)">
+          <option value="mensual">Mensual</option>
+          <option value="cuatrimestral">Cuatrimestral</option>
+          <option value="anual">Anual</option>
+        </select>
+      </div>
     </div>
     <div class="filtros-acciones">
       <button class="btn btn-primary" (click)="buscar()" [disabled]="cargando()">
@@ -89,6 +97,9 @@
     } @else {
       <div class="chart-wrapper">
         <canvas #chartCanvas></canvas>
+      </div>
+      <div class="chart-wrapper chart-wrapper--histogram">
+        <canvas #histogramCanvas></canvas>
       </div>
       <div class="tabla-wrapper">
         <table class="tabla">

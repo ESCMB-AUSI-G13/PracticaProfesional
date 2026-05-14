@@ -99,6 +99,11 @@ export interface DetalleCarreraEvolucion {
   totalEvaluados:       number;
 }
 
+export interface DistribucionNotaItem {
+  nota:     number;
+  cantidad: number;
+}
+
 export interface PuntoEvolucionNota {
   periodo:              string;
   totalEvaluados:       number;
@@ -107,6 +112,7 @@ export interface PuntoEvolucionNota {
   promedioGeneral:      number | null;
   porcentajeAprobacion: number;
   porCarrera:           DetalleCarreraEvolucion[];
+  distribucionNotas:    DistribucionNotaItem[];
 }
 
 export interface ReporteEvolucionNotas {
@@ -171,6 +177,7 @@ export class ReportesService {
     cuatrimestre?: number,
     anioCarrera?:  number,
     tipoExamen?:   number,
+    granularidad:  'mensual' | 'cuatrimestral' | 'anual' = 'mensual',
   ): Observable<ReporteEvolucionNotas> {
     const params: Record<string, string> = {};
     if (materiaId)    params['materiaId']    = String(materiaId);
@@ -178,6 +185,7 @@ export class ReportesService {
     if (cuatrimestre) params['cuatrimestre'] = String(cuatrimestre);
     if (anioCarrera)  params['anioCarrera']  = String(anioCarrera);
     if (tipoExamen)   params['tipoExamen']   = String(tipoExamen);
+    params['granularidad'] = granularidad;
     return this.http.get<ReporteEvolucionNotas>(`${this.apiUrl}/rendimiento/evolucion`, { params });
   }
 

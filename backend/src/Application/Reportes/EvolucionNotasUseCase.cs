@@ -21,6 +21,7 @@ public class EvolucionNotasUseCase(IRendimientoConsolidadoRepository repository)
         var puntos = await repository.ObtenerEvolucionNotasAsync(
             filtro.MateriaId, filtro.Anio, filtro.DocenteId,
             filtro.Cuatrimestre, filtro.AnioCarrera, filtro.TipoExamen,
+            filtro.Granularidad,
             cancellationToken);
 
         return new ReporteEvolucionNotasDto(

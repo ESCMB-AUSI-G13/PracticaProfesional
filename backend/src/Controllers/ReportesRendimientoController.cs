@@ -47,16 +47,20 @@ public class ReportesRendimientoController(
     [HttpGet("evolucion")]
     [ProducesResponseType(typeof(ReporteEvolucionNotasDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> EvolucionNotas(
-        [FromQuery] int?       materiaId,
-        [FromQuery] int?       anio,
-        [FromQuery] int?       cuatrimestre,
-        [FromQuery] byte?      anioCarrera,
+        [FromQuery] int?        materiaId,
+        [FromQuery] int?        anio,
+        [FromQuery] int?        cuatrimestre,
+        [FromQuery] byte?       anioCarrera,
         [FromQuery] TipoExamen? tipoExamen,
-        CancellationToken cancellationToken)
+        [FromQuery] string      granularidad = "mensual",
+        CancellationToken cancellationToken = default)
     {
+        var gran = granularidad is "mensual" or "cuatrimestral" or "anual"
+            ? granularidad : "mensual";
+
         var docenteId = await ResolverDocenteIdSiAplicaAsync(cancellationToken);
 
-        var filtro = new FiltroEvolucionNotasDto(materiaId, anio, docenteId, cuatrimestre, anioCarrera, tipoExamen);
+        var filtro = new FiltroEvolucionNotasDto(materiaId, anio, docenteId, cuatrimestre, anioCarrera, tipoExamen, gran);
         var resultado = await evolucionUseCase.EjecutarAsync(filtro, cancellationToken);
         return Ok(resultado);
     }

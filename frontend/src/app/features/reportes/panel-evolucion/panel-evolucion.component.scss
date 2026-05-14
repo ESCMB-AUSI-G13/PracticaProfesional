@@ -16,7 +16,7 @@
 .card-valor { font-size: 2rem; font-weight: 700; color: #2c3e50; }
 .card-label { font-size: 0.8rem; color: #777; margin-top: 0.2rem; }
 
-.chart-wrapper { background: white; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1.25rem; margin-bottom: 1.5rem; position: relative; height: 380px; }
+.chart-wrapper { background: white; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1.25rem; margin-bottom: 1.5rem; position: relative; height: 380px; &--histogram { height: 260px; } }
 .tabla-wrapper { overflow-x: auto; }
 .tabla { width: 100%; border-collapse: collapse; font-size: 0.9rem; th, td { padding: 0.6rem 0.75rem; border: 1px solid #e0e0e0; text-align: left; } th { background: #f5f5f5; font-weight: 600; } }
 

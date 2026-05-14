@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy, signal, computed, ViewChild, ElementRef, 
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { ReportesService, ReporteEvolucionNotas } from '../reportes.service';
+import { ReportesService, ReporteEvolucionNotas, PuntoEvolucionNota } from '../reportes.service';
 import { MateriasService, Materia } from '../../materias/materias.service';
 import { Chart, registerables } from 'chart.js';
 
@@ -16,14 +16,19 @@ Chart.register(...registerables);
   styleUrl: './panel-evolucion.component.scss'
 })
 export class PanelEvolucionComponent implements OnInit, OnDestroy {
-  @ViewChild('chartCanvas') canvasRef?: ElementRef<HTMLCanvasElement>;
-  private chart: Chart | null = null;
+  @ViewChild('chartCanvas')    canvasRef?:    ElementRef<HTMLCanvasElement>;
+  @ViewChild('histogramCanvas') histogramRef?: ElementRef<HTMLCanvasElement>;
+
+  private chart:     Chart | null = null;
+  private histogram: Chart | null = null;
+
   materias     = signal<Materia[]>([]);
   materiaId    = signal<number | null>(null);
   anio         = signal<number | null>(null);
   cuatrimestre = signal<number | null>(null);
   anioCarrera  = signal<number | null>(null);
   tipoExamen   = signal<number | null>(null);
+  granularidad = signal<'mensual' | 'cuatrimestral' | 'anual'>('mensual');
 
   reporte  = signal<ReporteEvolucionNotas | null>(null);
   cargando = signal(false);
@@ -76,25 +81,30 @@ export class PanelEvolucionComponent implements OnInit, OnDestroy {
         this.cuatrimestre() ?? undefined,
         this.anioCarrera()  ?? undefined,
         this.tipoExamen()   ?? undefined,
+        this.granularidad(),
       )
       .subscribe({
         next: data => {
           this.reporte.set(data);
           this.cargando.set(false);
-          afterNextRender(() => this.initChart(), { injector: this.injector });
+          afterNextRender(() => {
+            this.initChart();
+            this.initHistogram();
+          }, { injector: this.injector });
         },
         error: () => { this.error.set('Error al generar el reporte.'); this.cargando.set(false); }
       });
   }
 
   limpiar(): void {
-    this.chart?.destroy();
-    this.chart = null;
+    this.chart?.destroy();     this.chart     = null;
+    this.histogram?.destroy(); this.histogram = null;
     this.materiaId.set(null);
     this.anio.set(null);
     this.cuatrimestre.set(null);
     this.anioCarrera.set(null);
     this.tipoExamen.set(null);
+    this.granularidad.set('mensual');
     this.reporte.set(null);
     this.buscado.set(false);
     this.error.set(null);
@@ -102,6 +112,7 @@ export class PanelEvolucionComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.chart?.destroy();
+    this.histogram?.destroy();
   }
 
   private initChart(): void {
@@ -110,7 +121,77 @@ export class PanelEvolucionComponent implements OnInit, OnDestroy {
     const puntos = this.reporte()?.evolucion ?? [];
     if (!puntos.length) return;
 
-    // Recolectar todas las carreras únicas presentes en la respuesta
+    if (puntos.length === 1) {
+      this.initBarChart(puntos[0]);
+    } else {
+      this.initLineChart(puntos);
+    }
+  }
+
+  // Gráfico de barras para un único período: muestra promedio general + por carrera
+  private initBarChart(punto: PuntoEvolucionNota): void {
+    const carreras = punto.porCarrera ?? [];
+    const labels   = ['General', ...carreras.map(c => c.carreraNombre)];
+    const values   = [punto.promedioGeneral, ...carreras.map(c => c.promedio)];
+    const bgColors = values.map(v =>
+      v !== null && v >= 4 ? 'rgba(39, 174, 96, 0.75)' : 'rgba(231, 76, 60, 0.75)'
+    );
+    const borderColors = values.map(v =>
+      v !== null && v >= 4 ? 'rgba(39, 174, 96, 1)' : 'rgba(231, 76, 60, 1)'
+    );
+
+    this.chart = new Chart(this.canvasRef!.nativeElement, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Promedio',
+          data: values,
+          backgroundColor: bgColors,
+          borderColor: borderColors,
+          borderWidth: 1,
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          title: {
+            display: true,
+            text: `Período ${punto.periodo} — Promedio por carrera`,
+            color: '#555',
+            font: { size: 13 },
+          },
+          tooltip: {
+            callbacks: {
+              afterLabel: (item) => {
+                const idx = item.dataIndex;
+                if (idx === 0) {
+                  return `Aprobados: ${punto.aprobados}/${punto.totalEvaluados} (${punto.porcentajeAprobacion.toFixed(1)}%)`;
+                }
+                const c = (punto.porCarrera ?? [])[idx - 1];
+                return c ? `Aprobados: ${c.totalEvaluados} eval. (${c.porcentajeAprobacion.toFixed(1)}%)` : '';
+              }
+            }
+          }
+        },
+        scales: {
+          y: {
+            min: 0, max: 10,
+            title: { display: true, text: 'Promedio (1–10)', color: '#555' },
+            ticks: { stepSize: 1, color: '#555' },
+            grid: { color: 'rgba(0,0,0,0.06)' },
+          },
+          x: { grid: { display: false } },
+        },
+      },
+    });
+  }
+
+  // Gráfico de líneas para múltiples períodos
+  private initLineChart(puntos: PuntoEvolucionNota[]): void {
     const carrerasMap = new Map<number, string>();
     puntos.forEach(p => p.porCarrera?.forEach(c => carrerasMap.set(c.carreraId, c.carreraNombre)));
     const carreras = Array.from(carrerasMap.entries());
@@ -150,7 +231,7 @@ export class PanelEvolucionComponent implements OnInit, OnDestroy {
       })),
     ];
 
-    this.chart = new Chart(this.canvasRef.nativeElement, {
+    this.chart = new Chart(this.canvasRef!.nativeElement, {
       type: 'line',
       data: { labels: puntos.map(p => p.periodo), datasets },
       options: {
@@ -181,6 +262,68 @@ export class PanelEvolucionComponent implements OnInit, OnDestroy {
             title: { display: true, text: 'Promedio (1–10)', color: '#555' },
             ticks: { stepSize: 1, color: '#555' },
             grid: { color: 'rgba(0,0,0,0.06)' },
+          },
+        },
+      },
+    });
+  }
+
+  // Histograma: distribución de notas 1-10 (agregada sobre todos los períodos)
+  private initHistogram(): void {
+    if (!this.histogramRef) return;
+    this.histogram?.destroy();
+    const puntos = this.reporte()?.evolucion ?? [];
+    if (!puntos.length) return;
+
+    const cantidades = new Array(11).fill(0);
+    puntos.forEach(p =>
+      p.distribucionNotas?.forEach(d => { cantidades[d.nota] += d.cantidad; })
+    );
+
+    const labels  = Array.from({ length: 10 }, (_, i) => String(i + 1));
+    const data    = Array.from({ length: 10 }, (_, i) => cantidades[i + 1]);
+    const bgColors = Array.from({ length: 10 }, (_, i) =>
+      i + 1 >= 4 ? 'rgba(39, 174, 96, 0.75)' : 'rgba(231, 76, 60, 0.75)'
+    );
+
+    this.histogram = new Chart(this.histogramRef.nativeElement, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Estudiantes',
+          data,
+          backgroundColor: bgColors,
+          borderRadius: 4,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          title: {
+            display: true,
+            text: puntos.length > 1 ? 'Distribución de notas (todos los períodos)' : 'Distribución de notas',
+            color: '#555',
+            font: { size: 13 },
+          },
+          tooltip: {
+            callbacks: {
+              label: (item) => ` ${item.raw} estudiante${(item.raw as number) !== 1 ? 's' : ''}`,
+            }
+          }
+        },
+        scales: {
+          x: {
+            title: { display: true, text: 'Nota', color: '#555' },
+            grid: { display: false },
+          },
+          y: {
+            title: { display: true, text: 'Estudiantes', color: '#555' },
+            ticks: { stepSize: 1, color: '#555' },
+            grid: { color: 'rgba(0,0,0,0.06)' },
+            beginAtZero: true,
           },
         },
       },

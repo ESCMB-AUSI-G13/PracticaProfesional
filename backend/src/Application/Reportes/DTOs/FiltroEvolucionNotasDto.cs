@@ -8,5 +8,6 @@ public record FiltroEvolucionNotasDto(
     int?       DocenteId,
     int?       Cuatrimestre,
     byte?      AnioCarrera,
-    TipoExamen? TipoExamen
+    TipoExamen? TipoExamen,
+    string     Granularidad = "mensual"   // "mensual" | "cuatrimestral" | "anual"
 );
