@@ -112,7 +112,7 @@ backend/
 
 ## Comandos y Puertos
 
-- **Backend:** `cd backend && dotnet run` (Puerto 5000)
+- **Backend:** `cd backend/src && dotnet run` (Puerto 5000)
 - **Frontend:** `cd frontend && ng serve` (Puerto 4200)
 - **Base de Datos:** SQL Server
 

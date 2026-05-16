@@ -421,3 +421,8 @@ D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\n
 D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\PracticaProfesional.deps.json
 D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\PracticaProfesional.runtimeconfig.json
 D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\buildcheck\PracticaProfesional.staticwebassets.endpoints.json
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\obj\Debug\net8.0\PracticaProfesional.MvcApplicationPartsAssemblyInfo.cs
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\Microsoft.OpenApi.dll
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll

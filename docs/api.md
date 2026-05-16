@@ -4,8 +4,8 @@
 
 El backend expone documentación automática via Swagger UI:
 
-- **Local:** http://localhost:5201/swagger
-- **Producción:** https://escmb-practicaprof.azurewebsites.net/swagger
+- **Local:** http://localhost:5000/swagger
+- **Producción:** no disponible (solo activo en entorno Development)
 
 ---
 

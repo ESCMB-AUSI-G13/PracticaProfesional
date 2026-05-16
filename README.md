@@ -50,7 +50,7 @@ Abrir `backend/src/appsettings.Development.json` y reemplazar `INGRESA_LA_PASSWO
 ### 3. Levantar el backend
 
 ```bash
-cd backend && dotnet run
+cd backend/src && dotnet run
 ```
 
 En el primer arranque, EF Core crea todas las tablas automáticamente en Azure y genera el usuario administrador inicial.
@@ -61,6 +61,11 @@ En el primer arranque, EF Core crea todas las tablas automáticamente en Azure y
 cd frontend && ng serve
 ```
 
+> **Windows:** Si PowerShell bloquea el comando `ng` con un error de "ejecución de scripts deshabilitada", ejecutar una sola vez:
+> ```powershell
+> Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+> ```
+
 ---
 
 ## Puertos
@@ -68,7 +73,7 @@ cd frontend && ng serve
 | Servicio | URL |
 |---|---|
 | Frontend | http://localhost:4200 |
-| Backend API | http://localhost:5201 |
+| Backend API | http://localhost:5000 |
 
 ## Base de datos
 
@@ -88,7 +93,7 @@ La base de datos está en **Azure SQL**. Para conectarse desde un cliente visual
 
 ```bash
 # Backend
-cd backend && dotnet run
+cd backend/src && dotnet run
 
 # Frontend
 cd frontend && ng serve
