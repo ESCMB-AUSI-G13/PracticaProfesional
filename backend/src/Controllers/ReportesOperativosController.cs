@@ -9,8 +9,8 @@ namespace PracticaProfesional.Controllers;
 
 /// <summary>
 /// Reportes operativos de inasistencias (RR-08, RR-09).
-/// Accesible para Preceptores, Dirección y Docentes.
-/// Los Docentes solo ven las inasistencias de sus propios espacios curriculares.
+/// RR-08: Preceptores, Dirección y Docentes (Docentes filtrados a sus espacios curriculares).
+/// RR-09: Solo Preceptores y Dirección.
 /// </summary>
 [ApiController]
 [Route("api/reportes")]
@@ -56,6 +56,7 @@ public class ReportesOperativosController(
     /// cursada: totales, porcentajes y alertas de riesgo de pérdida de regularidad.
     /// </summary>
     [HttpGet("control-legajo/{legajo}")]
+    [Authorize(Roles = "Preceptor,Direccion")]
     [ProducesResponseType(typeof(ControlLegajoDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ControlPorLegajo(
