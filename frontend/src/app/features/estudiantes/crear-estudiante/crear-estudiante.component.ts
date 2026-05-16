@@ -28,7 +28,6 @@ export class CrearEstudianteComponent implements OnInit {
   ) {
     this.form = this.fb.group({
       dni: ['', [Validators.required, Validators.pattern(/^\d{7,8}$/)]],
-      legajo: ['', [Validators.required, Validators.maxLength(20)]],
       email: ['', [Validators.required, Validators.email]],
       nombre: ['', [Validators.required, Validators.maxLength(100)]],
       apellido: ['', [Validators.required, Validators.maxLength(100)]],

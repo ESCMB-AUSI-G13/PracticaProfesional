@@ -17,15 +17,13 @@ public class CrearUsuarioUseCase(
         if (await usuarioRepository.ExistePorDniAsync(dto.DNI, cancellationToken))
             throw new InvalidOperationException("Ya existe un usuario con ese DNI.");
 
-        if (await usuarioRepository.ExistePorLegajoAsync(dto.Legajo, cancellationToken))
-            throw new InvalidOperationException("Ya existe un usuario con ese legajo.");
-
         if (await usuarioRepository.ExistePorEmailAsync(dto.Email, cancellationToken))
             throw new InvalidOperationException("Ya existe un usuario con ese email.");
 
+        var legajo = await usuarioRepository.GenerarProximoLegajoAsync(cancellationToken);
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
 
-        var usuario = Usuario.Crear(dto.DNI, dto.Legajo, dto.Email, dto.Nombre, dto.Apellido, passwordHash, rol);
+        var usuario = Usuario.Crear(dto.DNI, legajo, dto.Email, dto.Nombre, dto.Apellido, passwordHash, rol);
 
         await usuarioRepository.AgregarAsync(usuario, cancellationToken);
 

@@ -22,6 +22,21 @@ public class UsuarioRepository(AppDbContext context) : IUsuarioRepository
         return await query.OrderBy(u => u.Apellido).ThenBy(u => u.Nombre).ToListAsync(cancellationToken);
     }
 
+    public async Task<string> GenerarProximoLegajoAsync(CancellationToken cancellationToken = default)
+    {
+        var legajos = await context.Usuarios
+            .Select(u => u.Legajo)
+            .ToListAsync(cancellationToken);
+
+        var max = legajos
+            .Where(l => l.Length > 0 && l.All(char.IsDigit))
+            .Select(int.Parse)
+            .DefaultIfEmpty(999)
+            .Max();
+
+        return (max + 1).ToString();
+    }
+
     public async Task<bool> ExistePorDniAsync(string dni, CancellationToken cancellationToken = default)
         => await context.Usuarios.AnyAsync(u => u.DNI == dni, cancellationToken);
 

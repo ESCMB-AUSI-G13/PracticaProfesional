@@ -19,7 +19,6 @@ export interface Preceptor {
 
 export interface CrearPreceptorRequest {
   dni: string;
-  legajo: string;
   email: string;
   nombre: string;
   apellido: string;

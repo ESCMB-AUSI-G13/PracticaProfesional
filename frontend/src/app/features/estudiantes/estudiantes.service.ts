@@ -29,7 +29,6 @@ export interface Estudiante {
 
 export interface CrearEstudianteRequest {
   dni:           string;
-  legajo:        string;
   email:         string;
   nombre:        string;
   apellido:      string;

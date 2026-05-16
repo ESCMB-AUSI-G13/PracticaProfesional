@@ -17,17 +17,15 @@ public class CrearEstudianteUseCase(
         if (await usuarioRepository.ExistePorDniAsync(dto.DNI, cancellationToken))
             throw new InvalidOperationException("Ya existe un usuario con ese DNI.");
 
-        if (await usuarioRepository.ExistePorLegajoAsync(dto.Legajo, cancellationToken))
-            throw new InvalidOperationException("Ya existe un usuario con ese legajo.");
-
         if (await usuarioRepository.ExistePorEmailAsync(dto.Email, cancellationToken))
             throw new InvalidOperationException("Ya existe un usuario con ese email.");
 
         var carrera = await carreraRepository.ObtenerPorIdAsync(dto.CarreraId, cancellationToken)
             ?? throw new BusinessException($"No se encontró la carrera con Id {dto.CarreraId}.");
 
+        var legajo = await usuarioRepository.GenerarProximoLegajoAsync(cancellationToken);
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
-        var usuario = Usuario.Crear(dto.DNI, dto.Legajo, dto.Email, dto.Nombre, dto.Apellido, passwordHash, Rol.Estudiante);
+        var usuario = Usuario.Crear(dto.DNI, legajo, dto.Email, dto.Nombre, dto.Apellido, passwordHash, Rol.Estudiante);
 
         await usuarioRepository.AgregarAsync(usuario, cancellationToken);
 

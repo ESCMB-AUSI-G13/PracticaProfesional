@@ -17,7 +17,6 @@ export interface Usuario {
 
 export interface CrearUsuarioRequest {
   dni: string;
-  legajo: string;
   email: string;
   nombre: string;
   apellido: string;

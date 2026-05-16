@@ -32,7 +32,6 @@ public class Usuario
         Rol rol)
     {
         if (string.IsNullOrWhiteSpace(dni)) throw new ArgumentException("El DNI es obligatorio.");
-        if (string.IsNullOrWhiteSpace(legajo)) throw new ArgumentException("El legajo es obligatorio.");
         if (string.IsNullOrWhiteSpace(email)) throw new ArgumentException("El email es obligatorio.");
         if (string.IsNullOrWhiteSpace(nombre)) throw new ArgumentException("El nombre es obligatorio.");
         if (string.IsNullOrWhiteSpace(apellido)) throw new ArgumentException("El apellido es obligatorio.");
