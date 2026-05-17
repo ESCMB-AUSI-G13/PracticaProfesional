@@ -127,7 +127,12 @@ Iniciar sesión en ambas extensiones con la cuenta de Azure.
 
 ### Deploy del backend
 
-En VS Code → panel Azure → App Services → click derecho en `escmb-practicaprof` → **Deploy to Web App** → seleccionar la carpeta `backend/publish`.
+1. Generar el build de publicación:
+```bash
+cd backend/src && dotnet publish -c Release -o ../publish
+```
+
+2. En VS Code → panel Azure → App Services → click derecho en `escmb-practicaprof` → **Deploy to Web App** → seleccionar la carpeta `backend/publish`.
 
 ### Deploy del frontend
 
