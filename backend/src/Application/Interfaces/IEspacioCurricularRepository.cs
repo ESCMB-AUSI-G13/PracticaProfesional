@@ -6,6 +6,7 @@ public interface IEspacioCurricularRepository
 {
     Task<IEnumerable<EspacioCurricular>> ListarAsync(CancellationToken cancellationToken = default);
     Task<IEnumerable<EspacioCurricular>> ListarPorDocenteIdAsync(int docenteId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<EspacioCurricular>> ListarPorCursoYMateriaAsync(int cursoId, int materiaId, CancellationToken cancellationToken = default);
     Task<EspacioCurricular?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default);
     Task<bool> ExisteAsync(int materiaId, int docenteId, int cursoId, CancellationToken cancellationToken = default);
     Task AgregarAsync(EspacioCurricular ec, CancellationToken cancellationToken = default);

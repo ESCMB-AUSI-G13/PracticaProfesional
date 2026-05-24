@@ -320,16 +320,15 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Alerta>(entity =>
         {
             entity.HasKey(a => a.Id);
-            entity.Property(a => a.Anio).IsRequired();
-            entity.Property(a => a.Comision).IsRequired().HasMaxLength(20);
-            entity.Property(a => a.EstadoFinal).IsRequired().HasMaxLength(50);
-            entity.Property(a => a.NotaFinal).IsRequired(false).HasColumnType("decimal(4,2)");
-            entity.Property(a => a.Condicion).IsRequired().HasMaxLength(50);
+            entity.Property(a => a.Tipo).IsRequired().HasConversion<string>().HasMaxLength(50);
+            entity.Property(a => a.Destinatario).IsRequired().HasMaxLength(150);
+            entity.Property(a => a.Mensaje).IsRequired();
             entity.Property(a => a.Enviada).IsRequired();
             entity.Property(a => a.FechaCreacion).IsRequired();
-            entity.HasOne(a => a.InscripcionExamen).WithMany().HasForeignKey(a => a.InscripcionExamenId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne(a => a.InscripcionMateria).WithMany().HasForeignKey(a => a.InscripcionMateriaId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne(a => a.Examen).WithMany().HasForeignKey(a => a.ExamenId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(a => a.Estudiante).WithMany().HasForeignKey(a => a.EstudianteId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(a => a.CalendarioAcademico).WithMany().HasForeignKey(a => a.CalendarioAcademicoId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+            entity.HasIndex(a => new { a.EstudianteId, a.Tipo, a.FechaCreacion });
+            entity.HasIndex(a => new { a.CalendarioAcademicoId, a.Destinatario, a.FechaCreacion });
         });
 
         // ──────────────────────────────────────────────

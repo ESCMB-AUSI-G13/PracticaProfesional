@@ -30,6 +30,15 @@ public class EspacioCurricularRepository(AppDbContext db) : IEspacioCurricularRe
             .Include(ec => ec.Curso)
             .FirstOrDefaultAsync(ec => ec.Id == id, cancellationToken);
 
+    public async Task<IEnumerable<EspacioCurricular>> ListarPorCursoYMateriaAsync(
+        int cursoId, int materiaId, CancellationToken cancellationToken = default)
+        => await db.EspaciosCurriculares
+            .Include(ec => ec.Docente).ThenInclude(d => d.Usuario)
+            .Include(ec => ec.Materia)
+            .Include(ec => ec.Curso)
+            .Where(ec => ec.CursoId == cursoId && ec.MateriaId == materiaId)
+            .ToListAsync(cancellationToken);
+
     public async Task<bool> ExisteAsync(int materiaId, int docenteId, int cursoId, CancellationToken cancellationToken = default)
         => await db.EspaciosCurriculares
             .AnyAsync(ec => ec.MateriaId == materiaId && ec.DocenteId == docenteId && ec.CursoId == cursoId, cancellationToken);

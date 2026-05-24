@@ -45,4 +45,13 @@ public class CalendarioAcademicoRepository(AppDbContext context) : ICalendarioAc
 
     public async Task<bool> TieneEventosAsync(CancellationToken cancellationToken = default)
         => await context.CalendarioAcademico.AnyAsync(cancellationToken);
+
+    public async Task<IEnumerable<CalendarioAcademico>> ObtenerProximosAsync(
+        DateTime desde, DateTime hasta, CancellationToken cancellationToken = default)
+        => await context.CalendarioAcademico
+            .Include(e => e.Materia)
+            .Include(e => e.Curso)
+            .Where(e => e.FechaFin.Date >= desde.Date && e.FechaFin.Date <= hasta.Date)
+            .OrderBy(e => e.FechaFin)
+            .ToListAsync(cancellationToken);
 }

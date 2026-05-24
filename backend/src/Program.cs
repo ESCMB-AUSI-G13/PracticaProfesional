@@ -20,6 +20,8 @@ using PracticaProfesional.Infrastructure.Seeding;
 using PracticaProfesional.Application.Asistencias;
 using PracticaProfesional.Application.EspaciosCurriculares;
 using PracticaProfesional.Application.Examenes;
+using PracticaProfesional.Application.Alertas;
+using PracticaProfesional.Infrastructure.BackgroundServices;
 using PracticaProfesional.Infrastructure.Persistence.Repositories;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Preceptores;
@@ -176,6 +178,13 @@ builder.Services.AddScoped<IRendimientoConsolidadoRepository, RendimientoConsoli
 builder.Services.AddScoped<ComparativoComisionesUseCase>();
 builder.Services.AddScoped<EvolucionNotasUseCase>();
 builder.Services.AddScoped<PromediosCatedraUseCase>();
+
+// Alertas académicas
+builder.Services.AddScoped<IAlertaRepository, AlertaRepository>();
+builder.Services.AddScoped<DetectarRiesgoAcademicoUseCase>();
+builder.Services.AddScoped<NotificarVencimientosUseCase>();
+builder.Services.AddScoped<ListarAlertasUseCase>();
+builder.Services.AddHostedService<AlertasBackgroundService>();
 
 // Estudiantes
 builder.Services.AddScoped<CrearEstudianteUseCase>();

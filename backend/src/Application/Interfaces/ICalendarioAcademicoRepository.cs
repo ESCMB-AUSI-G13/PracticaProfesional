@@ -12,4 +12,8 @@ public interface ICalendarioAcademicoRepository
     Task EliminarAsync(CalendarioAcademico evento, CancellationToken cancellationToken = default);
     Task GuardarCambiosAsync(CancellationToken cancellationToken = default);
     Task<bool> TieneEventosAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>Devuelve eventos cuya FechaFin cae dentro del rango [desde, hasta].</summary>
+    Task<IEnumerable<CalendarioAcademico>> ObtenerProximosAsync(
+        DateTime desde, DateTime hasta, CancellationToken cancellationToken = default);
 }

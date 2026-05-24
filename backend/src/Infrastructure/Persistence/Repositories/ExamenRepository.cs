@@ -55,12 +55,7 @@ public class ExamenRepository(AppDbContext db) : IExamenRepository
             .Where(a => a.ExamenId == id)
             .ExecuteUpdateAsync(s => s.SetProperty(a => a.ExamenId, (int?)null), cancellationToken);
 
-        // 4. Desligar Alertas que apuntan al examen
-        await db.Alertas
-            .Where(a => a.ExamenId == id)
-            .ExecuteUpdateAsync(s => s.SetProperty(a => a.ExamenId, (int?)null), cancellationToken);
-
-        // 5. Eliminar el examen
+        // 4. Eliminar el examen
         db.Examenes.Remove(examen);
         await db.SaveChangesAsync(cancellationToken);
     }

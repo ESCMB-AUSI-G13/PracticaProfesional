@@ -64,10 +64,27 @@
 
 ---
 
+## Módulo 6 — Alertas Académicas (RF-10, Módulo 7)
+
+| Caso de uso | Estado | Roles habilitados |
+|---|---|---|
+| Detección de riesgo por inasistencias (>25%) | Implementado | Sistema (automático, lunes 08:00) |
+| Detección de riesgo por inactividad (>30 días) | Implementado | Sistema (automático, lunes 08:00) |
+| Notificación de vencimientos del calendario | Implementado | Sistema (automático, lunes 08:00) |
+| Disparar alertas manualmente | Implementado | Preceptor, Administrador |
+| Historial de alertas generadas | Implementado | Preceptor, Administrador |
+
+**Reglas de negocio:**
+- Destinatarios: estudiante en riesgo + todos los preceptores activos + dirección.
+- Deduplicación: no se reenvía la misma alerta al mismo destinatario el mismo día.
+- Si el envío de email falla, la alerta igual se guarda en la BD con `Enviada = false`.
+- Las alertas de vencimiento se disparan con 3 días de anticipación.
+
+---
+
 ## Módulos Pendientes
 
 | Módulo | Estado |
 |---|---|
 | Encuestas académicas anónimas (CU-36, CU-40) | Pendiente |
-| Alertas automáticas de plazos (RF-10, Módulo 7) | Pendiente |
 | Certificados con Hash SHA-256 / QR (CU-38) | Pendiente |
