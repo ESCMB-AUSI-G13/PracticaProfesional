@@ -46,7 +46,7 @@ public class AlertasController(
     /// Solo disponible en Development. Envía un email de prueba para verificar la integración con ACS.
     /// </summary>
     [HttpPost("test-email")]
-    [AllowAnonymous]
+    [Authorize(Roles = "Direccion")]
     public async Task<IActionResult> TestEmail([FromQuery] string destinatario, CancellationToken cancellationToken)
     {
         if (!env.IsDevelopment())

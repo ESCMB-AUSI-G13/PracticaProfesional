@@ -11,6 +11,7 @@ public class NotificarVencimientosUseCase(
     IPreceptorRepository preceptorRepo,
     IUsuarioRepository usuarioRepo,
     IAlertaRepository alertaRepo,
+    INotificacionRepository notificacionRepo,
     IEmailService emailService)
 {
     private const int DiasAnticipacion = 3;
@@ -25,7 +26,6 @@ public class NotificarVencimientosUseCase(
         var limite = hoy.AddDays(DiasAnticipacion);
 
         var eventosProximos = await calendarioRepo.ObtenerProximosAsync(hoy, limite, cancellationToken);
-
         var preceptores = await preceptorRepo.ListarAsync(cancellationToken);
         var usuariosDireccion = await usuarioRepo.ListarAsync(Rol.Direccion, cancellationToken);
 
@@ -35,8 +35,9 @@ public class NotificarVencimientosUseCase(
             var tipoAlerta = evento.TipoEvento == TipoEvento.FechaLimiteCargaNotas
                 ? TipoAlerta.VencimientoCargaNotas
                 : TipoAlerta.VencimientoInscripcion;
+            var titulo = $"Vencimiento en {diasRestantes} día{(diasRestantes == 1 ? "" : "s")}: {evento.NombreEvento}";
 
-            // ── FechaLimiteCargaNotas → notificar al docente del espacio ────
+            // ── FechaLimiteCargaNotas → docente del espacio ──────────────────
             if (evento.TipoEvento == TipoEvento.FechaLimiteCargaNotas
                 && evento.MateriaId.HasValue && evento.CursoId.HasValue)
             {
@@ -57,22 +58,23 @@ public class NotificarVencimientosUseCase(
                     await alertaRepo.AgregarAsync(alerta, cancellationToken);
                     alertasGeneradas++;
 
-                    var detalle = $"[{evento.NombreEvento}] → {nombreDocente} ({emailDocente}) — vence en {diasRestantes} días.";
+                    await notificacionRepo.AgregarAsync(
+                        Notificacion.Crear(espacio.Docente.UsuarioId, titulo, evento.NombreEvento, tipoAlerta),
+                        cancellationToken);
 
                     if (await EnviarEmailAsync(() => emailService.EnviarAlertaVencimientoAsync(
                             emailDocente, nombreDocente, evento.NombreEvento,
-                            evento.FechaFin, diasRestantes, cancellationToken),
-                        detalles))
+                            evento.FechaFin, diasRestantes, cancellationToken), detalles))
                     {
                         alerta.MarcarEnviada();
                         emailsEnviados++;
                     }
 
-                    detalles.Add(detalle);
+                    detalles.Add($"[{evento.NombreEvento}] → {nombreDocente} — vence en {diasRestantes} días.");
                 }
             }
 
-            // ── Períodos de inscripción y carga de notas → preceptores y dirección ─
+            // ── Todos los eventos → preceptores y dirección ──────────────────
             if (evento.TipoEvento is TipoEvento.InscripcionMateria or TipoEvento.InscripcionExamen
                 or TipoEvento.FechaLimiteCargaNotas)
             {
@@ -88,10 +90,13 @@ public class NotificarVencimientosUseCase(
                     await alertaRepo.AgregarAsync(alerta, cancellationToken);
                     alertasGeneradas++;
 
+                    await notificacionRepo.AgregarAsync(
+                        Notificacion.Crear(preceptor.UsuarioId, titulo, evento.NombreEvento, tipoAlerta),
+                        cancellationToken);
+
                     if (await EnviarEmailAsync(() => emailService.EnviarAlertaVencimientoAsync(
                             emailP, nombreP, evento.NombreEvento,
-                            evento.FechaFin, diasRestantes, cancellationToken),
-                        detalles))
+                            evento.FechaFin, diasRestantes, cancellationToken), detalles))
                         emailsEnviados++;
 
                     detalles.Add($"[{evento.NombreEvento}] → Preceptor {nombreP} — vence en {diasRestantes} días.");
@@ -107,10 +112,13 @@ public class NotificarVencimientosUseCase(
                     await alertaRepo.AgregarAsync(alerta, cancellationToken);
                     alertasGeneradas++;
 
+                    await notificacionRepo.AgregarAsync(
+                        Notificacion.Crear(dir.Id, titulo, evento.NombreEvento, tipoAlerta),
+                        cancellationToken);
+
                     if (await EnviarEmailAsync(() => emailService.EnviarAlertaVencimientoAsync(
                             dir.Email, $"{dir.Nombre} {dir.Apellido}", evento.NombreEvento,
-                            evento.FechaFin, diasRestantes, cancellationToken),
-                        detalles))
+                            evento.FechaFin, diasRestantes, cancellationToken), detalles))
                         emailsEnviados++;
 
                     detalles.Add($"[{evento.NombreEvento}] → Dirección {dir.Email} — vence en {diasRestantes} días.");
@@ -119,6 +127,7 @@ public class NotificarVencimientosUseCase(
         }
 
         await alertaRepo.GuardarCambiosAsync(cancellationToken);
+        await notificacionRepo.GuardarCambiosAsync(cancellationToken);
 
         return new ResumenAlertasDto
         {
@@ -130,15 +139,7 @@ public class NotificarVencimientosUseCase(
 
     private static async Task<bool> EnviarEmailAsync(Func<Task> envio, List<string> detalles)
     {
-        try
-        {
-            await envio();
-            return true;
-        }
-        catch (Exception ex)
-        {
-            detalles.Add($"[EMAIL FALLIDO] {ex.Message}");
-            return false;
-        }
+        try { await envio(); return true; }
+        catch (Exception ex) { detalles.Add($"[EMAIL FALLIDO] {ex.Message}"); return false; }
     }
 }

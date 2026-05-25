@@ -40,6 +40,24 @@ Desde cualquier rol: hacé clic en tu nombre en la esquina superior derecha → 
 
 ---
 
+### Notificaciones internas
+
+El sistema genera notificaciones internas cada vez que se dispara una alerta académica o de vencimiento. Aparecen en la **campanita** ubicada en la barra lateral, junto a tu nombre y rol.
+
+**Cómo usarlas:**
+
+- El **badge rojo** sobre la campanita indica la cantidad de notificaciones sin leer.
+- Hacé clic en la campanita para abrir el panel de notificaciones.
+- Cada notificación muestra su título, mensaje y fecha.
+- Hacé clic en una notificación para marcarla como leída.
+- Usá el botón **Marcar todas como leídas** para limpiar el panel de una vez.
+- El panel se cierra automáticamente al hacer clic fuera de él.
+- El sistema actualiza las notificaciones automáticamente cada 60 segundos.
+
+> Las notificaciones internas complementan los emails: si el email falla, la notificación en el sistema siempre se genera igual.
+
+---
+
 ## 2. Administrador / Dirección
 
 El rol **Administrador** (Dirección) tiene acceso completo al sistema. Desde el panel puede gestionar todos los recursos académicos y consultar reportes globales.

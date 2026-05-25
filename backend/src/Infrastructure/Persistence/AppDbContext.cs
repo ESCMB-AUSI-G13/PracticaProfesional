@@ -30,6 +30,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     // Historial y seguimiento
     public DbSet<HistorialAcademico> HistorialAcademico => Set<HistorialAcademico>();
     public DbSet<Alerta> Alertas => Set<Alerta>();
+    public DbSet<Notificacion> Notificaciones => Set<Notificacion>();
     public DbSet<CalendarioAcademico> CalendarioAcademico => Set<CalendarioAcademico>();
 
     // Encuestas
@@ -329,6 +330,21 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.HasOne(a => a.CalendarioAcademico).WithMany().HasForeignKey(a => a.CalendarioAcademicoId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
             entity.HasIndex(a => new { a.EstudianteId, a.Tipo, a.FechaCreacion });
             entity.HasIndex(a => new { a.CalendarioAcademicoId, a.Destinatario, a.FechaCreacion });
+        });
+
+        // ──────────────────────────────────────────────
+        // Notificacion
+        // ──────────────────────────────────────────────
+        modelBuilder.Entity<Notificacion>(entity =>
+        {
+            entity.HasKey(n => n.Id);
+            entity.Property(n => n.Titulo).IsRequired().HasMaxLength(200);
+            entity.Property(n => n.Mensaje).IsRequired();
+            entity.Property(n => n.Leida).IsRequired();
+            entity.Property(n => n.FechaCreacion).IsRequired();
+            entity.Property(n => n.Tipo).IsRequired(false).HasConversion<string>().HasMaxLength(50);
+            entity.HasOne(n => n.Usuario).WithMany().HasForeignKey(n => n.UsuarioId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasIndex(n => new { n.UsuarioId, n.Leida, n.FechaCreacion });
         });
 
         // ──────────────────────────────────────────────

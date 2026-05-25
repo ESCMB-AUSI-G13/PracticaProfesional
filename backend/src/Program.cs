@@ -21,6 +21,7 @@ using PracticaProfesional.Application.Asistencias;
 using PracticaProfesional.Application.EspaciosCurriculares;
 using PracticaProfesional.Application.Examenes;
 using PracticaProfesional.Application.Alertas;
+using PracticaProfesional.Application.Notificaciones;
 using PracticaProfesional.Infrastructure.BackgroundServices;
 using PracticaProfesional.Infrastructure.Persistence.Repositories;
 using PracticaProfesional.Application.Interfaces;
@@ -179,8 +180,12 @@ builder.Services.AddScoped<ComparativoComisionesUseCase>();
 builder.Services.AddScoped<EvolucionNotasUseCase>();
 builder.Services.AddScoped<PromediosCatedraUseCase>();
 
-// Alertas académicas
+// Alertas académicas y notificaciones internas
 builder.Services.AddScoped<IAlertaRepository, AlertaRepository>();
+builder.Services.AddScoped<INotificacionRepository, NotificacionRepository>();
+builder.Services.AddScoped<ObtenerMisNotificacionesUseCase>();
+builder.Services.AddScoped<MarcarNotificacionLeidaUseCase>();
+builder.Services.AddScoped<MarcarTodasLeidasUseCase>();
 builder.Services.AddScoped<DetectarRiesgoAcademicoUseCase>();
 builder.Services.AddScoped<NotificarVencimientosUseCase>();
 builder.Services.AddScoped<ListarAlertasUseCase>();

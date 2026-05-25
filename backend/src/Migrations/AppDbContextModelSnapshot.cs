@@ -758,6 +758,43 @@ namespace PracticaProfesional.Migrations
                     b.ToTable("Materias");
                 });
 
+            modelBuilder.Entity("PracticaProfesional.Domain.Entities.Notificacion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("FechaCreacion")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("Leida")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Mensaje")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Tipo")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<string>("Titulo")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId", "Leida", "FechaCreacion");
+
+                    b.ToTable("Notificaciones");
+                });
+
             modelBuilder.Entity("PracticaProfesional.Domain.Entities.Preceptor", b =>
                 {
                     b.Property<int>("Id")
@@ -1200,6 +1237,17 @@ namespace PracticaProfesional.Migrations
                         .IsRequired();
 
                     b.Navigation("Carrera");
+                });
+
+            modelBuilder.Entity("PracticaProfesional.Domain.Entities.Notificacion", b =>
+                {
+                    b.HasOne("PracticaProfesional.Domain.Entities.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("PracticaProfesional.Domain.Entities.Preceptor", b =>

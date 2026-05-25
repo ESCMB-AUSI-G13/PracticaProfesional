@@ -1,8 +1,10 @@
-import { Component, inject, computed } from '@angular/core';
+import { Component, inject, computed, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '../../features/auth/services/auth.service';
 import { BannerVistaRolComponent } from '../banner-vista-rol/banner-vista-rol.component';
+import { NotificacionBellComponent } from '../notificacion-bell/notificacion-bell.component';
+import { NotificacionesService } from '../../features/notificaciones/notificaciones.service';
 
 interface NavItem {
   label: string;
@@ -114,13 +116,17 @@ const NAV: NavItem[] = [
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, BannerVistaRolComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, BannerVistaRolComponent, NotificacionBellComponent],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss'
 })
-export class ShellComponent {
+export class ShellComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
   private sanitizer = inject(DomSanitizer);
+  private notifSvc = inject(NotificacionesService);
+
+  ngOnInit(): void { this.notifSvc.iniciarPolling(); }
+  ngOnDestroy(): void { this.notifSvc.detenerPolling(); }
 
   sidebarOpen = false;
   expandedGroups: string[] = ['Gestión de Entidades'];

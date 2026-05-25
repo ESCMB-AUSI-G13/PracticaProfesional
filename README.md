@@ -98,6 +98,9 @@ cd backend/src && dotnet run
 # Frontend
 cd frontend && ng serve
 
+# Ejecutar tests unitarios del backend
+cd backend && dotnet test
+
 # Crear una nueva migración (después de cambiar el modelo)
 cd backend/src && dotnet ef migrations add NombreDeLaMigracion
 
