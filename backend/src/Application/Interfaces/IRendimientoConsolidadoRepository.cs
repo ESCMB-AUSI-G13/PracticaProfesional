@@ -5,6 +5,13 @@ namespace PracticaProfesional.Application.Interfaces;
 
 public interface IRendimientoConsolidadoRepository
 {
+    Task<List<DatosRiesgoEstudianteDto>> ObtenerDatosRiesgoAsync(
+        int? anioCohorte, int? carreraId, CancellationToken ct = default);
+
+    Task<List<DatosCohorteDto>> ObtenerDatosCohorteAsync(
+        int? carreraId, CancellationToken ct = default);
+
+
     Task<IEnumerable<FilaComparativoComisionDto>> ObtenerComparativoComisionesAsync(
         int? materiaId, int? anio, int? docenteId, CancellationToken ct = default);
 

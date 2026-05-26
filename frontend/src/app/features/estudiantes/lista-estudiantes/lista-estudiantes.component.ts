@@ -116,6 +116,14 @@ export class ListaEstudiantesComponent implements OnInit {
     });
   }
 
+  eliminar(usuarioId: number, nombre: string, apellido: string): void {
+    if (!confirm(`¿Eliminar permanentemente a ${apellido}, ${nombre}?\n\nEsta acción no se puede deshacer y borrará todos sus datos (inscripciones, asistencias, historial).`)) return;
+    this.estudiantesService.eliminar(usuarioId).subscribe({
+      next: () => this.cargarEstudiantes(),
+      error: () => this.error.set('Error al eliminar el estudiante.')
+    });
+  }
+
   irACrear(): void   { this.router.navigate(['/estudiantes/nuevo']); }
   irAEditar(id: number): void { this.router.navigate(['/estudiantes', id, 'editar']); }
 }

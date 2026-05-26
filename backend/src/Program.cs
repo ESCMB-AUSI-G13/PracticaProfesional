@@ -180,6 +180,10 @@ builder.Services.AddScoped<ComparativoComisionesUseCase>();
 builder.Services.AddScoped<EvolucionNotasUseCase>();
 builder.Services.AddScoped<PromediosCatedraUseCase>();
 
+// Reportes Cohorte — Riesgo Académico y Retención
+builder.Services.AddScoped<RiesgoAcademicoUseCase>();
+builder.Services.AddScoped<RetencionPorCohorteUseCase>();
+
 // Alertas académicas y notificaciones internas
 builder.Services.AddScoped<IAlertaRepository, AlertaRepository>();
 builder.Services.AddScoped<INotificacionRepository, NotificacionRepository>();
@@ -197,6 +201,7 @@ builder.Services.AddScoped<ListarEstudiantesUseCase>();
 builder.Services.AddScoped<ModificarEstudianteUseCase>();
 builder.Services.AddScoped<DesactivarEstudianteUseCase>();
 builder.Services.AddScoped<ReactivarEstudianteUseCase>();
+builder.Services.AddScoped<EliminarEstudianteUseCase>();
 
 // ── Autenticación JWT ──────────────────────────────────────────────────────────
 var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -310,6 +315,28 @@ var app = builder.Build();
     catch (Exception ex)
     {
         logger.LogError(ex, "Error al aplicar migraciones o seed. La aplicación continuará sin migración automática.");
+    }
+
+    // Corrección de condiciones académicas según datos reales de asistencia y notas.
+    try
+    {
+        var db2 = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await EstudiantesSeeder.CorregirCondicionesAsync(db2, logger);
+    }
+    catch (Exception ex)
+    {
+        logger.LogWarning(ex, "CorregirCondiciones: error no crítico, se continúa.");
+    }
+
+    // Patch de condiciones de retención (Desertores) — corre después de corregir condiciones.
+    try
+    {
+        var db3 = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await EstudiantesSeeder.PatchCondicionesRetencionAsync(db3, logger);
+    }
+    catch (Exception ex)
+    {
+        logger.LogWarning(ex, "PatchCondicionesRetencion: error no crítico, se continúa.");
     }
 }
 

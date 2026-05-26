@@ -300,6 +300,22 @@ export const routes: Routes = [
           import('./features/reportes/panel-catedras/panel-catedras.component')
             .then(m => m.PanelCatedrasComponent)
       },
+
+      // Reportes — solo Dirección
+      {
+        path: 'reportes/riesgo-academico',
+        canActivate: [roleGuard('Direccion')],
+        loadComponent: () =>
+          import('./features/reportes/panel-riesgo/panel-riesgo.component')
+            .then(m => m.PanelRiesgoComponent)
+      },
+      {
+        path: 'reportes/retencion-cohorte',
+        canActivate: [roleGuard('Direccion')],
+        loadComponent: () =>
+          import('./features/reportes/panel-cohorte/panel-cohorte.component')
+            .then(m => m.PanelCohorteComponent)
+      },
     ]
   },
 

@@ -426,3 +426,8 @@ D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\n
 D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
 D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 D:\Documents\3A\PRACTICA PROFESIONAL\PracticaProfesional\backend\src\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\Microsoft.OpenApi.dll
+D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\Swashbuckle.AspNetCore.Swagger.dll
+D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerGen.dll
+D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\bin\Debug\net8.0\Swashbuckle.AspNetCore.SwaggerUI.dll
+D:\facum\GITHUB TESIS\PracticaProfesional\backend\src\obj\Debug\net8.0\PracticaProfesional.MvcApplicationPartsAssemblyInfo.cs

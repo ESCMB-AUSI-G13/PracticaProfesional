@@ -1,0 +1,158 @@
+<div class="page">
+  <header class="page-header">
+    <h1>Riesgo de Deserción</h1>
+  </header>
+
+  <!-- Filtros -->
+  <section class="filtros-panel">
+    <h2>Filtros</h2>
+    <div class="filtros-grid">
+      <div class="campo">
+        <label>Cohorte (año de ingreso)</label>
+        <select [ngModel]="anioCohorte()" (ngModelChange)="anioCohorte.set($event ? +$event : null)">
+          <option [value]="null">— Todas —</option>
+          @for (c of cohortes(); track c) {
+            <option [value]="c">{{ c }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Carrera</label>
+        <select [ngModel]="carreraId()" (ngModelChange)="carreraId.set($event ? +$event : null)">
+          <option [value]="null">— Todas —</option>
+          @for (c of carreras(); track c.id) {
+            <option [value]="c.id">{{ c.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Nivel de riesgo</label>
+        <select [ngModel]="nivelFiltro()" (ngModelChange)="nivelFiltro.set($event)">
+          <option value="">— Todos —</option>
+          <option value="Alto">Alto</option>
+          <option value="Medio">Medio</option>
+          <option value="Bajo">Bajo</option>
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Condición</label>
+        <select [ngModel]="condicionFiltro()" (ngModelChange)="condicionFiltro.set($event)">
+          <option value="">— Todas —</option>
+          <option value="Promocional">Promocional</option>
+          <option value="Regular">Regular</option>
+          <option value="Libre">Libre</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="filtros-acciones">
+      <button class="btn-primario" (click)="buscar()" [disabled]="cargando()">
+        {{ cargando() ? 'Generando...' : 'Generar reporte' }}
+      </button>
+      <button class="btn-secundario" (click)="limpiar()">Limpiar</button>
+    </div>
+  </section>
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="alerta-error">{{ error() }}</div>
+  }
+
+  <!-- Resultados -->
+  @if (reporte(); as r) {
+    <!-- Cards de resumen + Dona -->
+    <section class="resumen-grid">
+      <div class="cards-col">
+        <div class="stat-card alto">
+          <span class="stat-num">{{ r.totalAlto }}</span>
+          <span class="stat-label">Riesgo Alto</span>
+        </div>
+        <div class="stat-card medio">
+          <span class="stat-num">{{ r.totalMedio }}</span>
+          <span class="stat-label">Riesgo Medio</span>
+        </div>
+        <div class="stat-card bajo">
+          <span class="stat-num">{{ r.totalBajo }}</span>
+          <span class="stat-label">Riesgo Bajo</span>
+        </div>
+        <div class="stat-card total">
+          <span class="stat-num">{{ r.estudiantes.length }}</span>
+          <span class="stat-label">Total activos</span>
+        </div>
+      </div>
+
+      <div class="dona-col">
+        <h3>Distribución de riesgo</h3>
+        <div class="dona-wrap">
+          <canvas #donaCanvas></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabla -->
+    @if (r.estudiantes.length > 0) {
+      <section class="tabla-seccion">
+        <div class="tabla-header">
+          <h3>Detalle por estudiante ({{ estudiantesFiltrados().length }})</h3>
+          <input
+            class="input-busqueda"
+            type="text"
+            placeholder="Buscar por nombre o legajo..."
+            (input)="onBusquedaChange($any($event.target).value)"
+          />
+        </div>
+
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th (click)="ordenarPor('legajo')">Legajo{{ flechaSort('legajo') }}</th>
+                <th (click)="ordenarPor('nombreCompleto')">Nombre{{ flechaSort('nombreCompleto') }}</th>
+                <th (click)="ordenarPor('anioCohorte')">Cohorte{{ flechaSort('anioCohorte') }}</th>
+                <th (click)="ordenarPor('anioCarrera')">Año{{ flechaSort('anioCarrera') }}</th>
+                <th (click)="ordenarPor('condicion')">Condición{{ flechaSort('condicion') }}</th>
+                <th (click)="ordenarPor('nivelRiesgo')">Riesgo{{ flechaSort('nivelRiesgo') }}</th>
+                <th (click)="ordenarPor('porcentajeInasistencias')">% Inasist.{{ flechaSort('porcentajeInasistencias') }}</th>
+                <th (click)="ordenarPor('promedioNotas')">Promedio{{ flechaSort('promedioNotas') }}</th>
+                <th (click)="ordenarPor('materiasReprobadas')">Reprobadas{{ flechaSort('materiasReprobadas') }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (e of estudiantesPaginados(); track e.estudianteId) {
+                <tr [class]="'fila-' + e.nivelRiesgo.toLowerCase()">
+                  <td>{{ e.legajo }}</td>
+                  <td>{{ e.nombreCompleto }}</td>
+                  <td>{{ e.anioCohorte }}</td>
+                  <td>{{ e.anioCarrera }}°</td>
+                  <td><span [class]="'badge ' + badgeCondicion(e.condicion)">{{ e.condicion }}</span></td>
+                  <td><span [class]="'badge ' + badgeRiesgo(e.nivelRiesgo)">{{ e.nivelRiesgo }}</span></td>
+                  <td>{{ e.porcentajeInasistencias | number:'1.1-1' }}%</td>
+                  <td>{{ e.promedioNotas !== null ? (e.promedioNotas | number:'1.2-2') : '—' }}</td>
+                  <td>{{ e.materiasReprobadas }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Paginación -->
+        @if (totalPaginas() > 1) {
+          <div class="paginacion">
+            <button (click)="irPagina(paginaActual() - 1)" [disabled]="paginaActual() === 1">‹ Ant.</button>
+            <span>Página {{ paginaActual() }} de {{ totalPaginas() }}</span>
+            <button (click)="irPagina(paginaActual() + 1)" [disabled]="paginaActual() === totalPaginas()">Sig. ›</button>
+          </div>
+        }
+      </section>
+    } @else {
+      <div class="sin-resultados">No hay estudiantes activos que coincidan con los filtros.</div>
+    }
+  }
+
+  @if (buscado() && !reporte() && !cargando() && !error()) {
+    <div class="sin-resultados">Sin resultados para los filtros seleccionados.</div>
+  }
+</div>

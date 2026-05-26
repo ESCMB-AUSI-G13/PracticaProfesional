@@ -112,14 +112,14 @@ public static class EstudiantesSeeder
             .ToListAsync(ct))
             .ToHashSet();
 
-        // Criterio de seed completo: ≥ 350 alumnos Y todos con asistencias
-        bool estudiantesOk   = mapaExistentes.Count >= 350;
-        bool asistenciasOk   = idsConAsistencias.Count >= mapaExistentes.Count - 5;
-
-        if (estudiantesOk && asistenciasOk)
+        // Criterio de seed completo: ≥ 350 estudiantes ya tienen asistencias.
+        // Se usa idsConAsistencias como fuente de verdad porque el formato de legajo
+        // puede diferir entre versiones del seeder, haciendo que mapaExistentes sea 0
+        // aunque los alumnos ya existan en la BD.
+        if (idsConAsistencias.Count >= 350)
         {
-            logger.LogInformation("EstudiantesSeeder: seed completo ({E} alumnos, {A} con asistencias), omitido.",
-                mapaExistentes.Count, idsConAsistencias.Count);
+            logger.LogInformation("EstudiantesSeeder: seed completo ({A} estudiantes con asistencias), omitido.",
+                idsConAsistencias.Count);
             return;
         }
 
@@ -394,6 +394,84 @@ public static class EstudiantesSeeder
     }
 
     /// <summary>
+    /// Asigna condiciones Desertor y Egresado a una porción de las cohortes antiguas,
+    /// para que el reporte de retención por cohorte tenga datos significativos.
+    /// Porcentajes por cohorte:
+    ///   2023 → 15% Desertor de los Libre, 25% Egresado de los Promocional
+    ///   2024 → 12% Desertor de los Libre
+    ///   2025 →  8% Desertor de los Libre
+    /// Es idempotente: se omite si ya existe al menos un Desertor o Egresado.
+    /// </summary>
+    public static async Task PatchCondicionesRetencionAsync(
+        AppDbContext db, ILogger logger, CancellationToken ct = default)
+    {
+        bool yaHayDesertores = await db.Estudiantes
+            .AnyAsync(e => e.Condicion == CondicionEstudiante.Desertor, ct);
+        bool yaHayEgresados  = await db.Estudiantes
+            .AnyAsync(e => e.Condicion == CondicionEstudiante.Egresado, ct);
+
+        if (yaHayDesertores && yaHayEgresados)
+        {
+            logger.LogInformation("PatchCondicionesRetencion: ya existen Desertores y Egresados, omitido.");
+            return;
+        }
+
+        var rng = new Random(13);
+
+        // Porcentajes: (anioCohorte → (pctDesertor, pctEgresado))
+        var config = new Dictionary<int, (double PctDesertor, double PctEgresado)>
+        {
+            { 2023, (0.15, 0.25) },
+            { 2024, (0.12, 0.00) },
+            { 2025, (0.08, 0.00) }
+        };
+
+        int desertores = 0, egresados = 0;
+
+        foreach (var (anio, (pctD, pctE)) in config)
+        {
+            var deCohorte = await db.Estudiantes
+                .Where(e => e.FechaDeIngreso.Year == anio)
+                .ToListAsync(ct);
+
+            if (!yaHayDesertores && pctD > 0)
+            {
+                var libres = deCohorte
+                    .Where(e => e.Condicion == CondicionEstudiante.Libre)
+                    .OrderBy(_ => rng.Next())
+                    .Take((int)Math.Round(deCohorte.Count(e => e.Condicion == CondicionEstudiante.Libre) * pctD))
+                    .ToList();
+
+                foreach (var e in libres)
+                {
+                    try { e.Desertar(); desertores++; }
+                    catch { /* transición inválida → ignorar */ }
+                }
+            }
+
+            if (!yaHayEgresados && pctE > 0)
+            {
+                var promocionales = deCohorte
+                    .Where(e => e.Condicion == CondicionEstudiante.Promocional)
+                    .OrderBy(_ => rng.Next())
+                    .Take((int)Math.Round(deCohorte.Count(e => e.Condicion == CondicionEstudiante.Promocional) * pctE))
+                    .ToList();
+
+                foreach (var e in promocionales)
+                {
+                    try { e.Egresar(); egresados++; }
+                    catch { /* transición inválida → ignorar */ }
+                }
+            }
+        }
+
+        await db.SaveChangesAsync(ct);
+        logger.LogInformation(
+            "PatchCondicionesRetencion: {D} Desertores y {E} Egresados asignados.",
+            desertores, egresados);
+    }
+
+    /// <summary>
     /// Corrige combinaciones nombre+apellido duplicadas entre alumnos del seed.
     /// </summary>
     public static async Task FixNombresAsync(AppDbContext db, ILogger logger, CancellationToken ct = default)
@@ -426,5 +504,123 @@ public static class EstudiantesSeeder
             actualizados++;
         }
         logger.LogInformation("EstudiantesSeeder.FixNombres: {A} registros actualizados.", actualizados);
+    }
+
+    /// <summary>
+    /// Corrige la Condicion de cada estudiante para que sea coherente con sus
+    /// datos reales de asistencia y notas de examen.
+    /// Reglas:
+    ///   Libre       → más de 25% de inasistencias  O  promedio menor a 4  O  2+ reprobadas
+    ///   Promocional → hasta 18% de inasistencias  Y  promedio 7+  Y  0 reprobadas
+    ///   Regular     → todo lo demás
+    /// Siempre corre (idempotente: si la condición ya es correcta no hace nada).
+    /// </summary>
+    public static async Task CorregirCondicionesAsync(
+        AppDbContext db, ILogger logger, CancellationToken ct = default)
+    {
+        var estudiantes = await db.Estudiantes
+            .Where(e => e.Condicion != CondicionEstudiante.Egresado)
+            .ToListAsync(ct);
+
+        if (estudiantes.Count == 0)
+        {
+            logger.LogInformation("CorregirCondiciones: sin estudiantes para corregir.");
+            return;
+        }
+
+        var ids = estudiantes.Select(e => e.Id).ToList();
+
+        // Asistencias reales por estudiante
+        var asistencias = await db.Asistencias
+            .Where(a => ids.Contains(a.EstudianteId))
+            .GroupBy(a => a.EstudianteId)
+            .Select(g => new
+            {
+                EstudianteId = g.Key,
+                Total        = g.Count(),
+                Ausentes     = g.Count(a => a.Estado != EstadoAsistencia.Presente)
+            })
+            .ToListAsync(ct);
+
+        var asistenciaMap = asistencias.ToDictionary(a => a.EstudianteId);
+
+        // Notas reales por estudiante (de exámenes)
+        var notas = await db.InscripcionesExamen
+            .Where(ie => ids.Contains(ie.EstudianteId) && ie.NotaValor != null)
+            .GroupBy(ie => ie.EstudianteId)
+            .Select(g => new
+            {
+                EstudianteId = g.Key,
+                Promedio     = g.Average(ie => ie.NotaValor!.Value),
+                Reprobadas   = g.Count(ie => ie.NotaValor < 4m)
+            })
+            .ToListAsync(ct);
+
+        var notasMap = notas.ToDictionary(n => n.EstudianteId);
+
+        int corregidos = 0;
+
+        foreach (var e in estudiantes)
+        {
+            asistenciaMap.TryGetValue(e.Id, out var asis);
+            notasMap.TryGetValue(e.Id, out var nota);
+
+            decimal pctAusencias = asis is { Total: > 0 }
+                ? Math.Round((decimal)asis.Ausentes / asis.Total * 100, 1)
+                : 0m;
+
+            // Determinar condición objetivo según datos reales
+            CondicionEstudiante objetivo;
+
+            if (pctAusencias > 35m
+                || (nota is not null && nota.Promedio < 4m)
+                || (nota is not null && nota.Reprobadas >= 2))
+            {
+                objetivo = CondicionEstudiante.Libre;
+            }
+            else if (nota is not null
+                && pctAusencias < 20m
+                && nota.Promedio >= 7m
+                && nota.Reprobadas == 0)
+            {
+                objetivo = CondicionEstudiante.Promocional;
+            }
+            else
+            {
+                objetivo = CondicionEstudiante.Regular;
+            }
+
+            if (e.Condicion == objetivo) continue;
+
+            try
+            {
+                // Pasar por Regular como estado intermedio si es necesario
+                if (e.Condicion != CondicionEstudiante.Regular)
+                {
+                    if (e.Condicion == CondicionEstudiante.Desertor)
+                        e.Reinscribir();
+                    else
+                        e.RecuperarRegularidad();
+                }
+
+                // Aplicar condición final
+                if (objetivo == CondicionEstudiante.Libre)
+                    e.PerderRegularidad();
+                else if (objetivo == CondicionEstudiante.Promocional)
+                    e.ObtenerPromocion();
+                // Regular: ya está
+
+                corregidos++;
+            }
+            catch
+            {
+                // Transición inválida → ignorar silenciosamente
+            }
+        }
+
+        await db.SaveChangesAsync(ct);
+        logger.LogInformation(
+            "CorregirCondiciones: {C}/{T} estudiantes actualizados.",
+            corregidos, estudiantes.Count);
     }
 }

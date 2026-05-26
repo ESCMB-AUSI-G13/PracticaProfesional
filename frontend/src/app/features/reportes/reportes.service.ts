@@ -144,6 +144,50 @@ export interface ReportePromediosCatedra {
   catedras:   FilaPromedioCatedra[];
 }
 
+// ── Modelos Riesgo Académico ─────────────────────────────────────────────────
+
+export interface RiesgoAcademico {
+  estudianteId:            number;
+  legajo:                  string;
+  nombreCompleto:          string;
+  carrera:                 string;
+  anioCarrera:             number;
+  anioCohorte:             number;
+  condicion:               string;
+  nivelRiesgo:             'Bajo' | 'Medio' | 'Alto';
+  porcentajeInasistencias: number;
+  promedioNotas:           number | null;
+  materiasReprobadas:      number;
+}
+
+export interface ReporteRiesgoAcademico {
+  estudiantes: RiesgoAcademico[];
+  totalAlto:   number;
+  totalMedio:  number;
+  totalBajo:   number;
+}
+
+// ── Modelos Retención por Cohorte ────────────────────────────────────────────
+
+export interface RetencionCohorte {
+  anioCohorte:   number;
+  carrera:       string;
+  total:         number;
+  activos:       number;
+  egresados:     number;
+  desertores:    number;
+  tasaRetencion: number;
+  tasaDesercion: number;
+  tasaEgreso:    number;
+}
+
+export interface ReporteRetencionCohorte {
+  cohortes:             RetencionCohorte[];
+  totalGeneral:         number;
+  tasaRetencionGlobal:  number;
+  tasaDesercionGlobal:  number;
+}
+
 // ── Servicio ─────────────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
@@ -195,5 +239,25 @@ export class ReportesService {
     if (anio)    params['anio']    = String(anio);
     if (cursoId) params['cursoId'] = String(cursoId);
     return this.http.get<ReportePromediosCatedra>(`${this.apiUrl}/rendimiento/catedras`, { params });
+  }
+
+  /** Riesgo académico por estudiante (Bajo / Medio / Alto). */
+  obtenerRiesgoAcademico(
+    anioCohorte?: number,
+    carreraId?:   number,
+    nivelRiesgo?: string,
+  ): Observable<ReporteRiesgoAcademico> {
+    const params: Record<string, string> = {};
+    if (anioCohorte) params['anioCohorte'] = String(anioCohorte);
+    if (carreraId)   params['carreraId']   = String(carreraId);
+    if (nivelRiesgo) params['nivelRiesgo'] = nivelRiesgo;
+    return this.http.get<ReporteRiesgoAcademico>(`${this.apiUrl}/riesgo-academico`, { params });
+  }
+
+  /** Retención y deserción agrupada por año de ingreso (cohorte). */
+  obtenerRetencionCohorte(carreraId?: number): Observable<ReporteRetencionCohorte> {
+    const params: Record<string, string> = {};
+    if (carreraId) params['carreraId'] = String(carreraId);
+    return this.http.get<ReporteRetencionCohorte>(`${this.apiUrl}/retencion-cohorte`, { params });
   }
 }

@@ -96,6 +96,7 @@
                 } @else {
                   <button class="btn btn-success btn-sm" (click)="reactivar(e.usuarioId)">Reactivar</button>
                 }
+                <button class="btn btn-eliminar btn-sm" (click)="eliminar(e.usuarioId, e.nombre, e.apellido)" title="Eliminar permanentemente">Eliminar</button>
               </td>
             </tr>
           }

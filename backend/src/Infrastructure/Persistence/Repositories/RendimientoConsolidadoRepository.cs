@@ -287,4 +287,142 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
             .Where(m => m.Id == materiaId)
             .Select(m => m.Nombre)
             .FirstOrDefaultAsync(ct);
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Riesgo académico — datos crudos por estudiante activo
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<List<DatosRiesgoEstudianteDto>> ObtenerDatosRiesgoAsync(
+        int? anioCohorte, int? carreraId, CancellationToken ct = default)
+    {
+        // Estudiantes activos (excluye Egresado y Desertor — ellos no tienen riesgo)
+        var estudiantesQuery = db.Estudiantes
+            .Where(e => e.Condicion != CondicionEstudiante.Egresado
+                     && e.Condicion != CondicionEstudiante.Desertor);
+
+        if (anioCohorte.HasValue)
+            estudiantesQuery = estudiantesQuery
+                .Where(e => e.FechaDeIngreso.Year == anioCohorte.Value);
+
+        if (carreraId.HasValue)
+            estudiantesQuery = estudiantesQuery
+                .Where(e => e.CarreraId == carreraId.Value);
+
+        var estudiantes = await estudiantesQuery
+            .Select(e => new
+            {
+                e.Id,
+                e.Anio,
+                e.FechaDeIngreso,
+                Condicion = e.Condicion.ToString(),
+                e.Usuario.Legajo,
+                e.Usuario.Nombre,
+                e.Usuario.Apellido,
+                CarreraNombre = e.Carrera.Nombre
+            })
+            .ToListAsync(ct);
+
+        if (estudiantes.Count == 0)
+            return [];
+
+        var ids = estudiantes.Select(e => e.Id).ToList();
+
+        // Asistencias agregadas por estudiante
+        var asistencias = await db.Asistencias
+            .Where(a => ids.Contains(a.EstudianteId))
+            .GroupBy(a => a.EstudianteId)
+            .Select(g => new
+            {
+                EstudianteId    = g.Key,
+                Total           = g.Count(),
+                Ausencias       = g.Count(a => a.Estado != EstadoAsistencia.Presente),
+                UltimaAsistencia = g.Max(a => a.Fecha)
+            })
+            .ToListAsync(ct);
+
+        var asistenciaMap = asistencias.ToDictionary(a => a.EstudianteId);
+
+        // Notas de exámenes por estudiante
+        var notas = await db.InscripcionesExamen
+            .Where(ie => ids.Contains(ie.EstudianteId) && ie.NotaValor != null)
+            .GroupBy(ie => ie.EstudianteId)
+            .Select(g => new
+            {
+                EstudianteId = g.Key,
+                Promedio     = g.Average(ie => ie.NotaValor!.Value),
+                Reprobadas   = g.Count(ie => ie.NotaValor < 4m)
+            })
+            .ToListAsync(ct);
+
+        var notasMap = notas.ToDictionary(n => n.EstudianteId);
+
+        var hoy = DateTime.UtcNow.Date;
+
+        return estudiantes.Select(e =>
+        {
+            asistenciaMap.TryGetValue(e.Id, out var asis);
+            notasMap.TryGetValue(e.Id, out var nota);
+
+            return new DatosRiesgoEstudianteDto
+            {
+                EstudianteId     = e.Id,
+                Legajo           = e.Legajo,
+                Nombre           = e.Nombre,
+                Apellido         = e.Apellido,
+                Carrera          = e.CarreraNombre,
+                AnioCarrera      = e.Anio,
+                AnioCohorte      = e.FechaDeIngreso.Year,
+                Condicion        = e.Condicion,
+                TotalClases      = asis?.Total ?? 0,
+                Ausencias        = asis?.Ausencias ?? 0,
+                PromedioNotas    = nota is not null ? (decimal?)nota.Promedio : null,
+                Reprobadas       = nota?.Reprobadas ?? 0,
+                UltimaAsistencia = asis?.UltimaAsistencia
+            };
+        }).ToList();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Retención por cohorte — agrupado por año de ingreso y carrera
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<List<DatosCohorteDto>> ObtenerDatosCohorteAsync(
+        int? carreraId, CancellationToken ct = default)
+    {
+        var query = db.Estudiantes.AsQueryable();
+
+        if (carreraId.HasValue)
+            query = query.Where(e => e.CarreraId == carreraId.Value);
+
+        var raw = await query
+            .Select(e => new
+            {
+                AnioCohorte  = e.FechaDeIngreso.Year,
+                CarreraNombre = e.Carrera.Nombre,
+                e.Condicion
+            })
+            .ToListAsync(ct);
+
+        return raw
+            .GroupBy(e => new { e.AnioCohorte, e.CarreraNombre })
+            .Select(g =>
+            {
+                int activos   = g.Count(e => e.Condicion == CondicionEstudiante.Regular
+                                          || e.Condicion == CondicionEstudiante.Libre
+                                          || e.Condicion == CondicionEstudiante.Promocional);
+                int egresados  = g.Count(e => e.Condicion == CondicionEstudiante.Egresado);
+                int desertores = g.Count(e => e.Condicion == CondicionEstudiante.Desertor);
+
+                return new DatosCohorteDto
+                {
+                    AnioCohorte = g.Key.AnioCohorte,
+                    Carrera     = g.Key.CarreraNombre,
+                    Total       = g.Count(),
+                    Activos     = activos,
+                    Egresados   = egresados,
+                    Desertores  = desertores
+                };
+            })
+            .OrderBy(d => d.AnioCohorte)
+            .ThenBy(d => d.Carrera)
+            .ToList();
+    }
 }

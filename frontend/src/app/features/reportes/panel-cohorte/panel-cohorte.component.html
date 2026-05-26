@@ -1,0 +1,120 @@
+<div class="page">
+  <header class="page-header">
+    <h1>Retención por Cohorte</h1>
+  </header>
+
+  <!-- Filtros -->
+  <section class="filtros-panel">
+    <h2>Filtros</h2>
+    <div class="filtros-grid">
+      <div class="campo">
+        <label>Carrera</label>
+        <select [ngModel]="carreraId()" (ngModelChange)="carreraId.set($event ? +$event : null)">
+          <option [value]="null">— Todas —</option>
+          @for (c of carreras(); track c.id) {
+            <option [value]="c.id">{{ c.nombre }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="filtros-acciones">
+      <button class="btn-primario" (click)="buscar()" [disabled]="cargando()">
+        {{ cargando() ? 'Generando...' : 'Generar reporte' }}
+      </button>
+      <button class="btn-secundario" (click)="limpiar()">Limpiar</button>
+    </div>
+  </section>
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="alerta-error">{{ error() }}</div>
+  }
+
+  <!-- Resultados -->
+  @if (reporte(); as r) {
+    <!-- Totales globales -->
+    <section class="globales-grid">
+      <div class="global-card retencion">
+        <span class="global-num">{{ r.tasaRetencionGlobal | number:'1.1-1' }}%</span>
+        <span class="global-label">Retención global</span>
+      </div>
+      <div class="global-card desercion">
+        <span class="global-num">{{ r.tasaDesercionGlobal | number:'1.1-1' }}%</span>
+        <span class="global-label">Deserción global</span>
+      </div>
+      <div class="global-card total">
+        <span class="global-num">{{ r.totalGeneral }}</span>
+        <span class="global-label">Total estudiantes</span>
+      </div>
+    </section>
+
+    <!-- Gráfico de barras -->
+    @if (r.cohortes.length > 0) {
+      <section class="grafico-seccion">
+        <h3>Distribución por cohorte</h3>
+        <div class="grafico-wrap">
+          <canvas #barrasCanvas></canvas>
+        </div>
+      </section>
+
+      <!-- Tabla de cohortes -->
+      <section class="tabla-seccion">
+        <h3>Detalle por cohorte</h3>
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Cohorte</th>
+                <th>Carrera</th>
+                <th>Total</th>
+                <th>Activos</th>
+                <th>Egresados</th>
+                <th>Desertores</th>
+                <th>Retención</th>
+                <th>Deserción</th>
+                <th>Egreso</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (c of r.cohortes; track c.anioCohorte + c.carrera) {
+                <tr>
+                  <td><strong>{{ c.anioCohorte }}</strong></td>
+                  <td class="td-carrera">{{ c.carrera }}</td>
+                  <td>{{ c.total }}</td>
+                  <td><span class="badge badge-activo">{{ c.activos }}</span></td>
+                  <td><span class="badge badge-egresado">{{ c.egresados }}</span></td>
+                  <td><span class="badge badge-desertor">{{ c.desertores }}</span></td>
+                  <td>
+                    <div class="barra-tasa">
+                      <div class="barra-fill retencion" [style.width.%]="c.tasaRetencion"></div>
+                    </div>
+                    <span class="tasa-valor">{{ c.tasaRetencion | number:'1.1-1' }}%</span>
+                  </td>
+                  <td>
+                    <div class="barra-tasa">
+                      <div class="barra-fill desercion" [style.width.%]="c.tasaDesercion"></div>
+                    </div>
+                    <span class="tasa-valor">{{ c.tasaDesercion | number:'1.1-1' }}%</span>
+                  </td>
+                  <td>
+                    <div class="barra-tasa">
+                      <div class="barra-fill egreso" [style.width.%]="c.tasaEgreso"></div>
+                    </div>
+                    <span class="tasa-valor">{{ c.tasaEgreso | number:'1.1-1' }}%</span>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    } @else {
+      <div class="sin-resultados">No hay datos de cohortes para los filtros seleccionados.</div>
+    }
+  }
+
+  @if (buscado() && !reporte() && !cargando() && !error()) {
+    <div class="sin-resultados">Sin resultados para los filtros seleccionados.</div>
+  }
+</div>
