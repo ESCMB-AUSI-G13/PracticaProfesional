@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, signal, Injector, afterNextRender } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, signal, Injector, effect, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ReportesService, ReporteRetencionCohorte } from '../reportes.service';
@@ -29,7 +29,15 @@ export class PanelCohorteComponent implements OnInit, OnDestroy {
   carreras = signal<Carrera[]>([]);
 
   // Filtros
-  carreraId = signal<number | null>(null);
+  carreraId   = signal<number | null>(null);
+  anioCohorte = signal<number | null>(null);
+
+  readonly anios: number[] = Array.from(
+    { length: new Date().getFullYear() - 2014 },
+    (_, i) => new Date().getFullYear() - i
+  );
+
+  aniosDisponibles = signal<Set<number>>(new Set());
 
   // Estado
   reporte  = signal<ReporteRetencionCohorte | null>(null);
@@ -41,7 +49,24 @@ export class PanelCohorteComponent implements OnInit, OnDestroy {
     private injector: Injector,
     private reportesService: ReportesService,
     private carrerasService: CarrerasService,
-  ) {}
+  ) {
+    effect(() => {
+      const carreraId = this.carreraId();
+      this.reportesService.obtenerAniosCohorte(carreraId ?? undefined).subscribe({
+        next: anios => {
+          this.aniosDisponibles.set(new Set(anios));
+          const sel = this.anioCohorte();
+          if (sel !== null && !anios.includes(sel)) {
+            this.anioCohorte.set(null);
+          }
+        },
+        error: () => {
+          // Si el endpoint falla, habilitamos todos los años para no bloquear al usuario
+          this.aniosDisponibles.set(new Set(this.anios));
+        }
+      });
+    });
+  }
 
   ngOnInit(): void {
     this.carrerasService.listar().subscribe({
@@ -59,7 +84,8 @@ export class PanelCohorteComponent implements OnInit, OnDestroy {
     this.buscado.set(true);
 
     this.reportesService.obtenerRetencionCohorte(
-      this.carreraId() ?? undefined,
+      this.carreraId()   ?? undefined,
+      this.anioCohorte() ?? undefined,
     ).subscribe({
       next: data => {
         this.reporte.set(data);
@@ -138,6 +164,7 @@ export class PanelCohorteComponent implements OnInit, OnDestroy {
 
   limpiar(): void {
     this.carreraId.set(null);
+    this.anioCohorte.set(null);
     this.reporte.set(null);
     this.buscado.set(false);
     this.error.set(null);

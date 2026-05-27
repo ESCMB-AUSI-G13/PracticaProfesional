@@ -7,5 +7,6 @@ public record FiltroRiesgoAcademicoDto(
 );
 
 public record FiltroRetencionCohorteDto(
-    int? CarreraId         // null = todas las carreras
+    int? CarreraId,        // null = todas las carreras
+    int? AnioCohorte       // null = todos los años
 );

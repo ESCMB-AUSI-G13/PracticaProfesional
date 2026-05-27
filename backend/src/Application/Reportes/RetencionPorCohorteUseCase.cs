@@ -5,11 +5,14 @@ namespace PracticaProfesional.Application.Reportes;
 
 public class RetencionPorCohorteUseCase(IRendimientoConsolidadoRepository repo)
 {
+    public Task<List<int>> ObtenerAniosAsync(int? carreraId, CancellationToken ct = default)
+        => repo.ObtenerAniosCohorteAsync(carreraId, ct);
+
     public async Task<ReporteRetencionCohorteDto> EjecutarAsync(
         FiltroRetencionCohorteDto filtro,
         CancellationToken ct = default)
     {
-        var datos = await repo.ObtenerDatosCohorteAsync(filtro.CarreraId, ct);
+        var datos = await repo.ObtenerDatosCohorteAsync(filtro.CarreraId, filtro.AnioCohorte, ct);
 
         var cohortes = datos.Select(d =>
         {

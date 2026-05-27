@@ -9,7 +9,9 @@ public interface IRendimientoConsolidadoRepository
         int? anioCohorte, int? carreraId, CancellationToken ct = default);
 
     Task<List<DatosCohorteDto>> ObtenerDatosCohorteAsync(
-        int? carreraId, CancellationToken ct = default);
+        int? carreraId, int? anioCohorte, CancellationToken ct = default);
+
+    Task<List<int>> ObtenerAniosCohorteAsync(int? carreraId, CancellationToken ct = default);
 
 
     Task<IEnumerable<FilaComparativoComisionDto>> ObtenerComparativoComisionesAsync(

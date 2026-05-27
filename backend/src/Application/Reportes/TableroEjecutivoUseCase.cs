@@ -14,7 +14,7 @@ public class TableroEjecutivoUseCase(IRendimientoConsolidadoRepository repo)
     public async Task<TableroEjecutivoDto> EjecutarAsync(CancellationToken ct = default)
     {
         var datosRiesgo   = await repo.ObtenerDatosRiesgoAsync(null, null, ct);
-        var datosCohorte  = await repo.ObtenerDatosCohorteAsync(null, ct);
+        var datosCohorte  = await repo.ObtenerDatosCohorteAsync(null, null, ct);
         var datosCatedras = await repo.ObtenerPromediosCatedraAsync(null, null, null, ct);
 
         // ── Matrícula histórica ───────────────────────────────────────────────

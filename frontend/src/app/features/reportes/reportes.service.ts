@@ -288,9 +288,16 @@ export class ReportesService {
   }
 
   /** Retención y deserción agrupada por año de ingreso (cohorte). */
-  obtenerRetencionCohorte(carreraId?: number): Observable<ReporteRetencionCohorte> {
+  obtenerAniosCohorte(carreraId?: number): Observable<number[]> {
     const params: Record<string, string> = {};
     if (carreraId) params['carreraId'] = String(carreraId);
+    return this.http.get<number[]>(`${this.apiUrl}/retencion-cohorte/anios`, { params });
+  }
+
+  obtenerRetencionCohorte(carreraId?: number, anioCohorte?: number): Observable<ReporteRetencionCohorte> {
+    const params: Record<string, string> = {};
+    if (carreraId)    params['carreraId']    = String(carreraId);
+    if (anioCohorte)  params['anioCohorte']  = String(anioCohorte);
     return this.http.get<ReporteRetencionCohorte>(`${this.apiUrl}/retencion-cohorte`, { params });
   }
 }

@@ -382,15 +382,35 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Retención por cohorte — agrupado por año de ingreso y carrera
+    // Años de cohorte disponibles (para deshabilitar opciones sin datos)
     // ─────────────────────────────────────────────────────────────────────────
-    public async Task<List<DatosCohorteDto>> ObtenerDatosCohorteAsync(
-        int? carreraId, CancellationToken ct = default)
+    public async Task<List<int>> ObtenerAniosCohorteAsync(int? carreraId, CancellationToken ct = default)
     {
         var query = db.Estudiantes.AsQueryable();
 
         if (carreraId.HasValue)
             query = query.Where(e => e.CarreraId == carreraId.Value);
+
+        return await query
+            .Select(e => e.FechaDeIngreso.Year)
+            .Distinct()
+            .OrderByDescending(y => y)
+            .ToListAsync(ct);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Retención por cohorte — agrupado por año de ingreso y carrera
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<List<DatosCohorteDto>> ObtenerDatosCohorteAsync(
+        int? carreraId, int? anioCohorte, CancellationToken ct = default)
+    {
+        var query = db.Estudiantes.AsQueryable();
+
+        if (carreraId.HasValue)
+            query = query.Where(e => e.CarreraId == carreraId.Value);
+
+        if (anioCohorte.HasValue)
+            query = query.Where(e => e.FechaDeIngreso.Year == anioCohorte.Value);
 
         var raw = await query
             .Select(e => new

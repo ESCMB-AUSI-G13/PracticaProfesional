@@ -47,6 +47,20 @@ public class ReportesCohorteController(
     }
 
     /// <summary>
+    /// Años de cohorte que tienen al menos un estudiante (para deshabilitar opciones vacías).
+    /// GET api/reportes/retencion-cohorte/anios?carreraId=1
+    /// </summary>
+    [HttpGet("retencion-cohorte/anios")]
+    [ProducesResponseType(typeof(List<int>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> AniosCohorte(
+        [FromQuery] int?  carreraId,
+        CancellationToken cancellationToken)
+    {
+        var anios = await retencionUseCase.ObtenerAniosAsync(carreraId, cancellationToken);
+        return Ok(anios);
+    }
+
+    /// <summary>
     /// Tasas de retención, deserción y egreso agrupadas por cohorte (año de ingreso).
     /// GET api/reportes/retencion-cohorte?carreraId=1
     /// </summary>
@@ -54,9 +68,10 @@ public class ReportesCohorteController(
     [ProducesResponseType(typeof(ReporteRetencionCohorteDto), StatusCodes.Status200OK)]
     public async Task<IActionResult> RetencionCohorte(
         [FromQuery] int?  carreraId,
+        [FromQuery] int?  anioCohorte,
         CancellationToken cancellationToken)
     {
-        var filtro    = new FiltroRetencionCohorteDto(carreraId);
+        var filtro    = new FiltroRetencionCohorteDto(carreraId, anioCohorte);
         var resultado = await retencionUseCase.EjecutarAsync(filtro, cancellationToken);
         return Ok(resultado);
     }

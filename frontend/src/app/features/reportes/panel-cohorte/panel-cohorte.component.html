@@ -16,6 +16,18 @@
           }
         </select>
       </div>
+
+      <div class="campo">
+        <label>Año de cohorte</label>
+        <select [ngModel]="anioCohorte()" (ngModelChange)="anioCohorte.set($event ? +$event : null)">
+          <option [value]="null">— Todos —</option>
+          @for (a of anios; track a) {
+            <option [value]="a" [disabled]="!aniosDisponibles().has(a)">
+              {{ a }}{{ !aniosDisponibles().has(a) ? ' — sin registros' : '' }}
+            </option>
+          }
+        </select>
+      </div>
     </div>
 
     <div class="filtros-acciones">
