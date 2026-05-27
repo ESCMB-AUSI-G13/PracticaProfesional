@@ -77,9 +77,16 @@
             }
 
             @if (p.textosLibres.length > 0) {
-              <div class="textos-libres">
-                @for (t of p.textosLibres; track $index) {
-                  <blockquote class="texto-libre">"{{ t }}"</blockquote>
+              <div class="comentarios-toggle">
+                <button class="btn-toggle" (click)="toggleComentarios(p.preguntaId)">
+                  {{ estaExpandido(p.preguntaId) ? '▲ Ocultar' : '▼ Ver' }} comentarios ({{ p.textosLibres.length }})
+                </button>
+                @if (estaExpandido(p.preguntaId)) {
+                  <div class="textos-libres">
+                    @for (t of p.textosLibres; track $index) {
+                      <blockquote class="texto-libre">"{{ t }}"</blockquote>
+                    }
+                  </div>
                 }
               </div>
             }

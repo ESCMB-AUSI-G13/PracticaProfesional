@@ -51,13 +51,25 @@ export class PanelEncuestasSatisfaccionComponent implements OnInit {
 
   promedioColor(promedio: number | null): string {
     if (promedio === null) return '#ccc';
-    if (promedio >= 4) return '#27ae60';
-    if (promedio >= 3) return '#f39c12';
-    return '#e74c3c';
+    if (promedio >= 4) return '#1a6b9e';
+    if (promedio >= 3) return '#3498db';
+    return '#5dade2';
   }
 
   estrellasLabel(promedio: number | null): string {
     if (promedio === null) return '—';
     return promedio.toFixed(2) + ' / 5';
+  }
+
+  expandidos = signal<Map<number, boolean>>(new Map());
+
+  toggleComentarios(preguntaId: number): void {
+    const m = new Map(this.expandidos());
+    m.set(preguntaId, !m.get(preguntaId));
+    this.expandidos.set(m);
+  }
+
+  estaExpandido(preguntaId: number): boolean {
+    return this.expandidos().get(preguntaId) ?? false;
   }
 }

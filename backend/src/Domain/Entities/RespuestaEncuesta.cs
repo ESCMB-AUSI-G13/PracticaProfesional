@@ -15,6 +15,6 @@ public class RespuestaEncuesta
 
     private RespuestaEncuesta() { }
 
-    public static RespuestaEncuesta Crear(int encuestaId)
-        => new() { EncuestaId = encuestaId, Fecha = DateTime.UtcNow };
+    public static RespuestaEncuesta Crear(int encuestaId, DateTime? fecha = null)
+        => new() { EncuestaId = encuestaId, Fecha = fecha ?? DateTime.UtcNow };
 }

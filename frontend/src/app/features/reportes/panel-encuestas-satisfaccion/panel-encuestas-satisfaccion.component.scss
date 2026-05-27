@@ -63,7 +63,14 @@
 .barra-valor { font-size: 0.88rem; font-weight: 700; white-space: nowrap; min-width: 60px; }
 
 /* Textos libres */
-.textos-libres { margin-top: 0.6rem; }
+.comentarios-toggle { margin-top: 0.6rem; }
+.btn-toggle {
+  background: none; border: 1px solid #3498db; border-radius: 5px;
+  color: #3498db; font-size: 0.8rem; padding: 0.3rem 0.75rem;
+  cursor: pointer; transition: background 0.15s;
+  &:hover { background: #ebf5fb; }
+}
+.textos-libres { margin-top: 0.5rem; }
 .texto-libre {
   background: #f8f9fa; border-left: 3px solid #3498db;
   margin: 0.4rem 0; padding: 0.45rem 0.8rem;

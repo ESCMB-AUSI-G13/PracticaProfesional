@@ -324,6 +324,7 @@ var app = builder.Build();
         await ExamenesSeeder.SeedAsync(db, logger);
         await NotasExamenesSeeder.SeedAsync(db, logger);
         await EncuestaSeeder.SeedAsync(db);
+        await EncuestaRespuestasSeeder.SeedAsync(db, app.Configuration["Encuestas:Salt"] ?? "pp-salt-2026");
     }
     catch (Exception ex)
     {
