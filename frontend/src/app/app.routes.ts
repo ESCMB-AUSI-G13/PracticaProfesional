@@ -310,6 +310,31 @@ export const routes: Routes = [
             .then(m => m.PanelCatedrasComponent)
       },
 
+      // Encuestas — admin Dirección
+      {
+        path: 'encuestas',
+        canActivate: [roleGuard('Direccion')],
+        loadComponent: () =>
+          import('./features/encuestas/panel-encuestas/panel-encuestas.component')
+            .then(m => m.PanelEncuestasComponent)
+      },
+
+      // Reportes encuestas — solo Dirección (RR-03, RR-04)
+      {
+        path: 'reportes/encuestas-satisfaccion',
+        canActivate: [roleGuard('Direccion')],
+        loadComponent: () =>
+          import('./features/reportes/panel-encuestas-satisfaccion/panel-encuestas-satisfaccion.component')
+            .then(m => m.PanelEncuestasSatisfaccionComponent)
+      },
+      {
+        path: 'reportes/encuestas-comparativo',
+        canActivate: [roleGuard('Direccion')],
+        loadComponent: () =>
+          import('./features/reportes/panel-encuestas-comparativo/panel-encuestas-comparativo.component')
+            .then(m => m.PanelEncuestasComparativoComponent)
+      },
+
       // Reportes — solo Dirección
       {
         path: 'reportes/riesgo-academico',

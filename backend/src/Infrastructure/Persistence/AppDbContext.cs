@@ -34,8 +34,11 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<CalendarioAcademico> CalendarioAcademico => Set<CalendarioAcademico>();
 
     // Encuestas
-    public DbSet<Encuesta> Encuestas => Set<Encuesta>();
-    public DbSet<RespuestaEncuesta> RespuestasEncuesta => Set<RespuestaEncuesta>();
+    public DbSet<Encuesta>           Encuestas           => Set<Encuesta>();
+    public DbSet<PreguntaEncuesta>   PreguntasEncuesta   => Set<PreguntaEncuesta>();
+    public DbSet<RespuestaEncuesta>  RespuestasEncuesta  => Set<RespuestaEncuesta>();
+    public DbSet<ItemRespuesta>      ItemsRespuesta      => Set<ItemRespuesta>();
+    public DbSet<EncuestaCompletada> EncuestasCompletadas => Set<EncuestaCompletada>();
 
     // Auditoría
     public DbSet<AuditoriaCambio> AuditoriaCambios => Set<AuditoriaCambio>();
@@ -368,26 +371,76 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Encuesta>(entity =>
         {
             entity.HasKey(e => e.Id);
-            entity.Property(e => e.Preguntas).IsRequired();
+            entity.Property(e => e.Titulo).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.Descripcion).HasMaxLength(500);
+            entity.Property(e => e.Tipo).IsRequired().HasConversion<string>();
+            entity.Property(e => e.CicloLectivo).IsRequired();
             entity.Property(e => e.Activa).IsRequired();
             entity.Property(e => e.FechaCreacion).IsRequired();
-            entity.HasOne(e => e.Materia).WithMany().HasForeignKey(e => e.MateriaId).OnDelete(DeleteBehavior.Restrict);
-            entity.HasOne(e => e.Docente).WithMany().HasForeignKey(e => e.DocenteId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(e => e.Materia).WithMany().HasForeignKey(e => e.MateriaId)
+                  .IsRequired(false).OnDelete(DeleteBehavior.Restrict);
         });
 
         // ──────────────────────────────────────────────
-        // RespuestaEncuesta
+        // PreguntaEncuesta
+        // ──────────────────────────────────────────────
+        modelBuilder.Entity<PreguntaEncuesta>(entity =>
+        {
+            entity.HasKey(p => p.Id);
+            entity.Property(p => p.Texto).IsRequired().HasMaxLength(500);
+            entity.Property(p => p.Orden).IsRequired();
+            entity.Property(p => p.TipoPregunta).IsRequired().HasConversion<string>();
+            entity.Property(p => p.EsObligatoria).IsRequired();
+            entity.HasOne(p => p.Encuesta)
+                  .WithMany(e => e.Preguntas)
+                  .HasForeignKey(p => p.EncuestaId)
+                  .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ──────────────────────────────────────────────
+        // RespuestaEncuesta (anónima — sin FK al alumno)
         // ──────────────────────────────────────────────
         modelBuilder.Entity<RespuestaEncuesta>(entity =>
         {
             entity.HasKey(r => r.Id);
-            entity.Property(r => r.Preguntas).IsRequired();
-            entity.Property(r => r.Respuestas).IsRequired();
             entity.Property(r => r.Fecha).IsRequired();
             entity.HasOne(r => r.Encuesta)
-                .WithMany(e => e.Respuestas)
-                .HasForeignKey(r => r.EncuestaId)
-                .OnDelete(DeleteBehavior.Restrict);
+                  .WithMany(e => e.Respuestas)
+                  .HasForeignKey(r => r.EncuestaId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ──────────────────────────────────────────────
+        // ItemRespuesta
+        // ──────────────────────────────────────────────
+        modelBuilder.Entity<ItemRespuesta>(entity =>
+        {
+            entity.HasKey(i => i.Id);
+            entity.Property(i => i.ValorNumerico).IsRequired(false);
+            entity.Property(i => i.TextoLibre).HasMaxLength(1000).IsRequired(false);
+            entity.HasOne(i => i.Respuesta)
+                  .WithMany(r => r.Items)
+                  .HasForeignKey(i => i.RespuestaEncuestaId)
+                  .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(i => i.Pregunta)
+                  .WithMany(p => p.Items)
+                  .HasForeignKey(i => i.PreguntaId)
+                  .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ──────────────────────────────────────────────
+        // EncuestaCompletada (token SHA-256, sin FK al alumno)
+        // ──────────────────────────────────────────────
+        modelBuilder.Entity<EncuestaCompletada>(entity =>
+        {
+            entity.HasKey(ec => ec.Id);
+            entity.Property(ec => ec.TokenAnonimo).IsRequired().HasMaxLength(64);
+            entity.HasIndex(ec => new { ec.TokenAnonimo, ec.EncuestaId }).IsUnique();
+            entity.Property(ec => ec.FechaCompletada).IsRequired();
+            entity.HasOne(ec => ec.Encuesta)
+                  .WithMany()
+                  .HasForeignKey(ec => ec.EncuestaId)
+                  .OnDelete(DeleteBehavior.Restrict);
         });
 
         // ──────────────────────────────────────────────

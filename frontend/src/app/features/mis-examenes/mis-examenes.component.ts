@@ -2,23 +2,28 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MisExamenesService, ExamenFinalDisponible, ComprobanteInscripcionExamen } from './mis-examenes.service';
+import { EncuestasService, EncuestaDto } from '../encuestas/encuestas.service';
+import { ModalEncuestaComponent } from '../encuestas/modal-encuesta/modal-encuesta.component';
 
 @Component({
   selector: 'app-mis-examenes',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, ModalEncuestaComponent],
   templateUrl: './mis-examenes.component.html',
   styleUrl: './mis-examenes.component.scss'
 })
 export class MisExamenesComponent implements OnInit {
-  examenes  = signal<ExamenFinalDisponible[]>([]);
+  examenes     = signal<ExamenFinalDisponible[]>([]);
   cargando     = signal(true);
   error        = signal<string | null>(null);
   inscribiendo = signal<number | null>(null);
   comprobante  = signal<ComprobanteInscripcionExamen | null>(null);
+  encuestaPendiente = signal<EncuestaDto | null>(null);
+  private examenPendienteId: number | null = null;
 
   constructor(
     private service: MisExamenesService,
+    private encuestasService: EncuestasService,
     private router: Router
   ) {}
 
@@ -35,12 +40,34 @@ export class MisExamenesComponent implements OnInit {
 
   inscribirse(examen: ExamenFinalDisponible): void {
     if (examen.yaInscripto || this.inscribiendo() !== null) return;
-    this.inscribiendo.set(examen.id);
     this.error.set(null);
-    this.service.inscribirse(examen.id).subscribe({
+
+    this.encuestasService.obtenerPendiente().subscribe({
+      next: (encuesta) => {
+        if (encuesta) {
+          this.examenPendienteId = examen.id;
+          this.encuestaPendiente.set(encuesta);
+        } else {
+          this.ejecutarInscripcion(examen.id);
+        }
+      },
+      error: () => this.ejecutarInscripcion(examen.id)
+    });
+  }
+
+  onEncuestaCompletada(): void {
+    const id = this.examenPendienteId;
+    this.encuestaPendiente.set(null);
+    this.examenPendienteId = null;
+    if (id !== null) this.ejecutarInscripcion(id);
+  }
+
+  private ejecutarInscripcion(examenId: number): void {
+    this.inscribiendo.set(examenId);
+    this.service.inscribirse(examenId).subscribe({
       next: (resultado) => {
         this.examenes.update(list =>
-          list.map(e => e.id === examen.id ? { ...e, yaInscripto: true } : e)
+          list.map(e => e.id === examenId ? { ...e, yaInscripto: true } : e)
         );
         this.inscribiendo.set(null);
         this.service.obtenerComprobante(resultado.id).subscribe({

@@ -6,11 +6,13 @@ import { catchError } from 'rxjs/operators';
 import { MisMateriasService, InscripcionMateria, ComprobanteInscripcionMateria } from './mis-materias.service';
 import { MateriasService, Materia } from '../materias/materias.service';
 import { CursosService, Curso } from '../cursos/cursos.service';
+import { EncuestasService, EncuestaDto } from '../encuestas/encuestas.service';
+import { ModalEncuestaComponent } from '../encuestas/modal-encuesta/modal-encuesta.component';
 
 @Component({
   selector: 'app-mis-materias',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ModalEncuestaComponent],
   templateUrl: './mis-materias.component.html',
   styleUrl: './mis-materias.component.scss'
 })
@@ -26,6 +28,7 @@ export class MisMateriasComponent implements OnInit {
 
   comprobante         = signal<ComprobanteInscripcionMateria | null>(null);
   cargandoComprobante = signal(false);
+  encuestaPendiente   = signal<EncuestaDto | null>(null);
 
   selectedMateriaId = signal<number | null>(null);
   selectedCursoId   = signal<number | null>(null);
@@ -33,7 +36,8 @@ export class MisMateriasComponent implements OnInit {
   constructor(
     private service: MisMateriasService,
     private materiasService: MateriasService,
-    private cursosService: CursosService
+    private cursosService: CursosService,
+    private encuestasService: EncuestasService
   ) {}
 
   ngOnInit(): void {
@@ -71,8 +75,27 @@ export class MisMateriasComponent implements OnInit {
       this.error.set('Seleccioná una materia y un curso.');
       return;
     }
-    this.guardando.set(true);
     this.error.set(null);
+
+    this.encuestasService.obtenerPendiente().subscribe({
+      next: (encuesta) => {
+        if (encuesta) {
+          this.encuestaPendiente.set(encuesta);
+        } else {
+          this.ejecutarInscripcion();
+        }
+      },
+      error: () => this.ejecutarInscripcion()
+    });
+  }
+
+  onEncuestaCompletada(): void {
+    this.encuestaPendiente.set(null);
+    this.ejecutarInscripcion();
+  }
+
+  private ejecutarInscripcion(): void {
+    this.guardando.set(true);
     this.service.inscribirse({ materiaId: this.selectedMateriaId()!, cursoId: this.selectedCursoId()! }).subscribe({
       next: (resultado) => {
         this.guardando.set(false);

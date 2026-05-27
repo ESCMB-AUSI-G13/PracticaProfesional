@@ -13,6 +13,7 @@ public class GlobalExceptionHandler : IExceptionHandler
     {
         var (statusCode, title) = exception switch
         {
+            BusinessException bex when bex.StatusCode == 428 => (428, "Encuesta pendiente"),
             BusinessException bex => (bex.StatusCode, "Error de negocio"),
             UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "No autorizado"),
             ArgumentException => (StatusCodes.Status400BadRequest, "Solicitud inválida"),

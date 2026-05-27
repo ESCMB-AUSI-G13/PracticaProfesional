@@ -1,3 +1,11 @@
+@if (encuestaPendiente(); as encuesta) {
+  <app-modal-encuesta
+    [encuesta]="encuesta"
+    (completada)="onEncuestaCompletada()"
+    (cerrar)="encuestaPendiente.set(null)">
+  </app-modal-encuesta>
+}
+
 <div class="page">
   <header class="page-header">
     <h1>Mis Inscripciones a Materias</h1>

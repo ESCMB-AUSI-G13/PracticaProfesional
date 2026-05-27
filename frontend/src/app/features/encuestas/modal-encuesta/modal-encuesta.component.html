@@ -1,0 +1,63 @@
+<div class="overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <h2>{{ encuesta.titulo }}</h2>
+        @if (encuesta.descripcion) {
+          <p class="descripcion">{{ encuesta.descripcion }}</p>
+        }
+      </div>
+      <span class="badge-anonima">Anónima</span>
+    </div>
+
+    <div class="modal-body">
+      @for (pregunta of encuesta.preguntas; track pregunta.id; let i = $index) {
+        <div class="pregunta" [class.obligatoria]="pregunta.esObligatoria">
+          <p class="pregunta-texto">
+            {{ i + 1 }}. {{ pregunta.texto }}
+            @if (pregunta.esObligatoria) { <span class="req">*</span> }
+          </p>
+
+          @if (pregunta.tipoPregunta === 'EscalaLikert') {
+            <div class="likert">
+              @for (val of [1,2,3,4,5]; track val) {
+                <button
+                  class="likert-btn"
+                  [class.selected]="getLikert(pregunta.id) === val"
+                  (click)="setLikert(pregunta.id, val)"
+                  type="button">
+                  <span class="likert-num">{{ val }}</span>
+                  <span class="likert-label">{{ likertLabels[val] }}</span>
+                </button>
+              }
+            </div>
+          }
+
+          @if (pregunta.tipoPregunta === 'TextoLibre') {
+            <textarea
+              class="textarea-libre"
+              rows="3"
+              placeholder="Tu respuesta..."
+              [value]="getTexto(pregunta.id)"
+              (input)="setTexto(pregunta.id, $any($event.target).value)">
+            </textarea>
+          }
+        </div>
+      }
+
+      @if (error()) {
+        <div class="alerta-error">{{ error() }}</div>
+      }
+    </div>
+
+    <div class="modal-footer">
+      <p class="aviso-anonima">Tus respuestas son completamente anónimas y no pueden vincularse a tu identidad.</p>
+      <button
+        class="btn-enviar"
+        (click)="enviar()"
+        [disabled]="!puedeEnviar() || enviando()">
+        {{ enviando() ? 'Enviando...' : 'Enviar y continuar' }}
+      </button>
+    </div>
+  </div>
+</div>

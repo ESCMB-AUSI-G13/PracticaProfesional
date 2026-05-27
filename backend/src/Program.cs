@@ -22,6 +22,7 @@ using PracticaProfesional.Application.EspaciosCurriculares;
 using PracticaProfesional.Application.Examenes;
 using PracticaProfesional.Application.Alertas;
 using PracticaProfesional.Application.Notificaciones;
+using PracticaProfesional.Application.Encuestas;
 using PracticaProfesional.Infrastructure.BackgroundServices;
 using PracticaProfesional.Infrastructure.Persistence.Repositories;
 using PracticaProfesional.Application.Interfaces;
@@ -185,6 +186,16 @@ builder.Services.AddScoped<RiesgoAcademicoUseCase>();
 builder.Services.AddScoped<RetencionPorCohorteUseCase>();
 builder.Services.AddScoped<TableroEjecutivoUseCase>();
 
+// Encuestas (CU-36/CU-40)
+builder.Services.AddScoped<IEncuestaRepository, EncuestaRepository>();
+builder.Services.AddScoped<ListarEncuestasUseCase>();
+builder.Services.AddScoped<CrearEncuestaUseCase>();
+builder.Services.AddScoped<AgregarPreguntaUseCase>();
+builder.Services.AddScoped<ActivarDesactivarEncuestaUseCase>();
+builder.Services.AddScoped<ObtenerEncuestaPendienteUseCase>();
+builder.Services.AddScoped<ResponderEncuestaUseCase>();
+builder.Services.AddScoped<ResultadosEncuestasUseCase>();
+
 // Alertas académicas y notificaciones internas
 builder.Services.AddScoped<IAlertaRepository, AlertaRepository>();
 builder.Services.AddScoped<INotificacionRepository, NotificacionRepository>();
@@ -312,6 +323,7 @@ var app = builder.Build();
         await EstudiantesSeeder.PatchJustificacionesAsync(db, logger);
         await ExamenesSeeder.SeedAsync(db, logger);
         await NotasExamenesSeeder.SeedAsync(db, logger);
+        await EncuestaSeeder.SeedAsync(db);
     }
     catch (Exception ex)
     {

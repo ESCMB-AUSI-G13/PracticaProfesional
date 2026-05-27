@@ -1,3 +1,4 @@
+using PracticaProfesional.Application.Encuestas;
 using PracticaProfesional.Application.Inscripciones.DTOs;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Domain.Entities;
@@ -11,20 +12,26 @@ namespace PracticaProfesional.Application.Inscripciones;
 /// Regla: para rendir un final el estudiante debe tener Aprobado sus correlativas de rendir.
 /// </summary>
 public class InscribirseEnExamenUseCase(
-    IEstudianteRepository estudianteRepository,
-    IExamenRepository examenRepository,
-    IInscripcionExamenRepository inscripcionExamenRepository,
-    IInscripcionMateriaRepository inscripcionMateriaRepository,
-    ICorrelativiadadRepository correlativiadadRepository,
-    IHistorialAcademicoRepository historialRepository,
-    ICalendarioAcademicoRepository calendarioRepository,
-    IAuditoriaService auditoria)
+    IEstudianteRepository           estudianteRepository,
+    IExamenRepository               examenRepository,
+    IInscripcionExamenRepository    inscripcionExamenRepository,
+    IInscripcionMateriaRepository   inscripcionMateriaRepository,
+    ICorrelativiadadRepository      correlativiadadRepository,
+    IHistorialAcademicoRepository   historialRepository,
+    ICalendarioAcademicoRepository  calendarioRepository,
+    IAuditoriaService               auditoria,
+    ObtenerEncuestaPendienteUseCase encuestaPendienteUseCase)
 {
     public async Task<InscripcionExamenResultDto> EjecutarAsync(
         InscribirseEnExamenDto dto, CancellationToken cancellationToken = default)
     {
         var estudiante = await estudianteRepository.ObtenerPorUsuarioIdAsync(dto.UsuarioId, cancellationToken)
             ?? throw new BusinessException($"No se encontró el perfil de estudiante para el usuario {dto.UsuarioId}.");
+
+        var pendiente = await encuestaPendienteUseCase.EjecutarAsync(estudiante.Id, cancellationToken);
+        if (pendiente is not null)
+            throw new BusinessException(
+                "Tenés una encuesta pendiente. Completala antes de inscribirte.", 428);
 
         if (estudiante.Condicion == CondicionEstudiante.Egresado)
             throw new BusinessException("El estudiante ya egresó.");

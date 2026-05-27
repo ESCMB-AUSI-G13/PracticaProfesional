@@ -1,0 +1,122 @@
+<div class="page">
+  <header class="page-header">
+    <h1>Resultados de Encuesta — RR-03</h1>
+  </header>
+
+  @if (error()) { <p class="alerta-error">{{ error() }}</p> }
+
+  <div class="filtros-card">
+    <div class="filtros-fila">
+      <div class="filtro-grupo">
+        <label>Encuesta</label>
+        @if (cargandoLista()) {
+          <select disabled><option>Cargando...</option></select>
+        } @else {
+          <select [ngModel]="encuestaId()" (ngModelChange)="encuestaId.set($event ? +$event : null)">
+            <option [value]="null">— Seleccioná una encuesta —</option>
+            @for (e of encuestas(); track e.id) {
+              <option [value]="e.id">{{ e.titulo }} ({{ e.cicloLectivo }})</option>
+            }
+          </select>
+        }
+      </div>
+    </div>
+    <div class="filtros-acciones">
+      <button class="btn btn-primary" (click)="generar()" [disabled]="cargando() || !encuestaId()">
+        {{ cargando() ? 'Generando...' : 'Generar reporte' }}
+      </button>
+      @if (reporte()) {
+        <button class="btn" (click)="limpiar()">Limpiar</button>
+      }
+    </div>
+  </div>
+
+  @if (cargando()) {
+    <p class="estado">Generando reporte...</p>
+  }
+
+  @if (reporte(); as r) {
+    <div class="reporte">
+      <!-- Resumen -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <span class="kpi-valor">{{ r.totalRespuestas }}</span>
+          <span class="kpi-label">Respuestas totales</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-valor" [style.color]="promedioColor(r.promedioGlobal)">
+            {{ estrellasLabel(r.promedioGlobal) }}
+          </span>
+          <span class="kpi-label">Promedio global</span>
+        </div>
+        <div class="kpi-card">
+          <span class="kpi-valor">{{ r.resultadosPorPregunta.length }}</span>
+          <span class="kpi-label">Preguntas evaluadas</span>
+        </div>
+      </div>
+
+      <!-- Resultados por pregunta -->
+      <section class="seccion">
+        <h2>Resultados por pregunta</h2>
+        @for (p of r.resultadosPorPregunta; track p.preguntaId) {
+          <div class="pregunta-resultado">
+            <div class="pregunta-header">
+              <p class="pregunta-texto">{{ p.textoPregunta }}</p>
+              <span class="resp-count">{{ p.totalRespuestas }} resp.</span>
+            </div>
+
+            @if (p.promedioLikert !== null) {
+              <div class="likert-resultado">
+                <div class="barra-contenedor">
+                  <div class="barra-fill" [style.width]="barWidth(p.promedioLikert)" [style.background]="promedioColor(p.promedioLikert)"></div>
+                </div>
+                <span class="barra-valor" [style.color]="promedioColor(p.promedioLikert)">
+                  {{ estrellasLabel(p.promedioLikert) }}
+                </span>
+              </div>
+            }
+
+            @if (p.textosLibres.length > 0) {
+              <div class="textos-libres">
+                @for (t of p.textosLibres; track $index) {
+                  <blockquote class="texto-libre">"{{ t }}"</blockquote>
+                }
+              </div>
+            }
+          </div>
+        }
+      </section>
+
+      <!-- Evolución mensual -->
+      @if (r.evolucionMensual.length > 0) {
+        <section class="seccion">
+          <h2>Evolución mensual</h2>
+          <table class="tabla">
+            <thead>
+              <tr>
+                <th>Período</th>
+                <th>Respuestas</th>
+                <th>Promedio</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (m of r.evolucionMensual; track m.periodo) {
+                <tr>
+                  <td>{{ m.periodo }}</td>
+                  <td>{{ m.totalRespuestas }}</td>
+                  <td>
+                    @if (m.promedioGeneral !== null) {
+                      <span [style.color]="promedioColor(m.promedioGeneral)">{{ estrellasLabel(m.promedioGeneral) }}</span>
+                    } @else { — }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </section>
+      }
+
+      <p class="generado-en">Generado el {{ r.generadoEn | date:'dd/MM/yyyy HH:mm' }}</p>
+    </div>
+  }
+</div>

@@ -46,6 +46,7 @@ const NAV: NavItem[] = [
       { label: 'Cursos',        ruta: '/cursos',                icon: '', roles: ['Direccion'] },
       { label: 'Cátedras',      ruta: '/espacios-curriculares', icon: '', roles: ['Direccion'] },
       { label: 'Inscripciones', ruta: '/inscripciones-materia', icon: '', roles: ['Direccion'] },
+      { label: 'Encuestas',    ruta: '/encuestas',             icon: '', roles: ['Direccion'] },
     ]
   },
   {
@@ -92,8 +93,10 @@ const NAV: NavItem[] = [
       { label: 'Comisiones',         ruta: '/reportes/comisiones',         icon: '', roles: ['Direccion', 'Docente'] },
       { label: 'Evolución de Notas', ruta: '/reportes/evolucion',          icon: '', roles: ['Direccion', 'Docente'] },
       { label: 'Promedios Cátedra',  ruta: '/reportes/catedras',           icon: '', roles: ['Direccion', 'Docente'] },
-      { label: 'Riesgo de Deserción', ruta: '/reportes/riesgo-academico',   icon: '', roles: ['Direccion'] },
-      { label: 'Retención Cohorte',  ruta: '/reportes/retencion-cohorte',  icon: '', roles: ['Direccion'] },
+      { label: 'Riesgo de Deserción',  ruta: '/reportes/riesgo-academico',        icon: '', roles: ['Direccion'] },
+      { label: 'Retención Cohorte',   ruta: '/reportes/retencion-cohorte',       icon: '', roles: ['Direccion'] },
+      { label: 'Resultados Encuesta', ruta: '/reportes/encuestas-satisfaccion',  icon: '', roles: ['Direccion'] },
+      { label: 'Comparativo Encuestas', ruta: '/reportes/encuestas-comparativo', icon: '', roles: ['Direccion'] },
     ]
   },
   {

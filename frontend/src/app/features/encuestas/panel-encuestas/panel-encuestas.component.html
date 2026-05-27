@@ -1,0 +1,137 @@
+<div class="page">
+  <header class="page-header">
+    <h1>Gestión de Encuestas</h1>
+    @if (!mostrarFormEncuesta()) {
+      <button class="btn btn-primary" (click)="mostrarFormEncuesta.set(true)">+ Nueva encuesta</button>
+    }
+  </header>
+
+  @if (error()) { <p class="alerta-error">{{ error() }}</p> }
+  @if (exito()) { <p class="alerta-exito">{{ exito() }}</p> }
+
+  @if (mostrarFormEncuesta()) {
+    <div class="form-card">
+      <h2 class="form-title">Nueva encuesta</h2>
+
+      <div class="form-row">
+        <label>Título <span class="req">*</span></label>
+        <input type="text" [(ngModel)]="nuevaEncuesta.titulo" placeholder="Ej: Evaluación Institucional 2026" />
+      </div>
+
+      <div class="form-row">
+        <label>Descripción</label>
+        <input type="text" [(ngModel)]="nuevaEncuesta.descripcion" placeholder="(opcional)" />
+      </div>
+
+      <div class="form-row">
+        <label>Tipo</label>
+        <select [(ngModel)]="nuevaEncuesta.tipo">
+          <option value="SatisfaccionGeneral">Satisfacción General</option>
+          <option value="EvaluacionDocente">Evaluación Docente</option>
+        </select>
+      </div>
+
+      <div class="form-row">
+        <label>Ciclo Lectivo</label>
+        <input type="number" [(ngModel)]="nuevaEncuesta.cicloLectivo" min="2020" max="2100" />
+      </div>
+
+      <div class="form-actions">
+        <button class="btn btn-primary" (click)="crearEncuesta()" [disabled]="guardandoEncuesta()">
+          {{ guardandoEncuesta() ? 'Creando...' : 'Crear encuesta' }}
+        </button>
+        <button class="btn" (click)="cancelarFormEncuesta()" [disabled]="guardandoEncuesta()">Cancelar</button>
+      </div>
+    </div>
+  }
+
+  @if (cargando()) {
+    <p class="estado">Cargando...</p>
+  } @else if (encuestas().length === 0) {
+    <p class="estado">No hay encuestas creadas.</p>
+  } @else {
+    @for (enc of encuestas(); track enc.id) {
+      <div class="encuesta-card" [class.inactiva]="!enc.activa">
+        <div class="encuesta-header">
+          <div class="encuesta-info">
+            <h2 class="encuesta-titulo">{{ enc.titulo }}</h2>
+            <div class="encuesta-meta">
+              <span class="badge-tipo">{{ tipoLabel(enc.tipo) }}</span>
+              <span class="meta-sep">·</span>
+              <span>Ciclo {{ enc.cicloLectivo }}</span>
+              <span class="meta-sep">·</span>
+              <span>{{ enc.preguntas.length }} preguntas</span>
+            </div>
+            @if (enc.descripcion) {
+              <p class="encuesta-desc">{{ enc.descripcion }}</p>
+            }
+          </div>
+          <div class="encuesta-acciones">
+            <span class="badge-estado" [class.activa]="enc.activa">
+              {{ enc.activa ? '● Activa' : '○ Inactiva' }}
+            </span>
+            <button class="btn btn-sm" (click)="toggleActiva(enc)">
+              {{ enc.activa ? 'Desactivar' : 'Activar' }}
+            </button>
+            <button class="btn btn-sm btn-primary" (click)="abrirFormPregunta(enc.id)">
+              + Pregunta
+            </button>
+          </div>
+        </div>
+
+        @if (enc.preguntas.length > 0) {
+          <div class="preguntas-lista">
+            @for (p of enc.preguntas; track p.id) {
+              <div class="pregunta-item">
+                <span class="pregunta-num">{{ p.orden }}</span>
+                <span class="pregunta-texto">{{ p.texto }}</span>
+                <div class="pregunta-tags">
+                  <span class="tag">{{ p.tipoPregunta === 'EscalaLikert' ? 'Likert 1–5' : 'Texto libre' }}</span>
+                  @if (p.esObligatoria) { <span class="tag tag-req">Obligatoria</span> }
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        @if (mostrarFormPregunta() && encuestaSeleccionadaId() === enc.id) {
+          <div class="form-pregunta">
+            <h3>Nueva pregunta</h3>
+
+            <div class="form-row">
+              <label>Texto <span class="req">*</span></label>
+              <input type="text" [(ngModel)]="nuevaPregunta.texto" placeholder="Ej: ¿Cómo evaluás la organización institucional?" />
+            </div>
+
+            <div class="form-row-grid">
+              <div class="form-row">
+                <label>Tipo</label>
+                <select [(ngModel)]="nuevaPregunta.tipoPregunta">
+                  <option value="EscalaLikert">Likert (1–5)</option>
+                  <option value="TextoLibre">Texto libre</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label>Orden</label>
+                <input type="number" [(ngModel)]="nuevaPregunta.orden" min="1" />
+              </div>
+              <div class="form-row check-row">
+                <label>
+                  <input type="checkbox" [(ngModel)]="nuevaPregunta.esObligatoria" />
+                  Obligatoria
+                </label>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="btn btn-primary btn-sm" (click)="agregarPregunta()" [disabled]="guardandoPregunta()">
+                {{ guardandoPregunta() ? 'Guardando...' : 'Agregar' }}
+              </button>
+              <button class="btn btn-sm" (click)="cancelarFormPregunta()" [disabled]="guardandoPregunta()">Cancelar</button>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

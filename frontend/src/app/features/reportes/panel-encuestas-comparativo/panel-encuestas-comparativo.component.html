@@ -1,0 +1,116 @@
+<div class="page">
+  <header class="page-header">
+    <h1>Comparativo de Encuestas — RR-04</h1>
+    <button class="btn btn-sm" (click)="cargar()" [disabled]="cargando()">↻ Actualizar</button>
+  </header>
+
+  @if (error()) { <p class="alerta-error">{{ error() }}</p> }
+
+  @if (cargando()) {
+    <p class="estado">Cargando...</p>
+  } @else {
+    @if (reporte(); as r) {
+      @if (r.encuestas.length === 0) {
+        <p class="estado">No hay encuestas con respuestas registradas.</p>
+      } @else {
+        <!-- KPIs globales -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <span class="kpi-valor">{{ r.encuestas.length }}</span>
+            <span class="kpi-label">Encuestas evaluadas</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-valor">{{ totalRespuestas(r.encuestas) }}</span>
+            <span class="kpi-label">Total de respuestas</span>
+          </div>
+          <div class="kpi-card">
+            <span class="kpi-valor" [style.color]="promedioColor(promedioGeneral(r.encuestas))">
+              {{ promedioGeneral(r.encuestas) !== null ? (promedioGeneral(r.encuestas)!.toFixed(2) + ' / 5') : '—' }}
+            </span>
+            <span class="kpi-label">Promedio general</span>
+          </div>
+          @if (mejorEncuesta(r.encuestas); as mejor) {
+            <div class="kpi-card kpi-destacado">
+              <span class="kpi-valor kpi-verde">{{ mejor.promedioGeneral!.toFixed(2) }} / 5</span>
+              <span class="kpi-label">Mejor: <strong>{{ mejor.titulo }}</strong></span>
+            </div>
+          }
+        </div>
+
+        <!-- Barras comparativas -->
+        <section class="seccion">
+          <h2>Promedio por encuesta</h2>
+          @for (enc of r.encuestas; track enc.encuestaId) {
+            <div class="fila-barra">
+              <div class="fila-info">
+                <span class="fila-titulo">{{ enc.titulo }}</span>
+                <div class="fila-meta">
+                  <span class="badge-tipo">{{ tipoLabel(enc.tipo) }}</span>
+                  <span class="fila-ciclo">{{ enc.cicloLectivo }}</span>
+                  <span class="fila-resp">{{ enc.totalRespuestas }} resp.</span>
+                </div>
+              </div>
+              <div class="barra-contenedor">
+                @if (enc.totalRespuestas > 0 && enc.promedioGeneral !== null) {
+                  <div class="barra-fill"
+                       [style.width]="barWidth(enc.promedioGeneral)"
+                       [style.background]="promedioColor(enc.promedioGeneral)">
+                  </div>
+                } @else {
+                  <span class="sin-datos">Sin respuestas</span>
+                }
+              </div>
+              <span class="barra-valor" [style.color]="promedioColor(enc.promedioGeneral)">
+                {{ enc.promedioGeneral !== null ? enc.promedioGeneral.toFixed(2) : '—' }}
+              </span>
+            </div>
+          }
+        </section>
+
+        <!-- Tabla detallada -->
+        <section class="seccion">
+          <h2>Detalle comparativo</h2>
+          <div class="tabla-wrap">
+            <table class="tabla">
+              <thead>
+                <tr>
+                  <th>Encuesta</th>
+                  <th>Tipo</th>
+                  <th>Ciclo</th>
+                  <th>Respuestas</th>
+                  <th>Promedio</th>
+                  <th>Desempeño</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (enc of r.encuestas; track enc.encuestaId) {
+                  <tr>
+                    <td>{{ enc.titulo }}</td>
+                    <td><span class="badge-tipo">{{ tipoLabel(enc.tipo) }}</span></td>
+                    <td>{{ enc.cicloLectivo }}</td>
+                    <td>{{ enc.totalRespuestas }}</td>
+                    <td>
+                      <span [style.color]="promedioColor(enc.promedioGeneral)" style="font-weight:600">
+                        {{ enc.promedioGeneral !== null ? enc.promedioGeneral.toFixed(2) + ' / 5' : '—' }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="mini-barra">
+                        <div class="mini-fill"
+                             [style.width]="barWidth(enc.promedioGeneral)"
+                             [style.background]="promedioColor(enc.promedioGeneral)">
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <p class="generado-en">Generado el {{ r.generadoEn | date:'dd/MM/yyyy HH:mm' }}</p>
+      }
+    }
+  }
+</div>
