@@ -18,6 +18,9 @@ public class EncuestasController(
     ObtenerEncuestaPendienteUseCase  pendienteUseCase,
     ResponderEncuestaUseCase         responderUseCase,
     ResultadosEncuestasUseCase       resultadosUseCase,
+    ListarEncuestasDocenteUseCase    listarDocenteUseCase,
+    CrearEncuestaDocenteUseCase      crearDocenteUseCase,
+    IEncuestaRepository              encuestaRepo,
     IEstudianteRepository            estudianteRepo) : ControllerBase
 {
     // ── Dirección — gestión ───────────────────────────────────────────────────
@@ -54,12 +57,67 @@ public class EncuestasController(
         return NoContent();
     }
 
+    // ── Docente — gestión de sus encuestas de evaluación ─────────────────────
+
+    [HttpGet("docente/materias")]
+    [Authorize(Roles = "Docente")]
+    public async Task<IActionResult> MisMaterias(CancellationToken ct)
+        => Ok(await listarDocenteUseCase.ObtenerMateriasAsync(ObtenerUsuarioId(), ct));
+
+    [HttpGet("docente")]
+    [Authorize(Roles = "Docente")]
+    public async Task<IActionResult> MisEncuestas(CancellationToken ct)
+        => Ok(await listarDocenteUseCase.EjecutarAsync(ObtenerUsuarioId(), ct));
+
+    [HttpPost("docente")]
+    [Authorize(Roles = "Docente")]
+    public async Task<IActionResult> CrearDocente([FromBody] CrearEncuestaDto dto, CancellationToken ct)
+        => Ok(await crearDocenteUseCase.EjecutarAsync(ObtenerUsuarioId(), dto, ct));
+
+    [HttpPost("docente/preguntas")]
+    [Authorize(Roles = "Docente")]
+    public async Task<IActionResult> AgregarPreguntaDocente(
+        [FromBody] AgregarPreguntaDto dto, CancellationToken ct)
+    {
+        var encuesta = await encuestaRepo.ObtenerConPreguntasAsync(dto.EncuestaId, ct);
+        if (encuesta?.MateriaId is null) return NotFound();
+
+        if (!await listarDocenteUseCase.EsMateriaDelDocenteAsync(ObtenerUsuarioId(), encuesta.MateriaId.Value, ct))
+            return Forbid();
+
+        return Ok(await agregarPreguntaUseCase.EjecutarAsync(dto, ct));
+    }
+
+    [HttpPatch("docente/{id}/activar")]
+    [Authorize(Roles = "Docente")]
+    public async Task<IActionResult> ActivarDocente(int id, CancellationToken ct)
+    {
+        var encuesta = await encuestaRepo.ObtenerConPreguntasAsync(id, ct);
+        if (encuesta?.MateriaId is null) return NotFound();
+
+        if (!await listarDocenteUseCase.EsMateriaDelDocenteAsync(ObtenerUsuarioId(), encuesta.MateriaId.Value, ct))
+            return Forbid();
+
+        await activarUseCase.EjecutarAsync(id, activar: true, ct);
+        return NoContent();
+    }
+
+    [HttpPatch("docente/{id}/desactivar")]
+    [Authorize(Roles = "Docente")]
+    public async Task<IActionResult> DesactivarDocente(int id, CancellationToken ct)
+    {
+        var encuesta = await encuestaRepo.ObtenerConPreguntasAsync(id, ct);
+        if (encuesta?.MateriaId is null) return NotFound();
+
+        if (!await listarDocenteUseCase.EsMateriaDelDocenteAsync(ObtenerUsuarioId(), encuesta.MateriaId.Value, ct))
+            return Forbid();
+
+        await activarUseCase.EjecutarAsync(id, activar: false, ct);
+        return NoContent();
+    }
+
     // ── Estudiante — flujo de inscripción ────────────────────────────────────
 
-    /// <summary>
-    /// Devuelve la encuesta pendiente del estudiante autenticado, o 204 si no hay.
-    /// El frontend llama a este endpoint antes de confirmar cualquier inscripción.
-    /// </summary>
     [HttpGet("pendiente")]
     [Authorize(Roles = "Estudiante")]
     public async Task<IActionResult> ObtenerPendiente(CancellationToken ct)
@@ -72,10 +130,6 @@ public class EncuestasController(
         return pendiente is null ? NoContent() : Ok(pendiente);
     }
 
-    /// <summary>
-    /// Registra la respuesta anónima. La identidad del estudiante se disocia
-    /// mediante token SHA-256 — la respuesta no tiene FK al alumno.
-    /// </summary>
     [HttpPost("responder")]
     [Authorize(Roles = "Estudiante")]
     public async Task<IActionResult> Responder(
@@ -85,15 +139,37 @@ public class EncuestasController(
         return NoContent();
     }
 
-    // ── Dirección — reportes (RR-02, RR-03, RR-04) ───────────────────────────
+    // ── Docente — reportes de sus propias encuestas ───────────────────────────
 
-    /// <summary>RR-03: Resultados de satisfacción de una encuesta.</summary>
+    [HttpGet("docente/{id}/resultados")]
+    [Authorize(Roles = "Docente")]
+    public async Task<IActionResult> ResultadosDocente(int id, CancellationToken ct)
+    {
+        var encuesta = await encuestaRepo.ObtenerConPreguntasAsync(id, ct);
+        if (encuesta?.MateriaId is null) return NotFound();
+
+        if (!await listarDocenteUseCase.EsMateriaDelDocenteAsync(ObtenerUsuarioId(), encuesta.MateriaId.Value, ct))
+            return Forbid();
+
+        return Ok(await resultadosUseCase.ObtenerSatisfaccionAsync(id, ct));
+    }
+
+    [HttpGet("docente/comparativo")]
+    [Authorize(Roles = "Docente")]
+    public async Task<IActionResult> ComparativoDocente(CancellationToken ct)
+    {
+        var materias   = await listarDocenteUseCase.ObtenerMateriasAsync(ObtenerUsuarioId(), ct);
+        var materiaIds = materias.Select(m => m.Id).ToList();
+        return Ok(await resultadosUseCase.ObtenerComparativoDocenteAsync(materiaIds, ct));
+    }
+
+    // ── Dirección — reportes (RR-03, RR-04) ──────────────────────────────────
+
     [HttpGet("{id}/resultados")]
     [Authorize(Roles = "Direccion")]
     public async Task<IActionResult> Resultados(int id, CancellationToken ct)
         => Ok(await resultadosUseCase.ObtenerSatisfaccionAsync(id, ct));
 
-    /// <summary>RR-04: Comparativo entre todas las encuestas.</summary>
     [HttpGet("comparativo")]
     [Authorize(Roles = "Direccion")]
     public async Task<IActionResult> Comparativo(CancellationToken ct)

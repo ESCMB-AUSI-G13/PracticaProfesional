@@ -89,6 +89,21 @@ public class ResultadosEncuestasUseCase(AppDbContext db)
         };
     }
 
+    // ── Docente: comparativo filtrado por sus materias ────────────────────────
+    public async Task<ReporteComparativoEncuestasDto> ObtenerComparativoDocenteAsync(
+        List<int> materiaIds, CancellationToken ct = default)
+    {
+        var encuestas = await db.Encuestas
+            .Include(e => e.Respuestas)
+                .ThenInclude(r => r.Items)
+            .Where(e => e.MateriaId.HasValue && materiaIds.Contains(e.MateriaId.Value))
+            .OrderByDescending(e => e.CicloLectivo)
+            .ThenBy(e => e.Titulo)
+            .ToListAsync(ct);
+
+        return BuildComparativo(encuestas);
+    }
+
     // ── RR-04: comparativo entre todas las encuestas ──────────────────────────
     public async Task<ReporteComparativoEncuestasDto> ObtenerComparativoAsync(
         CancellationToken ct = default)
@@ -100,6 +115,11 @@ public class ResultadosEncuestasUseCase(AppDbContext db)
             .ThenBy(e => e.Titulo)
             .ToListAsync(ct);
 
+        return BuildComparativo(encuestas);
+    }
+
+    private static ReporteComparativoEncuestasDto BuildComparativo(List<Domain.Entities.Encuesta> encuestas)
+    {
         var filas = encuestas.Select(e =>
         {
             var vals = e.Respuestas

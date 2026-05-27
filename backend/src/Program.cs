@@ -195,6 +195,8 @@ builder.Services.AddScoped<ActivarDesactivarEncuestaUseCase>();
 builder.Services.AddScoped<ObtenerEncuestaPendienteUseCase>();
 builder.Services.AddScoped<ResponderEncuestaUseCase>();
 builder.Services.AddScoped<ResultadosEncuestasUseCase>();
+builder.Services.AddScoped<ListarEncuestasDocenteUseCase>();
+builder.Services.AddScoped<CrearEncuestaDocenteUseCase>();
 
 // Alertas académicas y notificaciones internas
 builder.Services.AddScoped<IAlertaRepository, AlertaRepository>();
@@ -248,7 +250,10 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(o =>
+        o.JsonSerializerOptions.Converters.Add(
+            new System.Text.Json.Serialization.JsonStringEnumConverter()));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

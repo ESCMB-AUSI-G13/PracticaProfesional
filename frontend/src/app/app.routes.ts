@@ -310,6 +310,31 @@ export const routes: Routes = [
             .then(m => m.PanelCatedrasComponent)
       },
 
+      // Encuestas — Docente (sus propias evaluaciones)
+      {
+        path: 'mis-encuestas',
+        canActivate: [roleGuard('Docente')],
+        loadComponent: () =>
+          import('./features/encuestas/panel-encuestas-docente/panel-encuestas-docente.component')
+            .then(m => m.PanelEncuestasDocenteComponent)
+      },
+
+      // Reportes encuestas — Docente (solo sus materias)
+      {
+        path: 'mis-encuestas/resultados',
+        canActivate: [roleGuard('Docente')],
+        loadComponent: () =>
+          import('./features/reportes/panel-resultados-docente/panel-resultados-docente.component')
+            .then(m => m.PanelResultadosDocenteComponent)
+      },
+      {
+        path: 'mis-encuestas/comparativo',
+        canActivate: [roleGuard('Docente')],
+        loadComponent: () =>
+          import('./features/reportes/panel-comparativo-docente/panel-comparativo-docente.component')
+            .then(m => m.PanelComparativoDocenteComponent)
+      },
+
       // Encuestas — admin Dirección
       {
         path: 'encuestas',

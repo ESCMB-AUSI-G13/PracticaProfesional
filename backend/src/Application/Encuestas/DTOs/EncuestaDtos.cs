@@ -27,6 +27,10 @@ public record ResponderEncuestaDto(
     int                    EncuestaId,
     List<ItemRespuestaDto> Items);
 
+// ── Docente — materia simple ──────────────────────────────────────────────────
+
+public record MateriaEncuestaDto(int Id, string Nombre, string Codigo);
+
 // ── Responses ─────────────────────────────────────────────────────────────────
 
 public record PreguntaEncuestaDto(

@@ -12,14 +12,15 @@ export interface PreguntaEncuesta {
 }
 
 export interface EncuestaDto {
-  id:           number;
-  titulo:       string;
-  descripcion:  string | null;
-  tipo:         'EvaluacionDocente' | 'SatisfaccionGeneral';
-  materiaId:    number | null;
-  cicloLectivo: number;
-  activa:       boolean;
-  preguntas:    PreguntaEncuesta[];
+  id:            number;
+  titulo:        string;
+  descripcion:   string | null;
+  tipo:          'EvaluacionDocente' | 'SatisfaccionGeneral';
+  materiaId:     number | null;
+  materiaNombre: string | null;
+  cicloLectivo:  number;
+  activa:        boolean;
+  preguntas:     PreguntaEncuesta[];
 }
 
 export interface ItemRespuestaRequest {
@@ -47,6 +48,14 @@ export interface AgregarPreguntaRequest {
   orden:         number;
   tipoPregunta:  string;
   esObligatoria: boolean;
+}
+
+// ── Docente ───────────────────────────────────────────────────────────────────
+
+export interface MateriaEncuestaDto {
+  id:     number;
+  nombre: string;
+  codigo: string;
 }
 
 // ── Reportes ──────────────────────────────────────────────────────────────────
@@ -119,6 +128,31 @@ export class EncuestasService {
     return this.http.patch<void>(`${this.api}/${id}/desactivar`, {});
   }
 
+  // ── Docente — gestión de sus encuestas ───────────────────────────────────
+  listarMisMateriasDocente(): Observable<MateriaEncuestaDto[]> {
+    return this.http.get<MateriaEncuestaDto[]>(`${this.api}/docente/materias`);
+  }
+
+  listarMisEncuestasDocente(): Observable<EncuestaDto[]> {
+    return this.http.get<EncuestaDto[]>(`${this.api}/docente`);
+  }
+
+  crearDocente(dto: CrearEncuestaRequest): Observable<EncuestaDto> {
+    return this.http.post<EncuestaDto>(`${this.api}/docente`, dto);
+  }
+
+  agregarPreguntaDocente(dto: AgregarPreguntaRequest): Observable<PreguntaEncuesta> {
+    return this.http.post<PreguntaEncuesta>(`${this.api}/docente/preguntas`, dto);
+  }
+
+  activarDocente(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.api}/docente/${id}/activar`, {});
+  }
+
+  desactivarDocente(id: number): Observable<void> {
+    return this.http.patch<void>(`${this.api}/docente/${id}/desactivar`, {});
+  }
+
   // ── Dirección — reportes ──────────────────────────────────────────────────
   obtenerResultados(id: number): Observable<ReporteSatisfaccionDto> {
     return this.http.get<ReporteSatisfaccionDto>(`${this.api}/${id}/resultados`);
@@ -126,5 +160,14 @@ export class EncuestasService {
 
   obtenerComparativo(): Observable<ReporteComparativoEncuestasDto> {
     return this.http.get<ReporteComparativoEncuestasDto>(`${this.api}/comparativo`);
+  }
+
+  // ── Docente — reportes de sus propias encuestas ───────────────────────────
+  obtenerResultadosDocente(id: number): Observable<ReporteSatisfaccionDto> {
+    return this.http.get<ReporteSatisfaccionDto>(`${this.api}/docente/${id}/resultados`);
+  }
+
+  obtenerComparativoDocente(): Observable<ReporteComparativoEncuestasDto> {
+    return this.http.get<ReporteComparativoEncuestasDto>(`${this.api}/docente/comparativo`);
   }
 }

@@ -56,6 +56,12 @@ const NAV: NavItem[] = [
     roles: ['Docente']
   },
   {
+    label: 'Encuestas',
+    ruta: '/mis-encuestas',
+    icon: 'reportes',
+    roles: ['Docente']
+  },
+  {
     label: 'Asistencias',
     icon: 'asistencias',
     roles: ['Docente', 'Preceptor'],
@@ -97,6 +103,8 @@ const NAV: NavItem[] = [
       { label: 'Retención Cohorte',   ruta: '/reportes/retencion-cohorte',       icon: '', roles: ['Direccion'] },
       { label: 'Resultados Encuesta', ruta: '/reportes/encuestas-satisfaccion',  icon: '', roles: ['Direccion'] },
       { label: 'Comparativo Encuestas', ruta: '/reportes/encuestas-comparativo', icon: '', roles: ['Direccion'] },
+      { label: 'Resultados Mis Encuestas',    ruta: '/mis-encuestas/resultados',  icon: '', roles: ['Docente'] },
+      { label: 'Comparativo Mis Encuestas',   ruta: '/mis-encuestas/comparativo', icon: '', roles: ['Docente'] },
     ]
   },
   {
