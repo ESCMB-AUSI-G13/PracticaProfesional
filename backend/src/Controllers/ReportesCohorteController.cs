@@ -14,8 +14,21 @@ namespace PracticaProfesional.Controllers;
 [Authorize(Roles = "Direccion")]
 public class ReportesCohorteController(
     RiesgoAcademicoUseCase      riesgoUseCase,
-    RetencionPorCohorteUseCase  retencionUseCase) : ControllerBase
+    RetencionPorCohorteUseCase  retencionUseCase,
+    TableroEjecutivoUseCase     tableroUseCase) : ControllerBase
 {
+    /// <summary>
+    /// Tablero ejecutivo institucional — métricas globales para Dirección (RR-01).
+    /// GET api/reportes/tablero-ejecutivo
+    /// </summary>
+    [HttpGet("tablero-ejecutivo")]
+    [ProducesResponseType(typeof(TableroEjecutivoDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> TableroEjecutivo(CancellationToken cancellationToken)
+    {
+        var resultado = await tableroUseCase.EjecutarAsync(cancellationToken);
+        return Ok(resultado);
+    }
+
     /// <summary>
     /// Riesgo académico por estudiante (Bajo / Medio / Alto).
     /// GET api/reportes/riesgo-academico?anioCohorte=2024&amp;nivelRiesgo=Alto

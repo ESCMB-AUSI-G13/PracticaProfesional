@@ -188,6 +188,34 @@ export interface ReporteRetencionCohorte {
   tasaDesercionGlobal:  number;
 }
 
+// ── Modelos RR-01 Tablero Ejecutivo ──────────────────────────────────────────
+
+export interface EvolucionCohorteResumen {
+  anioCohorte: number;
+  total:       number;
+  activos:     number;
+  egresados:   number;
+  desertores:  number;
+}
+
+export interface TableroEjecutivo {
+  totalMatriculados:          number;
+  totalEgresados:             number;
+  totalDesertores:            number;
+  totalHistorico:             number;
+  riesgoAlto:                 number;
+  riesgoMedio:                number;
+  riesgoBajo:                 number;
+  porcentajeRiesgoAlto:       number;
+  tasaRetencionGlobal:        number;
+  tasaDesercionGlobal:        number;
+  tasaEgresoGlobal:           number;
+  promedioNotaGlobal:         number | null;
+  porcentajeAprobacionGlobal: number;
+  evolucionCohortes:          EvolucionCohorteResumen[];
+  generadoEn:                 string;
+}
+
 // ── Servicio ─────────────────────────────────────────────────────────────────
 
 @Injectable({ providedIn: 'root' })
@@ -252,6 +280,11 @@ export class ReportesService {
     if (carreraId)   params['carreraId']   = String(carreraId);
     if (nivelRiesgo) params['nivelRiesgo'] = nivelRiesgo;
     return this.http.get<ReporteRiesgoAcademico>(`${this.apiUrl}/riesgo-academico`, { params });
+  }
+
+  /** RR-01: Tablero ejecutivo institucional — métricas globales para Dirección. */
+  obtenerTableroEjecutivo(): Observable<TableroEjecutivo> {
+    return this.http.get<TableroEjecutivo>(`${this.apiUrl}/tablero-ejecutivo`);
   }
 
   /** Retención y deserción agrupada por año de ingreso (cohorte). */

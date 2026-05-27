@@ -262,6 +262,15 @@ export const routes: Routes = [
           import('./features/mis-examenes/mis-examenes.component').then(m => m.MisExamenesComponent)
       },
 
+      // Tablero Ejecutivo — solo Dirección (RR-01)
+      {
+        path: 'reportes/tablero-ejecutivo',
+        canActivate: [roleGuard('Direccion')],
+        loadComponent: () =>
+          import('./features/reportes/tablero-ejecutivo/tablero-ejecutivo.component')
+            .then(m => m.TableroEjecutivoComponent)
+      },
+
       // Reportes — Preceptor y Dirección
       {
         path: 'reportes/inasistencias',

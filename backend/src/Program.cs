@@ -183,6 +183,7 @@ builder.Services.AddScoped<PromediosCatedraUseCase>();
 // Reportes Cohorte — Riesgo Académico y Retención
 builder.Services.AddScoped<RiesgoAcademicoUseCase>();
 builder.Services.AddScoped<RetencionPorCohorteUseCase>();
+builder.Services.AddScoped<TableroEjecutivoUseCase>();
 
 // Alertas académicas y notificaciones internas
 builder.Services.AddScoped<IAlertaRepository, AlertaRepository>();

@@ -46,11 +46,14 @@
 
 | Caso de uso | Estado | Roles habilitados |
 |---|---|---|
-| Reporte de inasistencias | Implementado | Docente, Administrador |
-| Comparativo entre comisiones | Implementado | Administrador |
-| Evolución de notas por período | Implementado | Administrador |
-| Promedios por cátedra | Implementado | Administrador |
-| Control de legajo individual | Implementado | Preceptor, Administrador |
+| Tablero ejecutivo institucional (RR-01) | Implementado | Administrador |
+| Reporte de inasistencias (RR-08) | Implementado | Docente, Preceptor, Administrador |
+| Control de legajo individual (RR-09) | Implementado | Preceptor, Administrador |
+| Comparativo entre comisiones (RR-05) | Implementado | Docente, Administrador |
+| Evolución de notas por período (RR-06) | Implementado | Docente, Administrador |
+| Promedios por cátedra (RR-07) | Implementado | Docente, Administrador |
+| Riesgo de deserción académica | Implementado | Administrador |
+| Retención y deserción por cohorte | Implementado | Administrador |
 
 ---
 

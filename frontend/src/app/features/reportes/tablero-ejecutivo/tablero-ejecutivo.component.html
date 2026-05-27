@@ -1,0 +1,160 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Tablero Ejecutivo</h1>
+      @if (tablero(); as t) {
+        <span class="generado-en">Generado: {{ t.generadoEn | date:'dd/MM/yyyy HH:mm' }}</span>
+      }
+    </div>
+  </header>
+
+  @if (cargando()) {
+    <div class="cargando">Cargando métricas institucionales...</div>
+  }
+
+  @if (error()) {
+    <div class="alerta-error">{{ error() }}</div>
+  }
+
+  @if (tablero(); as t) {
+
+    <!-- Sección 1: KPIs de matrícula -->
+    <section class="seccion">
+      <h2 class="seccion-titulo">Matrícula Histórica</h2>
+      <div class="kpi-grid">
+        <div class="kpi-card azul">
+          <span class="kpi-num">{{ t.totalMatriculados }}</span>
+          <span class="kpi-label">Activos hoy</span>
+        </div>
+        <div class="kpi-card verde">
+          <span class="kpi-num">{{ t.totalEgresados }}</span>
+          <span class="kpi-label">Egresados</span>
+        </div>
+        <div class="kpi-card rojo">
+          <span class="kpi-num">{{ t.totalDesertores }}</span>
+          <span class="kpi-label">Desertores</span>
+        </div>
+        <div class="kpi-card gris">
+          <span class="kpi-num">{{ t.totalHistorico }}</span>
+          <span class="kpi-label">Total histórico</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección 2: Tasas institucionales -->
+    <section class="seccion">
+      <h2 class="seccion-titulo">Tasas Institucionales</h2>
+      <div class="tasas-grid">
+        <div class="tasa-card">
+          <div class="tasa-barra">
+            <div class="tasa-fill azul" [style.width.%]="t.tasaRetencionGlobal"></div>
+          </div>
+          <div class="tasa-info">
+            <span class="tasa-pct">{{ t.tasaRetencionGlobal | number:'1.1-1' }}%</span>
+            <span class="tasa-label">Tasa de retención</span>
+          </div>
+        </div>
+        <div class="tasa-card">
+          <div class="tasa-barra">
+            <div class="tasa-fill verde" [style.width.%]="t.tasaEgresoGlobal"></div>
+          </div>
+          <div class="tasa-info">
+            <span class="tasa-pct">{{ t.tasaEgresoGlobal | number:'1.1-1' }}%</span>
+            <span class="tasa-label">Tasa de egreso</span>
+          </div>
+        </div>
+        <div class="tasa-card">
+          <div class="tasa-barra">
+            <div class="tasa-fill rojo" [style.width.%]="t.tasaDesercionGlobal"></div>
+          </div>
+          <div class="tasa-info">
+            <span class="tasa-pct">{{ t.tasaDesercionGlobal | number:'1.1-1' }}%</span>
+            <span class="tasa-label">Tasa de deserción</span>
+          </div>
+        </div>
+        <div class="tasa-card">
+          <div class="tasa-barra">
+            <div class="tasa-fill naranja" [style.width.%]="t.porcentajeAprobacionGlobal"></div>
+          </div>
+          <div class="tasa-info">
+            <span class="tasa-pct">{{ t.porcentajeAprobacionGlobal | number:'1.1-1' }}%</span>
+            <span class="tasa-label">Aprobación global</span>
+          </div>
+        </div>
+      </div>
+
+      @if (t.promedioNotaGlobal !== null) {
+        <div class="promedio-global">
+          Promedio institucional de notas:
+          <strong>{{ t.promedioNotaGlobal | number:'1.2-2' }}</strong>
+          <span class="escala">/ 10</span>
+        </div>
+      }
+    </section>
+
+    <!-- Sección 3: Riesgo académico + Gráfico dona -->
+    <section class="seccion">
+      <h2 class="seccion-titulo">Riesgo Académico (Activos)</h2>
+      <div class="riesgo-grid">
+        <div class="riesgo-cards">
+          <div class="stat-card alto">
+            <span class="stat-num">{{ t.riesgoAlto }}</span>
+            <span class="stat-label">Riesgo Alto</span>
+          </div>
+          <div class="stat-card medio">
+            <span class="stat-num">{{ t.riesgoMedio }}</span>
+            <span class="stat-label">Riesgo Medio</span>
+          </div>
+          <div class="stat-card bajo">
+            <span class="stat-num">{{ t.riesgoBajo }}</span>
+            <span class="stat-label">Riesgo Bajo</span>
+          </div>
+          <div class="stat-card alerta">
+            <span class="stat-num">{{ t.porcentajeRiesgoAlto | number:'1.1-1' }}%</span>
+            <span class="stat-label">en riesgo alto</span>
+          </div>
+        </div>
+        <div class="dona-wrap">
+          <canvas #riesgoCanvas></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Sección 4: Evolución por cohorte -->
+    <section class="seccion">
+      <h2 class="seccion-titulo">Evolución por Cohorte</h2>
+      <div class="grafico-barras-wrap">
+        <canvas #barrasCanvas></canvas>
+      </div>
+
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Cohorte</th>
+              <th>Total</th>
+              <th>Activos</th>
+              <th>Egresados</th>
+              <th>Desertores</th>
+              <th>% Retención</th>
+              <th>% Deserción</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of t.evolucionCohortes; track c.anioCohorte) {
+              <tr>
+                <td><strong>{{ c.anioCohorte }}</strong></td>
+                <td>{{ c.total }}</td>
+                <td class="num-azul">{{ c.activos }}</td>
+                <td class="num-verde">{{ c.egresados }}</td>
+                <td class="num-rojo">{{ c.desertores }}</td>
+                <td>{{ c.total > 0 ? ((c.activos + c.egresados) / c.total * 100 | number:'1.1-1') : '—' }}%</td>
+                <td>{{ c.total > 0 ? (c.desertores / c.total * 100 | number:'1.1-1') : '—' }}%</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</div>

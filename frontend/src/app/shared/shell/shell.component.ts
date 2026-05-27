@@ -86,6 +86,7 @@ const NAV: NavItem[] = [
     icon: 'reportes',
     roles: ['Direccion', 'Docente', 'Preceptor'],
     children: [
+      { label: 'Tablero Ejecutivo',  ruta: '/reportes/tablero-ejecutivo',  icon: '', roles: ['Direccion'] },
       { label: 'Inasistencias',      ruta: '/reportes/inasistencias',      icon: '', roles: ['Direccion', 'Preceptor', 'Docente'] },
       { label: 'Control por Legajo', ruta: '/reportes/control-legajo',     icon: '', roles: ['Direccion', 'Preceptor'] },
       { label: 'Comisiones',         ruta: '/reportes/comisiones',         icon: '', roles: ['Direccion', 'Docente'] },
