@@ -94,11 +94,11 @@ export class PanelRiesgoComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.carrerasService.listar().subscribe({
-      next: data => {
-        this.carreras.set(data);
-        // Cohortes fijas según el seed (2023-2026)
-        this.cohortes.set([2023, 2024, 2025, 2026]);
-      }
+      next: data => this.carreras.set(data)
+    });
+    this.reportesService.obtenerAniosCohorte().subscribe({
+      next: anios => this.cohortes.set(anios),
+      error: () => this.cohortes.set([])
     });
   }
 

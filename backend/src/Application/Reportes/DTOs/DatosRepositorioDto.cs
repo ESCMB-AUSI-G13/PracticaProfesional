@@ -28,3 +28,15 @@ public class DatosCohorteDto
     public int    Egresados    { get; init; }
     public int    Desertores   { get; init; }
 }
+
+// Datos crudos para RR-12: un registro por (estudiante × año de historial).
+// Un mismo estudiante puede aparecer N veces (una por cada año que tiene en HistorialAcademico).
+// Si no tiene ningún registro, aparece una sola vez con AnioHistorial = -1.
+public class DatosRetencionAnualRawDto
+{
+    public int    AnioCohorte   { get; init; }
+    public string Carrera       { get; init; } = string.Empty;
+    public int    EstudianteId  { get; init; }
+    public int    AnioHistorial { get; init; }  // -1 cuando no hay registros en HistorialAcademico
+    public bool   EsDesertor    { get; init; }
+}

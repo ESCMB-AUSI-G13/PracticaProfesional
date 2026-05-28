@@ -62,6 +62,40 @@ tbody tr:hover { background: #fafafa; }
 
 .sin-resultados { text-align: center; padding: 2rem; color: #888; font-size: 0.9rem; }
 
+/* Tabs */
+.tabs-header { display: flex; align-items: center; gap: 0.7rem; padding: 0.8rem 1rem; border-bottom: 1px solid #e0e0e0; }
+.tab-sep { color: #ccc; font-size: 0.95rem; user-select: none; }
+.tab {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #bbb;
+  line-height: 1;
+}
+.tab:hover { color: #888; }
+.tab-activa { color: #444; }
+
+/* RR-12 dentro del tab */
+.tabla-anual-subtitulo { padding: 0.55rem 1rem; font-size: 0.8rem; color: #888; border-bottom: 1px solid #f0f0f0; }
+.umbral-hint { font-size: 0.78rem; color: #888; }
+.td-total { font-weight: 600; color: #555; }
+.td-tasa { min-width: 70px; text-align: center; }
+
+.badge-tasa { display: inline-block; padding: 0.2rem 0.55rem; border-radius: 10px; font-size: 0.82rem; font-weight: 600; }
+.badge-verde   { background: #eafaf1; color: #1e8449; }
+.badge-naranja { background: #fef9e7; color: #b7770d; }
+.badge-rojo    { background: #fdecea; color: #c0392b; }
+.badge-sin-dato { background: #f5f5f5; color: #aaa; }
+
+.analisis-bloque { padding: 0.8rem 1rem; border-top: 1px solid #f0f0f0; background: #fafafa; }
+.analisis-bloque h4 { font-size: 0.9rem; color: #444; margin: 0 0 0.6rem; }
+.analisis-grid { display: flex; flex-direction: column; gap: 0.4rem; }
+.analisis-fila { display: flex; justify-content: space-between; align-items: center; padding: 0.35rem 0.5rem; background: #fff; border-radius: 4px; border: 1px solid #eee; }
+.analisis-label { font-size: 0.83rem; color: #555; }
+
 @media (max-width: 768px) {
   .globales-grid { grid-template-columns: 1fr; }
 }

@@ -111,6 +111,7 @@
               <tr>
                 <th (click)="ordenarPor('legajo')">Legajo{{ flechaSort('legajo') }}</th>
                 <th (click)="ordenarPor('nombreCompleto')">Nombre{{ flechaSort('nombreCompleto') }}</th>
+                <th (click)="ordenarPor('carrera')">Carrera{{ flechaSort('carrera') }}</th>
                 <th (click)="ordenarPor('anioCohorte')">Cohorte{{ flechaSort('anioCohorte') }}</th>
                 <th (click)="ordenarPor('anioCarrera')">Año{{ flechaSort('anioCarrera') }}</th>
                 <th (click)="ordenarPor('condicion')">Condición{{ flechaSort('condicion') }}</th>
@@ -125,6 +126,7 @@
                 <tr [class]="'fila-' + e.nivelRiesgo.toLowerCase()">
                   <td>{{ e.legajo }}</td>
                   <td>{{ e.nombreCompleto }}</td>
+                  <td class="td-carrera">{{ e.carrera }}</td>
                   <td>{{ e.anioCohorte }}</td>
                   <td>{{ e.anioCarrera }}°</td>
                   <td><span [class]="'badge ' + badgeCondicion(e.condicion)">{{ e.condicion }}</span></td>

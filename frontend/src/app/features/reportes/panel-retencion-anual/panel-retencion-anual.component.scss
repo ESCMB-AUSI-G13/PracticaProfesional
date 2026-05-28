@@ -1,0 +1,61 @@
+.page { padding: 1.5rem; max-width: 1100px; margin: 0 auto; }
+
+.page-header h1 { font-size: 1.4rem; font-weight: 600; color: #2c3e50; margin: 0 0 0.2rem; }
+.subtitulo { font-size: 0.85rem; color: #888; margin: 0 0 1.2rem; }
+
+/* Filtros */
+.filtros-panel { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem 1.2rem; margin-bottom: 1.4rem; }
+.filtros-panel h2 { font-size: 0.95rem; font-weight: 600; color: #555; margin: 0 0 0.8rem; }
+.filtros-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.8rem; margin-bottom: 0.8rem; }
+.campo label { display: block; font-size: 0.8rem; color: #666; margin-bottom: 0.3rem; }
+.campo select { width: 100%; padding: 0.45rem 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.88rem; }
+.filtros-acciones { display: flex; gap: 0.6rem; }
+
+.btn-primario { padding: 0.45rem 1rem; background: #3498db; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 0.88rem; }
+.btn-primario:hover:not(:disabled) { background: #2980b9; }
+.btn-primario:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-secundario { padding: 0.45rem 1rem; background: #fff; color: #555; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; font-size: 0.88rem; }
+.btn-secundario:hover { background: #f0f0f0; }
+
+.alerta-error { background: #fdecea; color: #c0392b; border: 1px solid #e74c3c; border-radius: 6px; padding: 0.7rem 1rem; margin-bottom: 1rem; font-size: 0.88rem; }
+
+/* Tabla */
+.tabla-seccion { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden; margin-bottom: 1.2rem; }
+.tabla-header-row { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem 1rem; border-bottom: 1px solid #e0e0e0; }
+.tabla-header-row h3 { font-size: 0.95rem; color: #444; margin: 0; }
+.umbral-hint { font-size: 0.78rem; color: #888; }
+.tabla-wrap { overflow-x: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+thead th { background: #f5f5f5; padding: 0.55rem 0.75rem; text-align: center; font-weight: 600; color: #444; border-bottom: 1px solid #e0e0e0; white-space: nowrap; }
+thead th:nth-child(1),
+thead th:nth-child(2) { text-align: left; }
+tbody td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #f0f0f0; color: #333; vertical-align: middle; text-align: center; }
+tbody td:nth-child(1),
+tbody td:nth-child(2) { text-align: left; }
+tbody tr:hover { background: #fafafa; }
+.td-carrera { font-size: 0.8rem; color: #666; max-width: 220px; }
+.td-total { font-weight: 600; color: #555; }
+.td-tasa { min-width: 70px; }
+
+/* Badges de tasa */
+.badge-tasa {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.badge-verde   { background: #eafaf1; color: #1e8449; }
+.badge-naranja { background: #fef9e7; color: #b7770d; }
+.badge-rojo    { background: #fdecea; color: #c0392b; }
+.badge-sin-dato { background: #f5f5f5; color: #aaa; }
+
+/* Análisis de Retención */
+.analisis-seccion { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 1rem 1.2rem; }
+.analisis-seccion h3 { font-size: 0.95rem; color: #444; margin: 0 0 0.8rem; }
+.analisis-grid { display: flex; flex-direction: column; gap: 0.5rem; }
+.analisis-fila { display: flex; justify-content: space-between; align-items: center; padding: 0.4rem 0.6rem; background: #f8f9fa; border-radius: 4px; }
+.analisis-label { font-size: 0.85rem; color: #555; }
+
+.sin-resultados { text-align: center; padding: 2rem; color: #888; font-size: 0.9rem; }

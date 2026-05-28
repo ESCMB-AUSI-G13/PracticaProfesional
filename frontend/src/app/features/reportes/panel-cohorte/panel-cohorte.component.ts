@@ -1,7 +1,12 @@
-import { Component, OnInit, OnDestroy, ElementRef, ViewChild, signal, Injector, effect, afterNextRender } from '@angular/core';
+import { Component, OnInit, OnDestroy, ElementRef, ViewChild, signal, computed, Injector, effect, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ReportesService, ReporteRetencionCohorte } from '../reportes.service';
+import {
+  ReportesService,
+  ReporteRetencionCohorte,
+  ReporteRetencionAnual,
+  CohorteRetencionAnual,
+} from '../reportes.service';
 import { CarrerasService, Carrera } from '../../carreras/carreras.service';
 import {
   Chart,
@@ -40,10 +45,18 @@ export class PanelCohorteComponent implements OnInit, OnDestroy {
   aniosDisponibles = signal<Set<number>>(new Set());
 
   // Estado
-  reporte  = signal<ReporteRetencionCohorte | null>(null);
+  reporte      = signal<ReporteRetencionCohorte | null>(null);
+  reporteAnual = signal<ReporteRetencionAnual | null>(null);
   cargando = signal(false);
   error    = signal<string | null>(null);
   buscado  = signal(false);
+
+  // Columnas dinámicas para la tabla de retención anual
+  columnas = computed<number[]>(() => {
+    const r = this.reporteAnual();
+    if (!r) return [];
+    return Array.from({ length: r.maxAnios }, (_, i) => i + 1);
+  });
 
   constructor(
     private injector: Injector,
@@ -82,6 +95,7 @@ export class PanelCohorteComponent implements OnInit, OnDestroy {
     this.cargando.set(true);
     this.error.set(null);
     this.buscado.set(true);
+    this.reporteAnual.set(null); // forzar re-fetch con los filtros actuales
 
     this.reportesService.obtenerRetencionCohorte(
       this.carreraId()   ?? undefined,
@@ -91,12 +105,32 @@ export class PanelCohorteComponent implements OnInit, OnDestroy {
         this.reporte.set(data);
         this.cargando.set(false);
         afterNextRender(() => this.renderBarras(), { injector: this.injector });
+        if (this.tabActiva() === 'anual') {
+          this.cambiarTab('anual');
+        }
       },
       error: () => {
         this.error.set('Error al generar el reporte. Intentá nuevamente.');
         this.cargando.set(false);
       }
     });
+  }
+
+  tabActiva    = signal<'cohorte' | 'anual'>('cohorte');
+  cargandoAnual = signal(false);
+
+  cambiarTab(tab: 'cohorte' | 'anual'): void {
+    this.tabActiva.set(tab);
+    if (tab === 'anual' && !this.reporteAnual()) {
+      this.cargandoAnual.set(true);
+      this.reportesService.obtenerRetencionAnual(
+        this.carreraId()   ?? undefined,
+        this.anioCohorte() ?? undefined,
+      ).subscribe({
+        next:  data => { this.reporteAnual.set(data); this.cargandoAnual.set(false); },
+        error: ()   => this.cargandoAnual.set(false)
+      });
+    }
   }
 
   private renderBarras(): void {
@@ -166,9 +200,31 @@ export class PanelCohorteComponent implements OnInit, OnDestroy {
     this.carreraId.set(null);
     this.anioCohorte.set(null);
     this.reporte.set(null);
+    this.reporteAnual.set(null);
+    this.tabActiva.set('cohorte');
+    this.cargandoAnual.set(false);
     this.buscado.set(false);
     this.error.set(null);
     this.barrasChart?.destroy();
     this.barrasChart = null;
+  }
+
+  getTasaAnual(cohorte: CohorteRetencionAnual, anioOrdinal: number): number | null {
+    const val = cohorte.tasasPorAnio[anioOrdinal];
+    return val !== undefined ? val : null;
+  }
+
+  badgeTasa(tasa: number | null, umbral: number): string {
+    if (tasa === null) return 'badge-sin-dato';
+    if (tasa >= umbral)      return 'badge-verde';
+    if (tasa >= umbral - 10) return 'badge-naranja';
+    return 'badge-rojo';
+  }
+
+  promedioOrdinal(anioOrdinal: number): number | null {
+    const r = this.reporteAnual();
+    if (!r) return null;
+    const val = r.promediosPorAnio[anioOrdinal];
+    return val !== undefined ? val : null;
   }
 }

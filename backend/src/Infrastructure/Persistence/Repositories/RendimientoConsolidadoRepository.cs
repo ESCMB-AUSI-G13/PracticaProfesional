@@ -399,6 +399,88 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // RR-12: Retención por año de cursada — datos crudos (estudiante × año historial)
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<List<DatosRetencionAnualRawDto>> ObtenerDatosRetencionAnualAsync(
+        int? carreraId, int? anioCohorte, CancellationToken ct = default)
+    {
+        var estudiantesQuery = db.Estudiantes.AsQueryable();
+
+        if (carreraId.HasValue)
+            estudiantesQuery = estudiantesQuery.Where(e => e.CarreraId == carreraId.Value);
+
+        if (anioCohorte.HasValue)
+            estudiantesQuery = estudiantesQuery.Where(e => e.FechaDeIngreso.Year == anioCohorte.Value);
+
+        // Paso 1: obtener todos los estudiantes con su cohorte y carrera
+        var estudiantes = await estudiantesQuery
+            .Select(e => new
+            {
+                e.Id,
+                AnioCohorte  = e.FechaDeIngreso.Year,
+                Carrera      = e.Carrera.Nombre,
+                EsDesertor   = e.Condicion == CondicionEstudiante.Desertor
+            })
+            .ToListAsync(ct);
+
+        if (estudiantes.Count == 0)
+            return [];
+
+        var ids = estudiantes.Select(e => e.Id).ToList();
+
+        // Paso 2: pares (EstudianteId, Anio) distintos — unión de HistorialAcademico e InscripcionesMateria.
+        // Un alumno cuenta como "retenido" en el año Y si tiene cualquier registro en alguna de las dos tablas.
+        var desdeHistorial = await db.HistorialAcademico
+            .Where(h => ids.Contains(h.EstudianteId))
+            .Select(h => new { h.EstudianteId, h.Anio })
+            .ToListAsync(ct);
+
+        var desdeInscripciones = await db.InscripcionesMateria
+            .Where(im => ids.Contains(im.EstudianteId))
+            .Select(im => new { im.EstudianteId, Anio = im.Curso.Anio })
+            .ToListAsync(ct);
+
+        var aniosPorEstudiante = desdeHistorial
+            .Concat(desdeInscripciones)
+            .GroupBy(x => x.EstudianteId)
+            .ToDictionary(g => g.Key, g => g.Select(x => x.Anio).Distinct().ToList());
+
+        var historialLookup = aniosPorEstudiante;
+
+        // Paso 3: combinar — un registro por (estudiante × año historial)
+        var resultado = new List<DatosRetencionAnualRawDto>();
+
+        foreach (var e in estudiantes)
+        {
+            if (historialLookup.TryGetValue(e.Id, out var anios))
+            {
+                foreach (var anio in anios)
+                    resultado.Add(new DatosRetencionAnualRawDto
+                    {
+                        AnioCohorte   = e.AnioCohorte,
+                        Carrera       = e.Carrera,
+                        EstudianteId  = e.Id,
+                        AnioHistorial = anio,
+                        EsDesertor    = e.EsDesertor
+                    });
+            }
+            else
+            {
+                resultado.Add(new DatosRetencionAnualRawDto
+                {
+                    AnioCohorte   = e.AnioCohorte,
+                    Carrera       = e.Carrera,
+                    EstudianteId  = e.Id,
+                    AnioHistorial = -1,
+                    EsDesertor    = e.EsDesertor
+                });
+            }
+        }
+
+        return resultado;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Retención por cohorte — agrupado por año de ingreso y carrera
     // ─────────────────────────────────────────────────────────────────────────
     public async Task<List<DatosCohorteDto>> ObtenerDatosCohorteAsync(

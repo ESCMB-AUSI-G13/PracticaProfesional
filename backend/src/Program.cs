@@ -185,6 +185,7 @@ builder.Services.AddScoped<PromediosCatedraUseCase>();
 builder.Services.AddScoped<RiesgoAcademicoUseCase>();
 builder.Services.AddScoped<RetencionPorCohorteUseCase>();
 builder.Services.AddScoped<TableroEjecutivoUseCase>();
+builder.Services.AddScoped<RetencionAnualUseCase>();
 
 // Encuestas (CU-36/CU-40)
 builder.Services.AddScoped<IEncuestaRepository, EncuestaRepository>();
@@ -326,6 +327,7 @@ var app = builder.Build();
         await EstudiantesSeeder.SeedAsync(db, logger);
         await EstudiantesSeeder.FixNombresAsync(db, logger);
         await EstudiantesSeeder.PatchJustificacionesAsync(db, logger);
+        await HistorialAnteriorSeeder.SeedAsync(db, logger);
         await ExamenesSeeder.SeedAsync(db, logger);
         await NotasExamenesSeeder.SeedAsync(db, logger);
         await EncuestaSeeder.SeedAsync(db);

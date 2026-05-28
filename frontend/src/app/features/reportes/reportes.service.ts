@@ -198,6 +198,22 @@ export interface EvolucionCohorteResumen {
   desertores:  number;
 }
 
+// RR-12: Retención longitudinal por año de cursada
+export interface CohorteRetencionAnual {
+  anioCohorte:   number;
+  carrera:       string;
+  totalInicial:  number;
+  // clave = año ordinal (1..5), valor = tasa 0-100
+  tasasPorAnio:  Record<number, number>;
+}
+
+export interface ReporteRetencionAnual {
+  cohortes:         CohorteRetencionAnual[];
+  promediosPorAnio: Record<number, number>;
+  maxAnios:         number;
+  umbralAlerta:     number;
+}
+
 export interface TableroEjecutivo {
   totalMatriculados:          number;
   totalEgresados:             number;
@@ -299,5 +315,13 @@ export class ReportesService {
     if (carreraId)    params['carreraId']    = String(carreraId);
     if (anioCohorte)  params['anioCohorte']  = String(anioCohorte);
     return this.http.get<ReporteRetencionCohorte>(`${this.apiUrl}/retencion-cohorte`, { params });
+  }
+
+  /** RR-12: Retención longitudinal por año de cursada (Año 1..5 por cohorte). */
+  obtenerRetencionAnual(carreraId?: number, anioCohorte?: number): Observable<ReporteRetencionAnual> {
+    const params: Record<string, string> = {};
+    if (carreraId)   params['carreraId']   = String(carreraId);
+    if (anioCohorte) params['anioCohorte'] = String(anioCohorte);
+    return this.http.get<ReporteRetencionAnual>(`${this.apiUrl}/retencion-anual`, { params });
   }
 }

@@ -15,7 +15,8 @@ namespace PracticaProfesional.Controllers;
 public class ReportesCohorteController(
     RiesgoAcademicoUseCase      riesgoUseCase,
     RetencionPorCohorteUseCase  retencionUseCase,
-    TableroEjecutivoUseCase     tableroUseCase) : ControllerBase
+    TableroEjecutivoUseCase     tableroUseCase,
+    RetencionAnualUseCase       retencionAnualUseCase) : ControllerBase
 {
     /// <summary>
     /// Tablero ejecutivo institucional — métricas globales para Dirección (RR-01).
@@ -73,6 +74,22 @@ public class ReportesCohorteController(
     {
         var filtro    = new FiltroRetencionCohorteDto(carreraId, anioCohorte);
         var resultado = await retencionUseCase.EjecutarAsync(filtro, cancellationToken);
+        return Ok(resultado);
+    }
+
+    /// <summary>
+    /// Retención longitudinal por año de cursada (RR-12).
+    /// Muestra qué % de cada cohorte continuó en Año 2, Año 3, Año 4, Año 5.
+    /// GET api/reportes/retencion-anual?carreraId=1&amp;anioCohorte=2022
+    /// </summary>
+    [HttpGet("retencion-anual")]
+    [ProducesResponseType(typeof(ReporteRetencionAnualDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> RetencionAnual(
+        [FromQuery] int?  carreraId,
+        [FromQuery] int?  anioCohorte,
+        CancellationToken cancellationToken)
+    {
+        var resultado = await retencionAnualUseCase.EjecutarAsync(carreraId, anioCohorte, cancellationToken);
         return Ok(resultado);
     }
 }

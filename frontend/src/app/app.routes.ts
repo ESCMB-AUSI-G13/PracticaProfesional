@@ -375,6 +375,13 @@ export const routes: Routes = [
           import('./features/reportes/panel-cohorte/panel-cohorte.component')
             .then(m => m.PanelCohorteComponent)
       },
+      {
+        path: 'reportes/retencion-anual',
+        canActivate: [roleGuard('Direccion')],
+        loadComponent: () =>
+          import('./features/reportes/panel-retencion-anual/panel-retencion-anual.component')
+            .then(m => m.PanelRetencionAnualComponent)
+      },
     ]
   },
 
