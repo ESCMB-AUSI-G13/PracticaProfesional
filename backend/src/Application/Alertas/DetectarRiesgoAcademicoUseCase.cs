@@ -25,7 +25,7 @@ public class DetectarRiesgoAcademicoUseCase(
         int emailsEnviados = 0;
 
         var estudiantes = await estudianteRepo.ListarAsync(cancellationToken);
-        var estudiantesActivos = estudiantes.Where(e => e.Usuario?.Activo == true).ToList();
+        var estudiantesActivos = estudiantes.Where(e => e.Activo).ToList();
 
         var preceptores = await preceptorRepo.ListarAsync(cancellationToken);
         var usuariosDireccion = await usuarioRepo.ListarAsync(Rol.Direccion, cancellationToken);
@@ -50,14 +50,14 @@ public class DetectarRiesgoAcademicoUseCase(
                     estudiante.Id, TipoAlerta.RiesgoAsistencia, cancellationToken);
                 if (yaNotificado) continue;
 
-                var nombreEstudiante = $"{estudiante.Usuario!.Nombre} {estudiante.Usuario.Apellido}";
+                var nombreEstudiante = $"{estudiante.Nombre} {estudiante.Apellido}";
                 var materia = inscripcion.Materia?.Nombre ?? $"Materia #{inscripcion.MateriaId}";
                 int pct = (int)Math.Round(porcentajeAusencia * 100);
                 var mensaje = $"Riesgo de asistencia en {materia}: {ausentesInjustificados}/{total} ausencias injustificadas ({pct}%).";
                 var titulo = "Alerta: riesgo de pérdida de regularidad";
                 var detalle = $"{nombreEstudiante} — {mensaje}";
 
-                var alerta = Alerta.Crear(TipoAlerta.RiesgoAsistencia, estudiante.Usuario.Email, mensaje, estudiante.Id);
+                var alerta = Alerta.Crear(TipoAlerta.RiesgoAsistencia, estudiante.Email, mensaje, estudiante.Id);
                 await alertaRepo.AgregarAsync(alerta, cancellationToken);
                 alertasGeneradas++;
                 detalles.Add(detalle);
@@ -69,7 +69,7 @@ public class DetectarRiesgoAcademicoUseCase(
 
                 // Notificaciones internas a preceptores y dirección
                 var mensajeInterno = $"{nombreEstudiante}: {mensaje}";
-                foreach (var preceptor in preceptores.Where(p => p.Usuario?.Activo == true))
+                foreach (var preceptor in preceptores.Where(p => p.Activo))
                     await notificacionRepo.AgregarAsync(
                         Notificacion.Crear(preceptor.UsuarioId, titulo, mensajeInterno, TipoAlerta.RiesgoAsistencia),
                         cancellationToken);
@@ -81,17 +81,17 @@ public class DetectarRiesgoAcademicoUseCase(
 
                 // Emails
                 if (await EnviarEmailAsync(() => emailService.EnviarAlertaRiesgoAcademicoAsync(
-                        estudiante.Usuario.Email, nombreEstudiante,
+                        estudiante.Email, nombreEstudiante,
                         "Riesgo de pérdida de regularidad", mensaje, cancellationToken), detalles))
                 {
                     alerta.MarcarEnviada();
                     emailsEnviados++;
                 }
 
-                foreach (var preceptor in preceptores.Where(p => p.Usuario?.Activo == true))
+                foreach (var preceptor in preceptores.Where(p => p.Activo))
                     if (await EnviarEmailAsync(() => emailService.EnviarAlertaRiesgoAcademicoAsync(
-                            preceptor.Usuario!.Email,
-                            $"{preceptor.Usuario.Nombre} {preceptor.Usuario.Apellido}",
+                            preceptor.Email,
+                            $"{preceptor.Nombre} {preceptor.Apellido}",
                             "Alerta de riesgo académico — estudiante a cargo",
                             detalle, cancellationToken), detalles))
                         emailsEnviados++;
@@ -115,7 +115,7 @@ public class DetectarRiesgoAcademicoUseCase(
                 (DateTime.UtcNow.Date - ultimaActividad.Value.Date).TotalDays > DiasInactividad;
             if (!sinActividad) continue;
 
-            var nombreEst = $"{estudiante.Usuario!.Nombre} {estudiante.Usuario.Apellido}";
+            var nombreEst = $"{estudiante.Nombre} {estudiante.Apellido}";
             var mensajeInactividad = ultimaActividad == null
                 ? "No se registra asistencia desde el inicio del año lectivo."
                 : $"Sin actividad desde el {ultimaActividad.Value:dd/MM/yyyy} (más de {DiasInactividad} días).";
@@ -123,7 +123,7 @@ public class DetectarRiesgoAcademicoUseCase(
             var detalleInactividad = $"{nombreEst} — {mensajeInactividad}";
 
             var alertaInactividad = Alerta.Crear(
-                TipoAlerta.RiesgoInactividad, estudiante.Usuario.Email, mensajeInactividad, estudiante.Id);
+                TipoAlerta.RiesgoInactividad, estudiante.Email, mensajeInactividad, estudiante.Id);
             await alertaRepo.AgregarAsync(alertaInactividad, cancellationToken);
             alertasGeneradas++;
             detalles.Add(detalleInactividad);
@@ -133,7 +133,7 @@ public class DetectarRiesgoAcademicoUseCase(
                 cancellationToken);
 
             var mensajeInternoInact = $"{nombreEst}: {mensajeInactividad}";
-            foreach (var preceptor in preceptores.Where(p => p.Usuario?.Activo == true))
+            foreach (var preceptor in preceptores.Where(p => p.Activo))
                 await notificacionRepo.AgregarAsync(
                     Notificacion.Crear(preceptor.UsuarioId, tituloInactividad, mensajeInternoInact, TipoAlerta.RiesgoInactividad),
                     cancellationToken);
@@ -144,17 +144,17 @@ public class DetectarRiesgoAcademicoUseCase(
                     cancellationToken);
 
             if (await EnviarEmailAsync(() => emailService.EnviarAlertaRiesgoAcademicoAsync(
-                    estudiante.Usuario.Email, nombreEst,
+                    estudiante.Email, nombreEst,
                     "Alerta de inactividad académica", mensajeInactividad, cancellationToken), detalles))
             {
                 alertaInactividad.MarcarEnviada();
                 emailsEnviados++;
             }
 
-            foreach (var preceptor in preceptores.Where(p => p.Usuario?.Activo == true))
+            foreach (var preceptor in preceptores.Where(p => p.Activo))
                 if (await EnviarEmailAsync(() => emailService.EnviarAlertaRiesgoAcademicoAsync(
-                        preceptor.Usuario!.Email,
-                        $"{preceptor.Usuario.Nombre} {preceptor.Usuario.Apellido}",
+                        preceptor.Email,
+                        $"{preceptor.Nombre} {preceptor.Apellido}",
                         "Alerta de inactividad — estudiante a cargo",
                         detalleInactividad, cancellationToken), detalles))
                     emailsEnviados++;

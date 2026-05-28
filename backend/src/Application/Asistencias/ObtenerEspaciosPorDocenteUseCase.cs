@@ -21,8 +21,8 @@ public class ObtenerEspaciosPorDocenteUseCase(
             EspacioCurricularId: ec.Id,
             CursoId: ec.CursoId,
             MateriaId: ec.MateriaId,
-            MateriaNombre: ec.Materia.Nombre,
-            AnioLectivo: ec.Curso.AnioLectivo,
-            Comision: ec.Curso.Comision));
+            MateriaNombre: ec.MateriaNombre,
+            AnioLectivo: ec.CursoAnioLectivo,
+            Comision: ec.CursoComision));
     }
 }

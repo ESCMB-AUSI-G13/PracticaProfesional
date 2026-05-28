@@ -19,7 +19,7 @@ public class CalendarioAcademicoRepository(AppDbContext context) : ICalendarioAc
     public async Task<IEnumerable<CalendarioAcademico>> ListarAsync(
         int? anio = null, CancellationToken cancellationToken = default)
     {
-        var query = context.CalendarioAcademico.AsQueryable();
+        var query = context.CalendarioAcademico.AsNoTracking().AsQueryable();
         if (anio.HasValue)
             query = query.Where(e => e.FechaInicio.Year == anio || e.FechaFin.Year == anio);
         return await query.OrderBy(e => e.FechaInicio).ToListAsync(cancellationToken);
@@ -49,6 +49,7 @@ public class CalendarioAcademicoRepository(AppDbContext context) : ICalendarioAc
     public async Task<IEnumerable<CalendarioAcademico>> ObtenerProximosAsync(
         DateTime desde, DateTime hasta, CancellationToken cancellationToken = default)
         => await context.CalendarioAcademico
+            .AsNoTracking()
             .Include(e => e.Materia)
             .Include(e => e.Curso)
             .Where(e => e.FechaFin.Date >= desde.Date && e.FechaFin.Date <= hasta.Date)

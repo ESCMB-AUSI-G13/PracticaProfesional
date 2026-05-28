@@ -1,22 +1,25 @@
 using Microsoft.EntityFrameworkCore;
 using PracticaProfesional.Application.Interfaces;
+using PracticaProfesional.Application.Materias.DTOs;
 using PracticaProfesional.Domain.Entities;
 
 namespace PracticaProfesional.Infrastructure.Persistence.Repositories;
 
 public class MateriaRepository(AppDbContext context) : IMateriaRepository
 {
-    public async Task<IEnumerable<Materia>> ListarAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<MateriaDto>> ListarAsync(CancellationToken cancellationToken = default)
         => await context.Materias
-            .Include(m => m.Carrera)
+            .AsNoTracking()
             .OrderBy(m => m.Carrera.Nombre).ThenBy(m => m.Nombre)
+            .Select(m => new MateriaDto(m.Id, m.Codigo, m.Nombre, m.CarreraId, m.Carrera.Nombre, m.Anio))
             .ToListAsync(cancellationToken);
 
-    public async Task<IEnumerable<Materia>> ListarPorCarreraIdAsync(int carreraId, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<MateriaDto>> ListarPorCarreraIdAsync(int carreraId, CancellationToken cancellationToken = default)
         => await context.Materias
-            .Include(m => m.Carrera)
+            .AsNoTracking()
             .Where(m => m.CarreraId == carreraId)
             .OrderBy(m => m.Nombre)
+            .Select(m => new MateriaDto(m.Id, m.Codigo, m.Nombre, m.CarreraId, m.Carrera.Nombre, m.Anio))
             .ToListAsync(cancellationToken);
 
     public async Task<Materia?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default)

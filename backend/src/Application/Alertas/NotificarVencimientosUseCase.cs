@@ -78,14 +78,14 @@ public class NotificarVencimientosUseCase(
             if (evento.TipoEvento is TipoEvento.InscripcionMateria or TipoEvento.InscripcionExamen
                 or TipoEvento.FechaLimiteCargaNotas)
             {
-                foreach (var preceptor in preceptores.Where(p => p.Usuario?.Activo == true))
+                foreach (var preceptor in preceptores.Where(p => p.Activo))
                 {
-                    var emailP = preceptor.Usuario!.Email;
+                    var emailP = preceptor.Email;
                     bool yaEnviado = await alertaRepo.ExisteAlertaVencimientoHoyAsync(
                         evento.Id, emailP, cancellationToken);
                     if (yaEnviado) continue;
 
-                    var nombreP = $"{preceptor.Usuario.Nombre} {preceptor.Usuario.Apellido}";
+                    var nombreP = $"{preceptor.Nombre} {preceptor.Apellido}";
                     var alerta = Alerta.Crear(tipoAlerta, emailP, evento.NombreEvento, calendarioAcademicoId: evento.Id);
                     await alertaRepo.AgregarAsync(alerta, cancellationToken);
                     alertasGeneradas++;

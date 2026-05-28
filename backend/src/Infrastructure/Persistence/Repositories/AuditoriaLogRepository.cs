@@ -17,7 +17,7 @@ public class AuditoriaLogRepository(AppDbContext context) : IAuditoriaLogReposit
         AuditoriaLogFiltroDto filtro,
         CancellationToken cancellationToken = default)
     {
-        var query = context.AuditoriaLogs.AsQueryable();
+        var query = context.AuditoriaLogs.AsNoTracking().AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(filtro.EntidadTipo))
             query = query.Where(l => l.EntidadTipo == filtro.EntidadTipo);
@@ -50,6 +50,7 @@ public class AuditoriaLogRepository(AppDbContext context) : IAuditoriaLogReposit
         string entidadId,
         CancellationToken cancellationToken = default)
         => await context.AuditoriaLogs
+            .AsNoTracking()
             .Where(l => l.EntidadTipo == entidadTipo && l.EntidadId == entidadId)
             .OrderByDescending(l => l.Timestamp)
             .ToListAsync(cancellationToken);

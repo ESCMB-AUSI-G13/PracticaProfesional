@@ -32,7 +32,7 @@ public class ListarFinalesDisponiblesUseCase(
         var finales = todosExamenes
             .Where(e =>
                 materiaIds.Contains(e.MateriaId) &&
-                e.TipoExamen == TipoExamen.Final &&
+                e.TipoExamen == nameof(TipoExamen.Final) &&
                 e.FechaExamen >= DateTime.UtcNow.Date)
             .ToList();
 
@@ -46,12 +46,12 @@ public class ListarFinalesDisponiblesUseCase(
         return finales.Select(e => new ExamenFinalDisponibleDto(
             e.Id,
             e.MateriaId,
-            e.Materia?.Nombre ?? string.Empty,
-            e.Materia?.Codigo ?? string.Empty,
+            e.MateriaNombre,
+            e.MateriaCodigo,
             e.FechaExamen.ToString("yyyy-MM-dd"),
             e.Horario,
             e.Cupo,
-            e.TipoExamen.ToString(),
+            e.TipoExamen,
             yaInscriptoIds.Contains(e.Id)
         ));
     }

@@ -37,10 +37,9 @@ public class ListarEncuestasDocenteUseCase(
         var espacios = await espacioRepo.ListarPorDocenteIdAsync(docente.Id, ct);
 
         return espacios
-            .Select(e => e.Materia)
-            .DistinctBy(m => m.Id)
-            .OrderBy(m => m.Nombre)
-            .Select(m => new MateriaEncuestaDto(m.Id, m.Nombre, m.Codigo))
+            .DistinctBy(e => e.MateriaId)
+            .OrderBy(e => e.MateriaNombre)
+            .Select(e => new MateriaEncuestaDto(e.MateriaId, e.MateriaNombre, e.MateriaCodigo))
             .ToList();
     }
 

@@ -20,6 +20,7 @@ public class InscripcionExamenRepository(AppDbContext context) : IInscripcionExa
         int examenId,
         CancellationToken cancellationToken = default)
         => await context.InscripcionesExamen
+            .AsNoTracking()
             .Include(i => i.Estudiante)
                 .ThenInclude(e => e.Usuario)
             .Include(i => i.Examen)
@@ -47,6 +48,7 @@ public class InscripcionExamenRepository(AppDbContext context) : IInscripcionExa
 
     public async Task<IEnumerable<InscripcionExamen>> ListarPorEstudianteAsync(int estudianteId, CancellationToken cancellationToken = default)
         => await context.InscripcionesExamen
+            .AsNoTracking()
             .Include(i => i.Examen).ThenInclude(e => e.Materia)
             .Where(i => i.EstudianteId == estudianteId)
             .OrderByDescending(i => i.Examen.FechaExamen)

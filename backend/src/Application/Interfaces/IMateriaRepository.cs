@@ -1,11 +1,12 @@
+using PracticaProfesional.Application.Materias.DTOs;
 using PracticaProfesional.Domain.Entities;
 
 namespace PracticaProfesional.Application.Interfaces;
 
 public interface IMateriaRepository
 {
-    Task<IEnumerable<Materia>> ListarAsync(CancellationToken cancellationToken = default);
-    Task<IEnumerable<Materia>> ListarPorCarreraIdAsync(int carreraId, CancellationToken cancellationToken = default);
+    Task<IEnumerable<MateriaDto>> ListarAsync(CancellationToken cancellationToken = default);
+    Task<IEnumerable<MateriaDto>> ListarPorCarreraIdAsync(int carreraId, CancellationToken cancellationToken = default);
     Task<Materia?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default);
     Task<bool> ExistePorCodigoAsync(string codigo, CancellationToken cancellationToken = default);
     Task<bool> ExistePorCodigoExcluyendoAsync(string codigo, int excludeId, CancellationToken cancellationToken = default);

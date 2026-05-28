@@ -10,6 +10,7 @@ public class CorrelativiadadRepository(AppDbContext context) : ICorrelativiadadR
         int materiaDestinoId,
         CancellationToken cancellationToken = default)
         => await context.Correlatividades
+            .AsNoTracking()
             .Include(c => c.MateriaRequisito)
             .Where(c => c.MateriaDestinoId == materiaDestinoId && c.TipoRequerimiento == "Cursar")
             .ToListAsync(cancellationToken);
@@ -18,6 +19,7 @@ public class CorrelativiadadRepository(AppDbContext context) : ICorrelativiadadR
         int materiaDestinoId,
         CancellationToken cancellationToken = default)
         => await context.Correlatividades
+            .AsNoTracking()
             .Include(c => c.MateriaRequisito)
             .Where(c => c.MateriaDestinoId == materiaDestinoId && c.TipoRequerimiento == "Rendir")
             .ToListAsync(cancellationToken);
@@ -26,6 +28,7 @@ public class CorrelativiadadRepository(AppDbContext context) : ICorrelativiadadR
         string tipoRequerimiento,
         CancellationToken cancellationToken = default)
         => await context.Correlatividades
+            .AsNoTracking()
             .Where(c => c.TipoRequerimiento == tipoRequerimiento)
             .ToListAsync(cancellationToken);
 
@@ -39,6 +42,7 @@ public class CorrelativiadadRepository(AppDbContext context) : ICorrelativiadadR
         int materiaDestinoId,
         CancellationToken cancellationToken = default)
         => await context.Correlatividades
+            .AsNoTracking()
             .Include(c => c.MateriaRequisito)
             .Where(c => c.MateriaDestinoId == materiaDestinoId)
             .OrderBy(c => c.TipoRequerimiento)
