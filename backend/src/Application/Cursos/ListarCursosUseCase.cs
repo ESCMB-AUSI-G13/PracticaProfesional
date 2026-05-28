@@ -5,9 +5,6 @@ namespace PracticaProfesional.Application.Cursos;
 
 public class ListarCursosUseCase(ICursoRepository cursoRepository)
 {
-    public async Task<IEnumerable<CursoDto>> EjecutarAsync(CancellationToken cancellationToken = default)
-    {
-        var cursos = await cursoRepository.ListarAsync(cancellationToken);
-        return cursos.Select(c => CrearCursoUseCase.ToDto(c, c.Preceptor));
-    }
+    public Task<IEnumerable<CursoDto>> EjecutarAsync(CancellationToken cancellationToken = default)
+        => cursoRepository.ListarAsync(cancellationToken);
 }

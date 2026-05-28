@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using PracticaProfesional.Application.Examenes.DTOs;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Domain.Entities;
 using PracticaProfesional.Domain.Exceptions;
@@ -7,11 +8,22 @@ namespace PracticaProfesional.Infrastructure.Persistence.Repositories;
 
 public class ExamenRepository(AppDbContext db) : IExamenRepository
 {
-    public async Task<IEnumerable<Examen>> ListarAsync(CancellationToken cancellationToken = default)
-        => await db.Examenes
-            .Include(e => e.Materia)
+    public async Task<IEnumerable<ExamenDto>> ListarAsync(CancellationToken cancellationToken = default)
+    {
+        var raw = await db.Examenes
+            .AsNoTracking()
             .OrderByDescending(e => e.FechaExamen)
+            .Select(e => new {
+                e.Id, e.MateriaId, e.FechaExamen, e.Horario, e.Cupo, e.TipoExamen,
+                MateriaNombre = e.Materia.Nombre,
+                MateriaCodigo = e.Materia.Codigo
+            })
             .ToListAsync(cancellationToken);
+
+        return raw.Select(e => new ExamenDto(
+            e.Id, e.MateriaId, e.MateriaNombre, e.MateriaCodigo, e.FechaExamen, e.Horario, e.Cupo,
+            e.TipoExamen.ToString()));
+    }
 
     public async Task<Examen?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default)
         => await db.Examenes

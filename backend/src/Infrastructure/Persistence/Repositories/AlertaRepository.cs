@@ -41,6 +41,7 @@ public class AlertaRepository(AppDbContext context) : IAlertaRepository
         CancellationToken cancellationToken = default)
     {
         var query = context.Alertas
+            .AsNoTracking()
             .Include(a => a.Estudiante).ThenInclude(e => e!.Usuario)
             .Include(a => a.CalendarioAcademico)
             .AsQueryable();

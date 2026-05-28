@@ -15,6 +15,7 @@ public class NotificacionRepository(AppDbContext context) : INotificacionReposit
     public async Task<IEnumerable<Notificacion>> ListarPorUsuarioAsync(
         int usuarioId, CancellationToken cancellationToken = default)
         => await context.Notificaciones
+            .AsNoTracking()
             .Where(n => n.UsuarioId == usuarioId)
             .OrderByDescending(n => n.FechaCreacion)
             .Take(50)

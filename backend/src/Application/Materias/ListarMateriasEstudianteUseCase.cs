@@ -15,7 +15,6 @@ public class ListarMateriasEstudianteUseCase(
         var estudiante = await estudianteRepository.ObtenerPorUsuarioIdAsync(usuarioId, cancellationToken)
             ?? throw new BusinessException($"No se encontró el perfil de estudiante para el usuario {usuarioId}.");
 
-        var materias = await materiaRepository.ListarPorCarreraIdAsync(estudiante.CarreraId, cancellationToken);
-        return materias.Select(CrearMateriaUseCase.ToDtoConNavegacion);
+        return await materiaRepository.ListarPorCarreraIdAsync(estudiante.CarreraId, cancellationToken);
     }
 }

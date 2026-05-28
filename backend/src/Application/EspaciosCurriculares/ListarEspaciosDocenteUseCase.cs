@@ -14,7 +14,6 @@ public class ListarEspaciosDocenteUseCase(
         var docente = await docenteRepository.ObtenerPorUsuarioIdAsync(usuarioId, cancellationToken)
             ?? throw new BusinessException("No se encontró el docente asociado al usuario.");
 
-        var espacios = await espacioRepository.ListarPorDocenteIdAsync(docente.Id, cancellationToken);
-        return espacios.Select(ec => CrearEspacioCurricularUseCase.ToDto(ec, ec.Materia, ec.Docente, ec.Curso));
+        return await espacioRepository.ListarPorDocenteIdAsync(docente.Id, cancellationToken);
     }
 }

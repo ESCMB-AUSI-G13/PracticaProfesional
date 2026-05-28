@@ -8,6 +8,7 @@ public class EncuestaRepository(AppDbContext db) : IEncuestaRepository
 {
     public Task<List<Encuesta>> ListarActivasAsync(CancellationToken ct = default)
         => db.Encuestas
+             .AsNoTracking()
              .Where(e => e.Activa)
              .Include(e => e.Preguntas.OrderBy(p => p.Orden))
              .OrderBy(e => e.CicloLectivo)
@@ -15,6 +16,7 @@ public class EncuestaRepository(AppDbContext db) : IEncuestaRepository
 
     public Task<List<Encuesta>> ListarTodasAsync(CancellationToken ct = default)
         => db.Encuestas
+             .AsNoTracking()
              .Include(e => e.Preguntas.OrderBy(p => p.Orden))
              .Include(e => e.Materia)
              .OrderByDescending(e => e.CicloLectivo)
@@ -61,6 +63,7 @@ public class EncuestaRepository(AppDbContext db) : IEncuestaRepository
     public Task<List<RespuestaEncuesta>> ObtenerRespuestasConItemsAsync(
         int encuestaId, CancellationToken ct = default)
         => db.RespuestasEncuesta
+             .AsNoTracking()
              .Where(r => r.EncuestaId == encuestaId)
              .Include(r => r.Items)
              .ToListAsync(ct);

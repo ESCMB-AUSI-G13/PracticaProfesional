@@ -16,7 +16,7 @@ public class UsuarioRepository(AppDbContext context) : IUsuarioRepository
 
     public async Task<IEnumerable<Usuario>> ListarAsync(Rol? rol = null, CancellationToken cancellationToken = default)
     {
-        var query = context.Usuarios.AsQueryable();
+        var query = context.Usuarios.AsNoTracking().AsQueryable();
         if (rol.HasValue)
             query = query.Where(u => u.Rol == rol.Value);
         return await query.OrderBy(u => u.Apellido).ThenBy(u => u.Nombre).ToListAsync(cancellationToken);

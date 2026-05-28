@@ -51,6 +51,7 @@ public class AsistenciaRepository(AppDbContext context) : IAsistenciaRepository
         CancellationToken cancellationToken = default)
     {
         var query = context.Asistencias
+            .AsNoTracking()
             .Include(a => a.Estudiante).ThenInclude(e => e.Usuario)
             .Include(a => a.Materia)
             .Include(a => a.Curso)
@@ -95,6 +96,7 @@ public class AsistenciaRepository(AppDbContext context) : IAsistenciaRepository
         int estudianteId,
         CancellationToken cancellationToken = default)
         => await context.Asistencias
+            .AsNoTracking()
             .Include(a => a.Materia)
             .Include(a => a.Curso)
             .Where(a => a.EstudianteId == estudianteId)
@@ -125,6 +127,7 @@ public class AsistenciaRepository(AppDbContext context) : IAsistenciaRepository
         DateTime fecha,
         CancellationToken cancellationToken = default)
         => await context.Asistencias
+            .AsNoTracking()
             .Include(a => a.Estudiante).ThenInclude(e => e.Usuario)
             .Where(a => a.CursoId == cursoId && a.MateriaId == materiaId && a.Fecha == fecha.Date)
             .OrderBy(a => a.Estudiante.Usuario.Apellido)

@@ -49,9 +49,9 @@ public class CrearExamenUseCase(
             valorNuevo: new { examen.MateriaId, examen.FechaExamen, examen.TipoExamen, examen.Cupo },
             cancellationToken: cancellationToken);
 
-        return ToDto(examen, materia.Nombre);
+        return ToDto(examen, materia.Nombre, materia.Codigo);
     }
 
-    internal static ExamenDto ToDto(Examen e, string materiaNombre) => new(
-        e.Id, e.MateriaId, materiaNombre, e.FechaExamen, e.Horario, e.Cupo, e.TipoExamen.ToString());
+    internal static ExamenDto ToDto(Examen e, string materiaNombre, string materiaCodigo) => new(
+        e.Id, e.MateriaId, materiaNombre, materiaCodigo, e.FechaExamen, e.Horario, e.Cupo, e.TipoExamen.ToString());
 }
