@@ -25,6 +25,7 @@ export class ControlLegajoComponent implements OnInit, OnDestroy {
   resultado            = signal<ControlLegajo | null>(null);
   cargando             = signal(false);
   error                = signal<string | null>(null);
+  descargando          = signal(false);
 
   sugerencias = computed(() => {
     const q = this.busquedaTexto().trim().toLowerCase();
@@ -175,5 +176,23 @@ export class ControlLegajoComponent implements OnInit, OnDestroy {
       'desertor':    '✗ Desertor',
     };
     return map[condicion.toLowerCase()] ?? condicion;
+  }
+
+  descargarPdf(): void {
+    const legajo = this.resultado()?.legajo;
+    if (!legajo) return;
+    this.descargando.set(true);
+    this.reportesService.descargarControlLegajoPdf(legajo).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `control-legajo-${legajo}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.descargando.set(false);
+      },
+      error: () => this.descargando.set(false),
+    });
   }
 }

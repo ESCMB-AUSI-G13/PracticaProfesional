@@ -324,4 +324,72 @@ export class ReportesService {
     if (anioCohorte) params['anioCohorte'] = String(anioCohorte);
     return this.http.get<ReporteRetencionAnual>(`${this.apiUrl}/retencion-anual`, { params });
   }
+
+  // ── Descargas PDF ─────────────────────────────────────────────────────────────
+
+  descargarTableroEjecutivoPdf(): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/tablero-ejecutivo/pdf`, { responseType: 'blob' });
+  }
+
+  descargarRiesgoAcademicoPdf(anioCohorte?: number, carreraId?: number, nivelRiesgo?: string): Observable<Blob> {
+    const params: Record<string, string> = {};
+    if (anioCohorte) params['anioCohorte'] = String(anioCohorte);
+    if (carreraId)   params['carreraId']   = String(carreraId);
+    if (nivelRiesgo) params['nivelRiesgo'] = nivelRiesgo;
+    return this.http.get(`${this.apiUrl}/riesgo-academico/pdf`, { params, responseType: 'blob' });
+  }
+
+  descargarRetencionCohortePdf(carreraId?: number, anioCohorte?: number): Observable<Blob> {
+    const params: Record<string, string> = {};
+    if (carreraId)   params['carreraId']   = String(carreraId);
+    if (anioCohorte) params['anioCohorte'] = String(anioCohorte);
+    return this.http.get(`${this.apiUrl}/retencion-cohorte/pdf`, { params, responseType: 'blob' });
+  }
+
+  descargarInasistenciasPdf(filtro: FiltroInasistencias): Observable<Blob> {
+    return this.http.post(`${this.apiUrl}/inasistencias/pdf`, filtro, { responseType: 'blob' });
+  }
+
+  descargarPromediosCatedraPdf(anio?: number, cursoId?: number): Observable<Blob> {
+    const params: Record<string, string> = {};
+    if (anio)    params['anio']    = String(anio);
+    if (cursoId) params['cursoId'] = String(cursoId);
+    return this.http.get(`${this.apiUrl}/rendimiento/catedras/pdf`, { params, responseType: 'blob' });
+  }
+
+  descargarComparativoComisionesPdf(materiaId?: number, anio?: number): Observable<Blob> {
+    const params: Record<string, string> = {};
+    if (materiaId) params['materiaId'] = String(materiaId);
+    if (anio)      params['anio']      = String(anio);
+    return this.http.get(`${this.apiUrl}/rendimiento/comisiones/pdf`, { params, responseType: 'blob' });
+  }
+
+  descargarControlLegajoPdf(legajo: string): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/control-legajo/${encodeURIComponent(legajo)}/pdf`, { responseType: 'blob' });
+  }
+
+  descargarEvolucionNotasPdf(
+    materiaId?:    number,
+    anio?:         number,
+    cuatrimestre?: number,
+    anioCarrera?:  number,
+    tipoExamen?:   number,
+    granularidad:  'mensual' | 'cuatrimestral' | 'anual' = 'mensual',
+  ): Observable<Blob> {
+    const params: Record<string, string> = {};
+    if (materiaId)    params['materiaId']    = String(materiaId);
+    if (anio)         params['anio']         = String(anio);
+    if (cuatrimestre) params['cuatrimestre'] = String(cuatrimestre);
+    if (anioCarrera)  params['anioCarrera']  = String(anioCarrera);
+    if (tipoExamen)   params['tipoExamen']   = String(tipoExamen);
+    params['granularidad'] = granularidad;
+    return this.http.get(`${this.apiUrl}/rendimiento/evolucion/pdf`, { params, responseType: 'blob' });
+  }
+
+  descargarRetencionAnualPdf(carreraId?: number, anioCohorte?: number): Observable<Blob> {
+    const params: Record<string, string> = {};
+    if (carreraId)   params['carreraId']   = String(carreraId);
+    if (anioCohorte) params['anioCohorte'] = String(anioCohorte);
+    return this.http.get(`${this.apiUrl}/retencion-anual/pdf`, { params, responseType: 'blob' });
+  }
 }

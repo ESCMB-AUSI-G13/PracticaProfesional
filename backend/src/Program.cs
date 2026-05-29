@@ -37,7 +37,11 @@ using PracticaProfesional.Infrastructure.Sesiones;
 using PracticaProfesional.Infrastructure.Email;
 using PracticaProfesional.Infrastructure.Persistence;
 using PracticaProfesional.Domain.Exceptions;
+using PracticaProfesional.Infrastructure.Pdf;
 using Microsoft.AspNetCore.Mvc;
+using QuestPDF.Infrastructure;
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -186,6 +190,9 @@ builder.Services.AddScoped<RiesgoAcademicoUseCase>();
 builder.Services.AddScoped<RetencionPorCohorteUseCase>();
 builder.Services.AddScoped<TableroEjecutivoUseCase>();
 builder.Services.AddScoped<RetencionAnualUseCase>();
+
+// PDF
+builder.Services.AddSingleton<PdfReporteService>();
 
 // Encuestas (CU-36/CU-40)
 builder.Services.AddScoped<IEncuestaRepository, EncuestaRepository>();

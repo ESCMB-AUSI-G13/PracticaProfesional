@@ -22,10 +22,11 @@ export class PanelCatedrasComponent implements OnInit, OnDestroy {
   anio    = signal<number | null>(null);
   cursoId = signal<number | null>(null);
 
-  reporte  = signal<ReportePromediosCatedra | null>(null);
-  cargando = signal(false);
-  error    = signal<string | null>(null);
-  buscado  = signal(false);
+  reporte     = signal<ReportePromediosCatedra | null>(null);
+  cargando    = signal(false);
+  error       = signal<string | null>(null);
+  buscado     = signal(false);
+  descargando = signal(false);
 
   promedioGlobal = computed(() => {
     const catedras = this.reporte()?.catedras ?? [];
@@ -137,4 +138,23 @@ export class PanelCatedrasComponent implements OnInit, OnDestroy {
   }
 
   irAlDashboard(): void { this.router.navigate(['/dashboard']); }
+
+  descargarPdf(): void {
+    this.descargando.set(true);
+    this.reportesService.descargarPromediosCatedraPdf(
+      this.anio()    ?? undefined,
+      this.cursoId() ?? undefined,
+    ).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'promedios-catedra.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+        this.descargando.set(false);
+      },
+      error: () => this.descargando.set(false),
+    });
+  }
 }

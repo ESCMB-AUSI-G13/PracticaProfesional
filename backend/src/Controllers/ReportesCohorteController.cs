@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PracticaProfesional.Application.Reportes;
 using PracticaProfesional.Application.Reportes.DTOs;
+using PracticaProfesional.Infrastructure.Pdf;
 
 namespace PracticaProfesional.Controllers;
 
@@ -16,7 +17,8 @@ public class ReportesCohorteController(
     RiesgoAcademicoUseCase      riesgoUseCase,
     RetencionPorCohorteUseCase  retencionUseCase,
     TableroEjecutivoUseCase     tableroUseCase,
-    RetencionAnualUseCase       retencionAnualUseCase) : ControllerBase
+    RetencionAnualUseCase       retencionAnualUseCase,
+    PdfReporteService           pdfService) : ControllerBase
 {
     /// <summary>
     /// Tablero ejecutivo institucional — métricas globales para Dirección (RR-01).
@@ -91,5 +93,55 @@ public class ReportesCohorteController(
     {
         var resultado = await retencionAnualUseCase.EjecutarAsync(carreraId, anioCohorte, cancellationToken);
         return Ok(resultado);
+    }
+
+    // ── Endpoints PDF ────────────────────────────────────────────────────────────
+
+    /// <summary>GET api/reportes/tablero-ejecutivo/pdf</summary>
+    [HttpGet("tablero-ejecutivo/pdf")]
+    public async Task<IActionResult> TableroEjecutivoPdf(CancellationToken cancellationToken)
+    {
+        var data = await tableroUseCase.EjecutarAsync(cancellationToken);
+        var pdf  = pdfService.GenerarTableroEjecutivo(data);
+        return File(pdf, "application/pdf", "tablero-ejecutivo.pdf");
+    }
+
+    /// <summary>GET api/reportes/riesgo-academico/pdf</summary>
+    [HttpGet("riesgo-academico/pdf")]
+    public async Task<IActionResult> RiesgoAcademicoPdf(
+        [FromQuery] int?    anioCohorte,
+        [FromQuery] int?    carreraId,
+        [FromQuery] string? nivelRiesgo,
+        CancellationToken   cancellationToken)
+    {
+        var filtro = new FiltroRiesgoAcademicoDto(anioCohorte, carreraId, nivelRiesgo);
+        var data   = await riesgoUseCase.EjecutarAsync(filtro, cancellationToken);
+        var pdf    = pdfService.GenerarRiesgoAcademico(data);
+        return File(pdf, "application/pdf", "riesgo-academico.pdf");
+    }
+
+    /// <summary>GET api/reportes/retencion-anual/pdf</summary>
+    [HttpGet("retencion-anual/pdf")]
+    public async Task<IActionResult> RetencionAnualPdf(
+        [FromQuery] int?  carreraId,
+        [FromQuery] int?  anioCohorte,
+        CancellationToken cancellationToken)
+    {
+        var data = await retencionAnualUseCase.EjecutarAsync(carreraId, anioCohorte, cancellationToken);
+        var pdf  = pdfService.GenerarRetencionAnual(data);
+        return File(pdf, "application/pdf", "retencion-anual.pdf");
+    }
+
+    /// <summary>GET api/reportes/retencion-cohorte/pdf</summary>
+    [HttpGet("retencion-cohorte/pdf")]
+    public async Task<IActionResult> RetencionCohortePdf(
+        [FromQuery] int?  carreraId,
+        [FromQuery] int?  anioCohorte,
+        CancellationToken cancellationToken)
+    {
+        var filtro = new FiltroRetencionCohorteDto(carreraId, anioCohorte);
+        var data   = await retencionUseCase.EjecutarAsync(filtro, cancellationToken);
+        var pdf    = pdfService.GenerarRetencionCohorte(data);
+        return File(pdf, "application/pdf", "retencion-cohorte.pdf");
     }
 }

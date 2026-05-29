@@ -3,6 +3,11 @@
     <div class="header-left">
       <h1>Control Individual por Legajo</h1>
     </div>
+    @if (resultado()) {
+      <button class="btn-descargar-pdf" (click)="descargarPdf()" [disabled]="descargando()">
+        {{ descargando() ? 'Generando PDF...' : '⬇ Descargar PDF' }}
+      </button>
+    }
   </header>
 
   <!-- Buscador -->

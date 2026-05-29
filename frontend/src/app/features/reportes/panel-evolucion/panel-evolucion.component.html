@@ -3,6 +3,11 @@
     <div class="header-left">
       <h1>Evolución de Notas en el Tiempo <span class="badge-rr">RR-06</span></h1>
     </div>
+    @if (reporte()) {
+      <button class="btn-descargar-pdf" (click)="descargarPdf()" [disabled]="descargando()">
+        {{ descargando() ? 'Generando PDF...' : '⬇ Descargar PDF' }}
+      </button>
+    }
   </header>
 
   <section class="filtros-panel">

@@ -30,10 +30,11 @@ export class PanelEvolucionComponent implements OnInit, OnDestroy {
   tipoExamen   = signal<number | null>(null);
   granularidad = signal<'mensual' | 'cuatrimestral' | 'anual'>('mensual');
 
-  reporte  = signal<ReporteEvolucionNotas | null>(null);
-  cargando = signal(false);
-  error    = signal<string | null>(null);
-  buscado  = signal(false);
+  reporte     = signal<ReporteEvolucionNotas | null>(null);
+  cargando    = signal(false);
+  error       = signal<string | null>(null);
+  buscado     = signal(false);
+  descargando = signal(false);
 
   anioMateriaSeleccionada = computed<number | null>(() =>
     this.materias().find(m => m.id === this.materiaId())?.anio ?? null
@@ -113,6 +114,29 @@ export class PanelEvolucionComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.chart?.destroy();
     this.histogram?.destroy();
+  }
+
+  descargarPdf(): void {
+    this.descargando.set(true);
+    this.reportesService.descargarEvolucionNotasPdf(
+      this.materiaId()    ?? undefined,
+      this.anio()         ?? undefined,
+      this.cuatrimestre() ?? undefined,
+      this.anioCarrera()  ?? undefined,
+      this.tipoExamen()   ?? undefined,
+      this.granularidad(),
+    ).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'evolucion-notas.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+        this.descargando.set(false);
+      },
+      error: () => this.descargando.set(false),
+    });
   }
 
   private initChart(): void {

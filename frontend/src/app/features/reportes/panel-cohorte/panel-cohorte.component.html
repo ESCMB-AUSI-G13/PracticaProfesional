@@ -1,6 +1,11 @@
 <div class="page">
   <header class="page-header">
     <h1>Retención por Cohorte</h1>
+    @if (reporte()) {
+      <button class="btn-descargar-pdf" (click)="descargarPdf()" [disabled]="descargando()">
+        {{ descargando() ? 'Generando PDF...' : '⬇ Descargar PDF' }}
+      </button>
+    }
   </header>
 
   <!-- Filtros -->
@@ -144,6 +149,9 @@
             <div class="tabla-anual-subtitulo">
               Porcentaje de estudiantes que continúan en cada año de la carrera &nbsp;·&nbsp;
               <span class="umbral-hint">Umbral mínimo: {{ ra.umbralAlerta }}%</span>
+              <button class="btn-descargar-pdf" style="margin-left:1rem" (click)="descargarPdfAnual()" [disabled]="descargandoAnual()">
+                {{ descargandoAnual() ? 'Generando PDF...' : '⬇ Descargar PDF' }}
+              </button>
             </div>
             <div class="tabla-wrap">
               <table>

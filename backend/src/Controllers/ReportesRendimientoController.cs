@@ -6,6 +6,7 @@ using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Reportes;
 using PracticaProfesional.Application.Reportes.DTOs;
 using PracticaProfesional.Domain.Enums;
+using PracticaProfesional.Infrastructure.Pdf;
 
 namespace PracticaProfesional.Controllers;
 
@@ -20,7 +21,8 @@ public class ReportesRendimientoController(
     ComparativoComisionesUseCase comparativoUseCase,
     EvolucionNotasUseCase        evolucionUseCase,
     PromediosCatedraUseCase      promediosUseCase,
-    IDocenteRepository           docenteRepository) : ControllerBase
+    IDocenteRepository           docenteRepository,
+    PdfReporteService            pdfService) : ControllerBase
 {
     /// <summary>
     /// RR-05: Comparativo de rendimiento entre comisiones.
@@ -81,6 +83,57 @@ public class ReportesRendimientoController(
         var filtro = new FiltroPromediosCatedraDto(docenteId, anio, cursoId);
         var resultado = await promediosUseCase.EjecutarAsync(filtro, cancellationToken);
         return Ok(resultado);
+    }
+
+    // ── Endpoints PDF ────────────────────────────────────────────────────────────
+
+    /// <summary>GET api/reportes/rendimiento/evolucion/pdf</summary>
+    [HttpGet("evolucion/pdf")]
+    public async Task<IActionResult> EvolucionNotasPdf(
+        [FromQuery] int?        materiaId,
+        [FromQuery] int?        anio,
+        [FromQuery] int?        cuatrimestre,
+        [FromQuery] byte?       anioCarrera,
+        [FromQuery] TipoExamen? tipoExamen,
+        [FromQuery] string      granularidad = "mensual",
+        CancellationToken cancellationToken = default)
+    {
+        var gran = granularidad is "mensual" or "cuatrimestral" or "anual"
+            ? granularidad : "mensual";
+
+        var docenteId = await ResolverDocenteIdSiAplicaAsync(cancellationToken);
+        var filtro    = new FiltroEvolucionNotasDto(materiaId, anio, docenteId, cuatrimestre, anioCarrera, tipoExamen, gran);
+        var data      = await evolucionUseCase.EjecutarAsync(filtro, cancellationToken);
+        var pdf       = pdfService.GenerarEvolucionNotas(data);
+        return File(pdf, "application/pdf", "evolucion-notas.pdf");
+    }
+
+    /// <summary>GET api/reportes/rendimiento/catedras/pdf</summary>
+    [HttpGet("catedras/pdf")]
+    public async Task<IActionResult> PromediosCatedraPdf(
+        [FromQuery] int? anio,
+        [FromQuery] int? cursoId,
+        CancellationToken cancellationToken)
+    {
+        var docenteId = await ResolverDocenteIdSiAplicaAsync(cancellationToken);
+        var filtro    = new FiltroPromediosCatedraDto(docenteId, anio, cursoId);
+        var data      = await promediosUseCase.EjecutarAsync(filtro, cancellationToken);
+        var pdf       = pdfService.GenerarPromediosCatedra(data);
+        return File(pdf, "application/pdf", "promedios-catedra.pdf");
+    }
+
+    /// <summary>GET api/reportes/rendimiento/comisiones/pdf</summary>
+    [HttpGet("comisiones/pdf")]
+    public async Task<IActionResult> ComparativoComisionesPdf(
+        [FromQuery] int? materiaId,
+        [FromQuery] int? anio,
+        CancellationToken cancellationToken)
+    {
+        var docenteId = await ResolverDocenteIdSiAplicaAsync(cancellationToken);
+        var filtro    = new FiltroComparativoComisionesDto(materiaId, anio, docenteId);
+        var data      = await comparativoUseCase.EjecutarAsync(filtro, cancellationToken);
+        var pdf       = pdfService.GenerarComparativoComisiones(data);
+        return File(pdf, "application/pdf", "comparativo-comisiones.pdf");
     }
 
     // Si el usuario es Docente, resuelve su DocenteId para restringir la consulta.

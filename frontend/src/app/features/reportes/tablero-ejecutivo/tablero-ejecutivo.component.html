@@ -6,6 +6,11 @@
         <span class="generado-en">Generado: {{ t.generadoEn | date:'dd/MM/yyyy HH:mm' }}</span>
       }
     </div>
+    @if (tablero()) {
+      <button class="btn-descargar-pdf" (click)="descargarPdf()" [disabled]="descargando()">
+        {{ descargando() ? 'Generando PDF...' : '⬇ Descargar PDF' }}
+      </button>
+    }
   </header>
 
   @if (cargando()) {

@@ -82,10 +82,11 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
   });
 
   // ── Estado ─────────────────────────────────────────────────────────────────
-  reporte  = signal<ReporteInasistencias | null>(null);
-  cargando = signal(false);
-  error    = signal<string | null>(null);
-  buscado  = signal(false);
+  reporte     = signal<ReporteInasistencias | null>(null);
+  cargando    = signal(false);
+  error       = signal<string | null>(null);
+  buscado     = signal(false);
+  descargando = signal(false);
 
   // ── Tabla: búsqueda, orden y paginación ───────────────────────────────────
   busquedaNombre = signal('');
@@ -419,5 +420,29 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
 
   irAlDashboard(): void {
     this.router.navigate(['/dashboard']);
+  }
+
+  descargarPdf(): void {
+    this.descargando.set(true);
+    const filtro: FiltroInasistencias = {
+      soloAusencias: this.soloAusencias(),
+      ...(this.anioLectivoFiltro() && { anioLectivo: this.anioLectivoFiltro()! }),
+      ...(this.materiaId()         && { materiaId:   this.materiaId()!         }),
+      ...(this.fechaDesde()        && { fechaDesde:  this.fechaDesde()         }),
+      ...(this.fechaHasta()        && { fechaHasta:  this.fechaHasta()         }),
+      ...(this.comisionFiltro()    && { comision:    this.comisionFiltro()     }),
+    };
+    this.reportesService.descargarInasistenciasPdf(filtro).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'reporte-inasistencias.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+        this.descargando.set(false);
+      },
+      error: () => this.descargando.set(false),
+    });
   }
 }

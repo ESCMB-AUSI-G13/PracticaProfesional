@@ -22,10 +22,11 @@ export class PanelComisionesComponent implements OnInit, OnDestroy {
   materiaId = signal<number | null>(null);
   anio      = signal<number | null>(null);
 
-  reporte  = signal<ReporteComparativoComisiones | null>(null);
-  cargando = signal(false);
-  error    = signal<string | null>(null);
-  buscado  = signal(false);
+  reporte     = signal<ReporteComparativoComisiones | null>(null);
+  cargando    = signal(false);
+  error       = signal<string | null>(null);
+  buscado     = signal(false);
+  descargando = signal(false);
 
   promedioGeneral = computed(() => {
     const filas = this.reporte()?.comisiones ?? [];
@@ -136,4 +137,23 @@ export class PanelComisionesComponent implements OnInit, OnDestroy {
   }
 
   irAlDashboard(): void { this.router.navigate(['/dashboard']); }
+
+  descargarPdf(): void {
+    this.descargando.set(true);
+    this.reportesService.descargarComparativoComisionesPdf(
+      this.materiaId() ?? undefined,
+      this.anio()      ?? undefined,
+    ).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'comparativo-comisiones.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+        this.descargando.set(false);
+      },
+      error: () => this.descargando.set(false),
+    });
+  }
 }

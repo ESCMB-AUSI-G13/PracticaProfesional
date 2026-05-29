@@ -38,10 +38,11 @@ export class PanelRiesgoComponent implements OnInit, OnDestroy {
   condicionFiltro = signal<string>('');
 
   // Estado
-  reporte  = signal<ReporteRiesgoAcademico | null>(null);
-  cargando = signal(false);
-  error    = signal<string | null>(null);
-  buscado  = signal(false);
+  reporte     = signal<ReporteRiesgoAcademico | null>(null);
+  cargando    = signal(false);
+  error       = signal<string | null>(null);
+  buscado     = signal(false);
+  descargando = signal(false);
 
   // Tabla
   busqueda      = signal('');
@@ -214,5 +215,25 @@ export class PanelRiesgoComponent implements OnInit, OnDestroy {
   flechaSort(col: keyof RiesgoAcademico): string {
     if (this.sortColumna() !== col) return '';
     return this.sortDir() === 'asc' ? ' ↑' : ' ↓';
+  }
+
+  descargarPdf(): void {
+    this.descargando.set(true);
+    this.reportesService.descargarRiesgoAcademicoPdf(
+      this.anioCohorte() ?? undefined,
+      this.carreraId()   ?? undefined,
+      this.nivelFiltro() || undefined,
+    ).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'riesgo-academico.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+        this.descargando.set(false);
+      },
+      error: () => this.descargando.set(false),
+    });
   }
 }

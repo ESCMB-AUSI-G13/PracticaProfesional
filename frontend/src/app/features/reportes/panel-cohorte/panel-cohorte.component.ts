@@ -47,9 +47,11 @@ export class PanelCohorteComponent implements OnInit, OnDestroy {
   // Estado
   reporte      = signal<ReporteRetencionCohorte | null>(null);
   reporteAnual = signal<ReporteRetencionAnual | null>(null);
-  cargando = signal(false);
-  error    = signal<string | null>(null);
-  buscado  = signal(false);
+  cargando    = signal(false);
+  error       = signal<string | null>(null);
+  buscado     = signal(false);
+  descargando      = signal(false);
+  descargandoAnual = signal(false);
 
   // Columnas dinámicas para la tabla de retención anual
   columnas = computed<number[]>(() => {
@@ -226,5 +228,43 @@ export class PanelCohorteComponent implements OnInit, OnDestroy {
     if (!r) return null;
     const val = r.promediosPorAnio[anioOrdinal];
     return val !== undefined ? val : null;
+  }
+
+  descargarPdf(): void {
+    this.descargando.set(true);
+    this.reportesService.descargarRetencionCohortePdf(
+      this.carreraId()   ?? undefined,
+      this.anioCohorte() ?? undefined,
+    ).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'retencion-cohorte.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+        this.descargando.set(false);
+      },
+      error: () => this.descargando.set(false),
+    });
+  }
+
+  descargarPdfAnual(): void {
+    this.descargandoAnual.set(true);
+    this.reportesService.descargarRetencionAnualPdf(
+      this.carreraId()   ?? undefined,
+      this.anioCohorte() ?? undefined,
+    ).subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'retencion-anual.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+        this.descargandoAnual.set(false);
+      },
+      error: () => this.descargandoAnual.set(false),
+    });
   }
 }

@@ -1,6 +1,11 @@
 <div class="page">
   <header class="page-header">
     <h1>Riesgo de Deserción</h1>
+    @if (reporte()) {
+      <button class="btn-descargar-pdf" (click)="descargarPdf()" [disabled]="descargando()">
+        {{ descargando() ? 'Generando PDF...' : '⬇ Descargar PDF' }}
+      </button>
+    }
   </header>
 
   <!-- Filtros -->

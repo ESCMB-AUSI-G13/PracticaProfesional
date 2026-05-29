@@ -1,1 +1,21 @@
 /* You can add global styles to this file, and also import other style files */
+
+.btn-descargar-pdf {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  background: #2471a3;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  align-self: flex-start;
+
+  &:hover:not(:disabled) { background: #1a5276; }
+  &:disabled { opacity: 0.65; cursor: not-allowed; }
+}

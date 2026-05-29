@@ -40,7 +40,12 @@
       "Bash(node -e \"const p=require\\('./package.json'\\); const deps={...p.dependencies,...p.devDependencies}; console.log\\('chart.js:', deps['chart.js']||'NO'\\); console.log\\('ng2-charts:', deps['ng2-charts']||'NO'\\);\")",
       "Bash(Get-ChildItem -Path \"d:\\\\Documents\\\\3A\\\\PRACTICA PROFESIONAL\\\\PracticaProfesional\\\\frontend\\\\src\\\\app\\\\features\\\\reportes\" -Recurse -File)",
       "Bash(Select-Object FullName)",
-      "Bash(Get-ChildItem \"d:\\\\Documents\\\\3A\\\\PRACTICA PROFESIONAL\\\\PracticaProfesional\\\\backend\" -Recurse -Filter \"*.csproj\")"
+      "Bash(Get-ChildItem \"d:\\\\Documents\\\\3A\\\\PRACTICA PROFESIONAL\\\\PracticaProfesional\\\\backend\" -Recurse -Filter \"*.csproj\")",
+      "Bash(Get-ChildItem -Path \"d:\\\\Git Facultad\\\\PracticaProfesional\" -Force)",
+      "Bash(dotnet restore *)",
+      "PowerShell(Get-ChildItem \"C:\\\\\", \"D:\\\\\", \"$env:LOCALAPPDATA\", \"$env:PROGRAMFILES\\(X86\\)\" -Filter \"dotnet.exe\" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 5 FullName)",
+      "PowerShell(Test-Path \"C:\\\\Program Files\\\\dotnet\\\\dotnet.exe\"; Test-Path \"$env:USERPROFILE\\\\.dotnet\\\\dotnet.exe\")",
+      "PowerShell(& \"D:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\dotnet\\\\net8.0\\\\runtime\\\\dotnet.exe\" --version 2>&1)"
     ]
   }
 }

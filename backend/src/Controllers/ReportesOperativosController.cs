@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Reportes;
 using PracticaProfesional.Application.Reportes.DTOs;
+using PracticaProfesional.Infrastructure.Pdf;
 using System.Security.Claims;
 
 namespace PracticaProfesional.Controllers;
@@ -19,7 +20,8 @@ public class ReportesOperativosController(
     ReporteInasistenciasUseCase reporteInasistencias,
     ControlIndividualPorLegajoUseCase controlPorLegajo,
     IDocenteRepository docenteRepository,
-    IEspacioCurricularRepository espacioCurricularRepository) : ControllerBase
+    IEspacioCurricularRepository espacioCurricularRepository,
+    PdfReporteService pdfService) : ControllerBase
 {
     /// <summary>
     /// RR-08: Reporte detallado de inasistencias.
@@ -65,5 +67,43 @@ public class ReportesOperativosController(
     {
         var resultado = await controlPorLegajo.EjecutarAsync(legajo, cancellationToken);
         return Ok(resultado);
+    }
+
+    // ── Endpoints PDF ────────────────────────────────────────────────────────────
+
+    /// <summary>GET api/reportes/control-legajo/{legajo}/pdf</summary>
+    [HttpGet("control-legajo/{legajo}/pdf")]
+    [Authorize(Roles = "Preceptor,Direccion")]
+    public async Task<IActionResult> ControlPorLegajoPdf(
+        string legajo,
+        CancellationToken cancellationToken)
+    {
+        var data = await controlPorLegajo.EjecutarAsync(legajo, cancellationToken);
+        var pdf  = pdfService.GenerarControlLegajo(data);
+        return File(pdf, "application/pdf", $"control-legajo-{legajo}.pdf");
+    }
+
+    /// <summary>POST api/reportes/inasistencias/pdf</summary>
+    [HttpPost("inasistencias/pdf")]
+    public async Task<IActionResult> ReporteInasistenciasPdf(
+        [FromBody] FiltroInasistenciasDto filtro,
+        CancellationToken cancellationToken)
+    {
+        IReadOnlyList<(int MateriaId, int CursoId)>? espaciosDocente = null;
+
+        if (User.IsInRole("Docente"))
+        {
+            var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var docente   = await docenteRepository.ObtenerPorUsuarioIdAsync(usuarioId, cancellationToken);
+            if (docente is not null)
+            {
+                var espacios = await espacioCurricularRepository.ListarPorDocenteIdAsync(docente.Id, cancellationToken);
+                espaciosDocente = espacios.Select(e => (e.MateriaId, e.CursoId)).ToList();
+            }
+        }
+
+        var data = await reporteInasistencias.EjecutarAsync(filtro, espaciosDocente, cancellationToken);
+        var pdf  = pdfService.GenerarInasistencias(data);
+        return File(pdf, "application/pdf", "reporte-inasistencias.pdf");
     }
 }

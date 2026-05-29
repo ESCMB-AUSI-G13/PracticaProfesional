@@ -33,9 +33,10 @@ export class TableroEjecutivoComponent implements OnInit, OnDestroy {
   private barrasChart: Chart | null = null;
   private riesgoChart: Chart | null = null;
 
-  tablero  = signal<TableroEjecutivo | null>(null);
-  cargando = signal(true);
-  error    = signal<string | null>(null);
+  tablero     = signal<TableroEjecutivo | null>(null);
+  cargando    = signal(true);
+  error       = signal<string | null>(null);
+  descargando = signal(false);
 
   constructor(
     private injector:        Injector,
@@ -62,6 +63,22 @@ export class TableroEjecutivoComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.barrasChart?.destroy();
     this.riesgoChart?.destroy();
+  }
+
+  descargarPdf(): void {
+    this.descargando.set(true);
+    this.reportesService.descargarTableroEjecutivoPdf().subscribe({
+      next: blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'tablero-ejecutivo.pdf';
+        a.click();
+        URL.revokeObjectURL(url);
+        this.descargando.set(false);
+      },
+      error: () => this.descargando.set(false),
+    });
   }
 
   private renderBarras(cohortes: EvolucionCohorteResumen[]): void {
