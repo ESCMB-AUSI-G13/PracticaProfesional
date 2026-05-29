@@ -45,7 +45,8 @@
       "Bash(dotnet restore *)",
       "PowerShell(Get-ChildItem \"C:\\\\\", \"D:\\\\\", \"$env:LOCALAPPDATA\", \"$env:PROGRAMFILES\\(X86\\)\" -Filter \"dotnet.exe\" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 5 FullName)",
       "PowerShell(Test-Path \"C:\\\\Program Files\\\\dotnet\\\\dotnet.exe\"; Test-Path \"$env:USERPROFILE\\\\.dotnet\\\\dotnet.exe\")",
-      "PowerShell(& \"D:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\dotnet\\\\net8.0\\\\runtime\\\\dotnet.exe\" --version 2>&1)"
+      "PowerShell(& \"D:\\\\Program Files\\\\Microsoft Visual Studio\\\\2022\\\\Community\\\\dotnet\\\\net8.0\\\\runtime\\\\dotnet.exe\" --version 2>&1)",
+      "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\k6\" -ErrorAction SilentlyContinue; Get-ChildItem \"$env:ProgramFiles\\\\k6\" -ErrorAction SilentlyContinue)"
     ]
   }
 }
