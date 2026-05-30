@@ -342,6 +342,7 @@ var app = builder.Build();
         // await CursosSeeder.SeedAsync(db, logger);
 
         // ── Estudiantes cohorte histórica 2021 ───────────────────────────────
+        // ✅ 2021 completo — todos idempotentes
         await CohorteHistoricaSeeder.SeedAsync(db, logger);
         await CohorteHistoricaSeeder.SeedInscripcionesCohorte2021Async(db, logger);
         await Examenes2021Seeder.SeedAsync(db, logger);
@@ -350,6 +351,13 @@ var app = builder.Build();
         await Asistencias2021Seeder.SeedAsync(db, logger);
         await EspaciosCurriculares2021Seeder.SeedAsync(db, logger);
         await HistorialAcademico2021Seeder.SeedAsync(db, logger);
+
+        // ── 2022 Paso 2a: nueva cohorte ─────────────────────────────────────
+        await NuevosEstudiantes2022Seeder.SeedAsync(db, logger);
+
+        // ── 2022 Actividades académicas (EspaciosCurriculares, Asistencias,
+        //         Exámenes, Notas, HistorialAcademico, Encuestas, Estados) ──
+        await Anio2022ActividadesSeeder.SeedAsync(db, logger);
 
         // await EstudiantesSeeder.SeedAsync(db, logger);
         // await EstudiantesSeeder.FixNombresAsync(db, logger);
