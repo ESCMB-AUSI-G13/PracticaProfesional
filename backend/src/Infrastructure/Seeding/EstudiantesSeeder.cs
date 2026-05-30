@@ -66,30 +66,36 @@ public static class EstudiantesSeeder
         int CarreraId,
         int AnioEstudiante,
         string Comision,
-        int CursoId,
         int[] MateriaIds,
         int AnioIngreso,
         int CantLibre,
         int CantRegular,
         int CantPromocional
-    );
+    )
+    {
+        // El año calendario del Curso es el año en que ese grupo cursa ese nivel.
+        // Ej: cohorte 2025, nivel 2 → cursan en 2026 → Anio = 2025 + 2 - 1 = 2026.
+        public int CursoAnio       => AnioIngreso + AnioEstudiante - 1;
+        public int CursoAnioLectivo => AnioEstudiante;
+    }
 
     // 425 alumnos en total (incluye Año 4 Profesorado cohorte 2023)
+    // CursoId ya no se hardcodea — se resuelve en runtime via CursosSeeder.ObtenerIdAsync.
     private static readonly Grupo[] Grupos =
     [
-        //                                                              L    R   P
-        new(1, 1, "A", 1,  [17,18,19,20,21,22,23,24,48],         2026, 10, 19,  3), // 32
-        new(1, 1, "B", 2,  [17,18,19,20,21,22,23,24,48],         2026, 11, 17,  3), // 31
-        new(1, 2, "A", 14, [25,26,27,28,29,30,31,49,50],         2025, 10, 15,  5), // 30
-        new(1, 2, "B", 15, [25,26,27,28,29,30,31,49,50],         2025,  9, 15,  6), // 30
-        new(1, 3, "A", 16, [32,33,34,35,36,37,38,39,51],         2024,  5, 17,  9), // 31
-        new(1, 3, "B", 17, [32,33,34,35,36,37,38,39,51],         2024,  4, 17,  9), // 30
-        new(1, 4, "A", 18, [40,41,42,43,44,45,46,47,52,53],      2023,  5, 17,  8), // 30
-        new(1, 4, "B", 19, [40,41,42,43,44,45,46,47,52,53],      2023,  4, 18,  8), // 30
-        new(2, 1, "A", 1,  [4,6,7,8,9,10,11],                    2026,  9, 16,  6), // 31
-        new(2, 1, "B", 2,  [4,6,7,8,9,10,11],                    2026,  9, 16,  5), // 30
-        new(2, 2, "A", 14, [12,13,14,15,16],                      2025,  6, 16,  8), // 30
-        new(2, 2, "B", 15, [12,13,14,15,16],                      2025,  7, 15,  8), // 30
+        //                                               L    R   P
+        new(1, 1, "A", [17,18,19,20,21,22,23,24,48], 2026, 10, 19,  3), // 32
+        new(1, 1, "B", [17,18,19,20,21,22,23,24,48], 2026, 11, 17,  3), // 31
+        new(1, 2, "A", [25,26,27,28,29,30,31,49,50], 2025, 10, 15,  5), // 30
+        new(1, 2, "B", [25,26,27,28,29,30,31,49,50], 2025,  9, 15,  6), // 30
+        new(1, 3, "A", [32,33,34,35,36,37,38,39,51], 2024,  5, 17,  9), // 31
+        new(1, 3, "B", [32,33,34,35,36,37,38,39,51], 2024,  4, 17,  9), // 30
+        new(1, 4, "A", [40,41,42,43,44,45,46,47,52,53], 2023, 5, 17, 8), // 30
+        new(1, 4, "B", [40,41,42,43,44,45,46,47,52,53], 2023, 4, 18, 8), // 30
+        new(2, 1, "A", [4,6,7,8,9,10,11],             2026,  9, 16,  6), // 31
+        new(2, 1, "B", [4,6,7,8,9,10,11],             2026,  9, 16,  5), // 30
+        new(2, 2, "A", [12,13,14,15,16],               2025,  6, 16,  8), // 30
+        new(2, 2, "B", [12,13,14,15,16],               2025,  7, 15,  8), // 30
     ];
 
     // ────────────────────────────────────────────────────────────────────────────
@@ -138,6 +144,8 @@ public static class EstudiantesSeeder
 
         foreach (var grupo in Grupos)
         {
+            var cursoId      = await CursosSeeder.ObtenerIdAsync(
+                db, grupo.CursoAnio, grupo.CursoAnioLectivo, grupo.Comision, grupo.CarreraId, ct);
             var fechasClase  = grupo.CarreraId == 1 ? FechasClaseProfesoral : FechasClaseTrayecto;
             int total        = grupo.CantLibre + grupo.CantRegular + grupo.CantPromocional;
             var fechaIngreso = new DateTime(grupo.AnioIngreso, 3, 1);
@@ -188,7 +196,7 @@ public static class EstudiantesSeeder
                     await db.SaveChangesAsync(ct);
 
                     foreach (var mid in grupo.MateriaIds)
-                        db.InscripcionesMateria.Add(InscripcionMateria.Crear(estudiante.Id, mid, grupo.CursoId));
+                        db.InscripcionesMateria.Add(InscripcionMateria.Crear(estudiante.Id, mid, cursoId));
 
                     estudianteId = estudiante.Id;
                     creados++;
@@ -196,7 +204,7 @@ public static class EstudiantesSeeder
 
                 // ── Asistencias (tanto nuevos como existentes sin asistencias) ─
                 foreach (var asistencia in GenerarAsistencias(
-                    estudianteId, grupo.MateriaIds, grupo.CursoId,
+                    estudianteId, grupo.MateriaIds, cursoId,
                     fechasClase, condicionDeseada, desercionTemprana, globalIdx))
                 {
                     db.Asistencias.Add(asistencia);

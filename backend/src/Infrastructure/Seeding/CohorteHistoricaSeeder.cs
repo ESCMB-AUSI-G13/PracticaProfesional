@@ -543,4 +543,140 @@ public static class CohorteHistoricaSeeder
         logger.LogInformation(
             "CorregirDistribucionProf2023: {E} egresados incorrectos reseteados a Regular.", egresadosActuales);
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // SeedInscripcionesCohorte2021Async
+    //
+    // Crea las InscripcionesMateria para los estudiantes de la cohorte 2021,
+    // ligándolos a los cursos y materias de 1er año correspondientes.
+    //
+    // Estado de la inscripción:
+    //   Desertor en año 1  → Baja       (abandonó en el primer año)
+    //   Todos los demás    → Aprobada   (pasaron el año 1 y avanzaron)
+    //
+    // FechaInscripcion se ajusta a 2021-03-01 vía SQL para datos históricos correctos.
+    // Idempotente: si ya existen inscripciones para cursos de 2021, se omite.
+    // ─────────────────────────────────────────────────────────────────────────
+    public static async Task SeedInscripcionesCohorte2021Async(
+        AppDbContext db, ILogger logger, CancellationToken ct = default)
+    {
+        // Guard
+        var cursoIds2021 = await db.Cursos
+            .Where(c => c.Anio == 2021)
+            .Select(c => c.Id)
+            .ToListAsync(ct);
+
+        if (cursoIds2021.Count == 0)
+        {
+            logger.LogWarning("SeedInscripcionesCohorte2021: no hay cursos de 2021. Ejecutá CursosSeeder primero.");
+            return;
+        }
+
+        bool yaExisten = await db.InscripcionesMateria
+            .AnyAsync(im => cursoIds2021.Contains(im.CursoId), ct);
+
+        if (yaExisten)
+        {
+            logger.LogInformation("SeedInscripcionesCohorte2021: inscripciones ya existen, omitido.");
+            return;
+        }
+
+        // Materias de 1er año por carrera (CarreraId=1 Profesorado, CarreraId=2 Trayecto)
+        var materiasPorCarrera = await db.Materias
+            .Where(m => m.Anio == 1 && (m.CarreraId == 1 || m.CarreraId == 2))
+            .GroupBy(m => m.CarreraId)
+            .ToDictionaryAsync(g => g.Key, g => g.Select(m => m.Id).ToArray(), ct);
+
+        if (materiasPorCarrera.Count == 0)
+        {
+            logger.LogWarning("SeedInscripcionesCohorte2021: no se encontraron materias de 1er año.");
+            return;
+        }
+
+        // Cursos de 2021 AnioLectivo=1, indexados por (CarreraId, Comision)
+        var cursosPorCarreraComision = await db.Cursos
+            .Where(c => c.Anio == 2021 && c.AnioLectivo == 1)
+            .ToDictionaryAsync(c => (c.CarreraId, c.Comision), c => c.Id, ct);
+
+        // Estudiantes cohorte 2021 con sus Usuarios
+        var estudiantes = await db.Estudiantes
+            .Include(e => e.Usuario)
+            .Where(e => e.FechaDeIngreso.Year == 2021)
+            .ToListAsync(ct);
+
+        if (estudiantes.Count == 0)
+        {
+            logger.LogWarning("SeedInscripcionesCohorte2021: sin estudiantes de 2021. Ejecutá CohorteHistoricaSeeder primero.");
+            return;
+        }
+
+        var nuevas = new List<InscripcionMateria>();
+
+        foreach (var est in estudiantes)
+        {
+            // Parsear legajo: EST-H2021-C{carreraId}{comision}-{n}
+            // Ejemplo: EST-H2021-C1A-001 → carreraId=1, comision="A"
+            if (!TryParsarLegajoHistorico(est.Usuario.Legajo, out int carreraId, out string comision))
+                continue;
+
+            if (!cursosPorCarreraComision.TryGetValue((carreraId, comision), out int cursoId))
+                continue;
+
+            if (!materiasPorCarrera.TryGetValue(carreraId, out var materiaIds))
+                continue;
+
+            // Desertó en año 1 → Baja; el resto aprobó ese año
+            bool desertorAnio1 = est.Condicion == CondicionEstudiante.Desertor && est.Anio == 1;
+
+            foreach (var materiaId in materiaIds)
+            {
+                var insc = InscripcionMateria.Crear(est.Id, materiaId, cursoId);
+                if (desertorAnio1)
+                    insc.DarDeBaja();
+                else
+                    insc.MarcarAprobada();
+
+                nuevas.Add(insc);
+            }
+        }
+
+        db.InscripcionesMateria.AddRange(nuevas);
+        await db.SaveChangesAsync(ct);
+
+        // Corregir FechaInscripcion a la fecha real de inicio del ciclo 2021
+        if (cursoIds2021.Count > 0)
+        {
+            var ids = string.Join(",", cursoIds2021);
+            await db.Database.ExecuteSqlRawAsync(
+                $"UPDATE InscripcionesMateria SET FechaInscripcion = '2021-03-01' WHERE CursoId IN ({ids})",
+                ct);
+        }
+
+        logger.LogInformation(
+            "SeedInscripcionesCohorte2021: {I} inscripciones creadas para {E} estudiantes.",
+            nuevas.Count, estudiantes.Count);
+    }
+
+    // Parsea el legajo histórico: EST-H{año}-C{carreraId}{comision}-{n}
+    private static bool TryParsarLegajoHistorico(string legajo, out int carreraId, out string comision)
+    {
+        carreraId = 0;
+        comision  = string.Empty;
+
+        // ["EST", "H2021", "C1A", "001"]
+        var partes = legajo.Split('-');
+        if (partes.Length < 4 || !partes[2].StartsWith('C'))
+            return false;
+
+        var carreraComision = partes[2][1..]; // "1A" o "2B"
+        if (carreraComision.Length < 2)
+            return false;
+
+        // Todo menos el último char es el carreraId
+        if (!int.TryParse(carreraComision[..^1], out carreraId))
+            return false;
+
+        comision = carreraComision[^1..].ToUpperInvariant();
+        return true;
+    }
 }

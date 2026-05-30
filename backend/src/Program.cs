@@ -338,19 +338,31 @@ var app = builder.Build();
         await CorrelativiadadesSeeder.SeedCarrera1Async(db, logger);
         await CorrelativiadadesSeeder.SeedCarrera2Async(db, logger);
 
-        await EstudiantesSeeder.SeedAsync(db, logger);
-        await EstudiantesSeeder.FixNombresAsync(db, logger);
-        await EstudiantesSeeder.PatchJustificacionesAsync(db, logger);
+        // ✅ HECHO: CursosSeeder ya corrió — 58 cursos 2021-2026 creados.
+        // await CursosSeeder.SeedAsync(db, logger);
+
+        // ── Estudiantes cohorte histórica 2021 ───────────────────────────────
         await CohorteHistoricaSeeder.SeedAsync(db, logger);
-        await CohorteHistoricaSeeder.RepararAsync(db, logger);
-        await CohorteHistoricaSeeder.SeedHistorialAsync(db, logger);
-        await CohorteHistoricaSeeder.SeedDesertoresActivosAsync(db, logger);
-        await HistorialAnteriorSeeder.SeedAsync(db, logger);
-        await ExamenesSeeder.SeedAsync(db, logger);
-        await NotasExamenesSeeder.SeedAsync(db, logger);
-        await NotasHistoricasSeeder.SeedAsync(db, logger);
-        await EncuestaSeeder.SeedAsync(db);
-        await EncuestaRespuestasSeeder.SeedAsync(db, app.Configuration["Encuestas:Salt"] ?? "pp-salt-2026");
+        await CohorteHistoricaSeeder.SeedInscripcionesCohorte2021Async(db, logger);
+        await Examenes2021Seeder.SeedAsync(db, logger);
+        await Notas2021Seeder.SeedAsync(db, logger);
+        await Encuestas2021Seeder.SeedAsync(db, logger);
+        await Asistencias2021Seeder.SeedAsync(db, logger);
+        await EspaciosCurriculares2021Seeder.SeedAsync(db, logger);
+        await HistorialAcademico2021Seeder.SeedAsync(db, logger);
+
+        // await EstudiantesSeeder.SeedAsync(db, logger);
+        // await EstudiantesSeeder.FixNombresAsync(db, logger);
+        // await EstudiantesSeeder.PatchJustificacionesAsync(db, logger);
+        // await CohorteHistoricaSeeder.RepararAsync(db, logger);
+        // await CohorteHistoricaSeeder.SeedHistorialAsync(db, logger);
+        // await CohorteHistoricaSeeder.SeedDesertoresActivosAsync(db, logger);
+        // await HistorialAnteriorSeeder.SeedAsync(db, logger);
+        // await ExamenesSeeder.SeedAsync(db, logger);
+        // await NotasExamenesSeeder.SeedAsync(db, logger);
+        // await NotasHistoricasSeeder.SeedAsync(db, logger);
+        // await EncuestaSeeder.SeedAsync(db);
+        // await EncuestaRespuestasSeeder.SeedAsync(db, app.Configuration["Encuestas:Salt"] ?? "pp-salt-2026");
     }
     catch (Exception ex)
     {
@@ -358,48 +370,45 @@ var app = builder.Build();
     }
 
     // Corrección de condiciones académicas según datos reales de asistencia y notas.
-    try
-    {
-        var db2 = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await EstudiantesSeeder.CorregirCondicionesAsync(db2, logger);
-    }
-    catch (Exception ex)
-    {
-        logger.LogWarning(ex, "CorregirCondiciones: error no crítico, se continúa.");
-    }
+    // try
+    // {
+    //     var db2 = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    //     await EstudiantesSeeder.CorregirCondicionesAsync(db2, logger);
+    // }
+    // catch (Exception ex)
+    // {
+    //     logger.LogWarning(ex, "CorregirCondiciones: error no crítico, se continúa.");
+    // }
 
-    // Garantiza que los desertores históricos EST-D no sean revertidos por CorregirCondicionesAsync.
-    try
-    {
-        var dbD = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await CohorteHistoricaSeeder.AsegurarDesertoresActivosAsync(dbD, logger);
-    }
-    catch (Exception ex)
-    {
-        logger.LogWarning(ex, "AsegurarDesertoresActivos: error no crítico, se continúa.");
-    }
+    // try
+    // {
+    //     var dbD = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    //     await CohorteHistoricaSeeder.AsegurarDesertoresActivosAsync(dbD, logger);
+    // }
+    // catch (Exception ex)
+    // {
+    //     logger.LogWarning(ex, "AsegurarDesertoresActivos: error no crítico, se continúa.");
+    // }
 
-    // Patch de condiciones de retención (Desertores) — corre después de corregir condiciones.
-    try
-    {
-        var db3 = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await EstudiantesSeeder.PatchCondicionesRetencionAsync(db3, logger);
-    }
-    catch (Exception ex)
-    {
-        logger.LogWarning(ex, "PatchCondicionesRetencion: error no crítico, se continúa.");
-    }
+    // try
+    // {
+    //     var db3 = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    //     await EstudiantesSeeder.PatchCondicionesRetencionAsync(db3, logger);
+    // }
+    // catch (Exception ex)
+    // {
+    //     logger.LogWarning(ex, "PatchCondicionesRetencion: error no crítico, se continúa.");
+    // }
 
-    // Corrección de distribución Profesorado 2023 (cohorte casi completa, alta deserción acumulada).
-    try
-    {
-        var db4 = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        await CohorteHistoricaSeeder.CorregirDistribucionProf2023Async(db4, logger);
-    }
-    catch (Exception ex)
-    {
-        logger.LogWarning(ex, "CorregirDistribucionProf2023: error no crítico, se continúa.");
-    }
+    // try
+    // {
+    //     var db4 = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    //     await CohorteHistoricaSeeder.CorregirDistribucionProf2023Async(db4, logger);
+    // }
+    // catch (Exception ex)
+    // {
+    //     logger.LogWarning(ex, "CorregirDistribucionProf2023: error no crítico, se continúa.");
+    // }
 }
 
 app.UseCors("AllowFrontend");

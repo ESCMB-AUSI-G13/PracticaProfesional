@@ -228,11 +228,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(c => c.Comision).IsRequired().HasMaxLength(20);
             entity.Property(c => c.Cupo).IsRequired();
             entity.Property(c => c.Estado).IsRequired().HasConversion<string>();
+            entity.Property(c => c.CarreraId).IsRequired();
             entity.HasOne(c => c.Preceptor)
                 .WithMany()
                 .HasForeignKey(c => c.PreceptorId)
                 .OnDelete(DeleteBehavior.Restrict);
-            entity.HasIndex(c => new { c.Anio, c.AnioLectivo, c.Comision }).IsUnique();
+            entity.HasIndex(c => new { c.Anio, c.AnioLectivo, c.Comision, c.CarreraId }).IsUnique();
         });
 
         // ──────────────────────────────────────────────

@@ -5,5 +5,6 @@ public record CrearCursoDto(
     int    AnioLectivo,
     string Comision,
     int    Cupo,
-    int    PreceptorId
+    int    PreceptorId,
+    int    CarreraId
 );

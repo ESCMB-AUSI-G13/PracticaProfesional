@@ -8,5 +8,6 @@ public record CursoDto(
     int    Cupo,
     string Estado,
     int    PreceptorId,
-    string PreceptorNombre
+    string PreceptorNombre,
+    int    CarreraId
 );

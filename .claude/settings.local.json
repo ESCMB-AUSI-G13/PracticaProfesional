@@ -49,7 +49,11 @@
       "PowerShell(Get-ChildItem \"C:\\\\Program Files\\\\k6\" -ErrorAction SilentlyContinue; Get-ChildItem \"$env:ProgramFiles\\\\k6\" -ErrorAction SilentlyContinue)",
       "Bash(python -c ' *)",
       "PowerShell(Stop-Process -Id 18700 -Force)",
-      "Bash(grep -v \"//\")"
+      "Bash(grep -v \"//\")",
+      "Bash(Get-ChildItem -Path \"d:\\\\facum\\\\GITHUB TESIS\\\\PracticaProfesional\" -Recurse -Directory)",
+      "PowerShell(Get-ChildItem -Path \"d:\\\\facum\\\\GITHUB TESIS\\\\PracticaProfesional\" -Recurse -Directory | Select-Object -First 30 | ForEach-Object { $_.FullName })",
+      "Bash(Select-String -Pattern \"error\" -CaseSensitive)",
+      "Bash(grep -E \"^.*error CS|0 Errores|Errores$\")"
     ]
   }
 }

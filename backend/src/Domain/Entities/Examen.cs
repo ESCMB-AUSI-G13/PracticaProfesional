@@ -38,4 +38,20 @@ public class Examen
         Horario = horario;
         Cupo = cupo;
     }
+
+    // Solo para seeders históricos — bypasea la validación de fecha pasada.
+    public static Examen CrearHistorico(int materiaId, DateTime fechaExamen, string horario, int cupo, TipoExamen tipo)
+    {
+        if (string.IsNullOrWhiteSpace(horario)) throw new ArgumentException("El horario es obligatorio.");
+        if (cupo <= 0) throw new ArgumentException("El cupo debe ser mayor a cero.");
+
+        return new Examen
+        {
+            MateriaId   = materiaId,
+            FechaExamen = fechaExamen.Date,
+            Horario     = horario,
+            Cupo        = cupo,
+            TipoExamen  = tipo
+        };
+    }
 }

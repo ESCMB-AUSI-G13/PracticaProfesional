@@ -64,7 +64,7 @@ public static class NotasHistoricasSeeder
         }
 
         // Cache compartido: (materiaId, anioExamen) → examenId
-        var cache = new Dictionary<(int MateriaId, int AnioExamen), int>();
+        var cache = new Dictionary<(int, int), int>();
         int totalExamenes = 0, totalInscripciones = 0;
 
         foreach (var est in estudiantes)
@@ -78,7 +78,7 @@ public static class NotasHistoricasSeeder
 
             for (int anioMateria = 1; anioMateria <= anioMax; anioMateria++)
             {
-                if (!materiasPorAnio.TryGetValue((est.CarreraId, anioMateria), out var matIds))
+                if (!MateriasPorAnio.TryGetValue((est.CarreraId, anioMateria), out var matIds))
                     continue;
 
                 int      anioExamen = cohorte + anioMateria - 1;
