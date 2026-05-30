@@ -20,12 +20,7 @@ La aplicación está desplegada en tres recursos de Azure independientes:
 
 ## Deploy del backend
 
-1. Buildear la imagen:
-```bash
-docker-compose up --build -d
-```
-
-2. En VS Code → panel Azure → App Services → click derecho en `escmb-practicaprof` → **Deploy to Web App** → seleccionar `backend/publish`.
+En VS Code → panel Azure → App Services → click derecho en `escmb-practicaprof` → **Deploy to Web App** → seleccionar `backend/publish`.
 
 ---
 

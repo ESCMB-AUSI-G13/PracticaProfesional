@@ -96,6 +96,27 @@ backend/
 - **State:** Componentes ligeros; lógica delegada a servicios de Angular.
 - **Naming:** Archivos en `kebab-case`.
 
+#### Caché en servicios Angular
+`CarrerasService` usa `shareReplay(1)` para cachear el listado en memoria durante la sesión — el HTTP request se hace una sola vez y todos los componentes reutilizan la respuesta.
+
+**IMPORTANTE:** Si en el futuro se agrega un método `crear`, `modificar` o `eliminar` en `CarrerasService`, hay que invalidar el caché después de cada mutación exitosa. Patrón:
+```typescript
+private cache$: Observable<Carrera[]> | null = null;
+
+listar(): Observable<Carrera[]> {
+  if (!this.cache$) {
+    this.cache$ = this.http.get<Carrera[]>(this.apiUrl).pipe(shareReplay(1));
+  }
+  return this.cache$;
+}
+
+crear(dto: CrearCarreraRequest): Observable<Carrera> {
+  return this.http.post<Carrera>(this.apiUrl, dto).pipe(
+    tap(() => this.cache$ = null)  // invalida el caché
+  );
+}
+```
+
 ---
 
 ## Modelo de Dominio (Resumen)
