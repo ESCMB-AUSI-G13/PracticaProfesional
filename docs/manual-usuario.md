@@ -138,6 +138,46 @@ Define los períodos oficiales del año lectivo (inicio de clases, períodos de 
 
 Todos los reportes están en la sección **Reportes** del menú lateral.
 
+#### Tablero ejecutivo institucional (RR-01)
+
+Vista de resumen global para la dirección. Se carga automáticamente al ingresar a **Reportes → Tablero ejecutivo**.
+
+Muestra:
+- Métricas generales de la institución (total de estudiantes, tasa de egreso, deserción, etc.).
+- **Gráfico de barras:** evolución por cohorte — cantidad de activos, egresados y desertores por año de ingreso.
+- **Gráfico de dona:** distribución del riesgo académico actual (Alto / Medio / Bajo).
+- Botón **Descargar PDF** para exportar el tablero completo.
+
+---
+
+#### Riesgo de deserción académica
+
+Permite identificar estudiantes en situación de riesgo, con filtros y detalle individual.
+
+1. Ir a **Reportes → Riesgo académico**.
+2. Aplicar filtros opcionales: **Carrera**, **Año de cohorte**, **Nivel de riesgo** (Alto / Medio / Bajo).
+3. Hacer clic en **Buscar**.
+4. El panel muestra:
+   - Gráfico de dona con la distribución de niveles de riesgo.
+   - Tabla paginada con cada estudiante, su legajo, condición académica y nivel de riesgo.
+5. Podés buscar un estudiante por nombre o legajo dentro de la tabla.
+6. Usar **Descargar PDF** para exportar el listado con los filtros aplicados.
+
+---
+
+#### Retención y deserción por cohorte
+
+Muestra cómo evoluciona cada cohorte a lo largo del tiempo: cuántos siguen activos, cuántos egresaron y cuántos desertaron.
+
+1. Ir a **Reportes → Retención por cohorte**.
+2. Aplicar filtros opcionales: **Carrera**, **Año de cohorte**.
+3. Hacer clic en **Buscar**.
+4. El panel tiene dos pestañas:
+   - **Por cohorte:** gráfico de barras agrupado (Activos / Egresados / Desertores) por año de ingreso. Botón **Descargar PDF**.
+   - **Retención anual:** tabla con tasas de retención por año ordinal de cursada (1°, 2°, 3°...) para cada cohorte. Botón **Descargar PDF**.
+
+---
+
 #### Reporte de inasistencias (RR-08)
 
 Muestra el registro de asistencias con filtros por curso, materia, rango de fechas y si incluir solo ausencias.

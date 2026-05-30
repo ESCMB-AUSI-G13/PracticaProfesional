@@ -1,6 +1,7 @@
 -- ============================================================
 -- Sistema Académico Integral — Script de creación de tablas
 -- Motor: SQL Server
+-- Generado desde AppDbContextModelSnapshot — 2026-05-30
 -- ============================================================
 
 -- ──────────────────────────────────────────────────────────
@@ -8,18 +9,18 @@
 -- ──────────────────────────────────────────────────────────
 
 CREATE TABLE Usuarios (
-    Id            INT IDENTITY(1,1) PRIMARY KEY,
-    DNI           NVARCHAR(10)  NOT NULL,
-    Legajo        NVARCHAR(20)  NOT NULL,
-    Email         NVARCHAR(150) NOT NULL,
-    Nombre        NVARCHAR(100) NOT NULL,
-    Apellido      NVARCHAR(100) NOT NULL,
-    PasswordHash  NVARCHAR(MAX) NOT NULL,
-    Rol           NVARCHAR(50)  NOT NULL,
-    Activo        BIT           NOT NULL DEFAULT 1,
-    FechaCreacion DATETIME2     NOT NULL DEFAULT GETUTCDATE(),
-    PasswordResetToken        NVARCHAR(100) NULL,
-    PasswordResetTokenExpiry  DATETIME2     NULL,
+    Id                       INT IDENTITY(1,1) PRIMARY KEY,
+    DNI                      NVARCHAR(10)  NOT NULL,
+    Legajo                   NVARCHAR(20)  NOT NULL,
+    Email                    NVARCHAR(150) NOT NULL,
+    Nombre                   NVARCHAR(100) NOT NULL,
+    Apellido                 NVARCHAR(100) NOT NULL,
+    PasswordHash             NVARCHAR(MAX) NOT NULL,
+    Rol                      NVARCHAR(MAX) NOT NULL,
+    Activo                   BIT           NOT NULL DEFAULT 1,
+    FechaCreacion            DATETIME2     NOT NULL,
+    PasswordResetToken       NVARCHAR(MAX) NULL,
+    PasswordResetTokenExpiry DATETIME2     NULL,
     CONSTRAINT UQ_Usuarios_DNI    UNIQUE (DNI),
     CONSTRAINT UQ_Usuarios_Legajo UNIQUE (Legajo),
     CONSTRAINT UQ_Usuarios_Email  UNIQUE (Email)
@@ -27,10 +28,10 @@ CREATE TABLE Usuarios (
 
 CREATE TABLE Docentes (
     Id        INT IDENTITY(1,1) PRIMARY KEY,
-    UsuarioId INT          NOT NULL,
-    Telefono  NVARCHAR(20) NOT NULL,
+    UsuarioId INT           NOT NULL,
+    Telefono  NVARCHAR(20)  NOT NULL,
     Categoria NVARCHAR(100) NOT NULL,
-    CONSTRAINT FK_Docentes_Usuarios FOREIGN KEY (UsuarioId) REFERENCES Usuarios(Id),
+    CONSTRAINT FK_Docentes_Usuarios  FOREIGN KEY (UsuarioId) REFERENCES Usuarios(Id),
     CONSTRAINT UQ_Docentes_UsuarioId UNIQUE (UsuarioId)
 );
 
@@ -39,39 +40,50 @@ CREATE TABLE Preceptores (
     UsuarioId INT          NOT NULL,
     Telefono  NVARCHAR(20) NOT NULL,
     Turno     NVARCHAR(50) NOT NULL,
-    CONSTRAINT FK_Preceptores_Usuarios FOREIGN KEY (UsuarioId) REFERENCES Usuarios(Id),
+    CONSTRAINT FK_Preceptores_Usuarios  FOREIGN KEY (UsuarioId) REFERENCES Usuarios(Id),
     CONSTRAINT UQ_Preceptores_UsuarioId UNIQUE (UsuarioId)
-);
-
-CREATE TABLE Estudiantes (
-    Id             INT IDENTITY(1,1) PRIMARY KEY,
-    UsuarioId      INT          NOT NULL,
-    Anio           INT          NOT NULL,
-    Condicion      NVARCHAR(50) NOT NULL,
-    FechaDeIngreso DATE         NOT NULL,
-    CONSTRAINT FK_Estudiantes_Usuarios FOREIGN KEY (UsuarioId) REFERENCES Usuarios(Id),
-    CONSTRAINT UQ_Estudiantes_UsuarioId UNIQUE (UsuarioId),
-    CONSTRAINT CK_Estudiantes_Anio CHECK (Anio BETWEEN 1 AND 6)
 );
 
 -- ──────────────────────────────────────────────────────────
 -- PLAN ACADÉMICO
 -- ──────────────────────────────────────────────────────────
 
+CREATE TABLE Carreras (
+    Id         INT IDENTITY(1,1) PRIMARY KEY,
+    Nombre     NVARCHAR(200) NOT NULL,
+    Resolucion NVARCHAR(50)  NOT NULL,
+    CONSTRAINT UQ_Carreras_Nombre UNIQUE (Nombre)
+);
+
+CREATE TABLE Estudiantes (
+    Id             INT IDENTITY(1,1) PRIMARY KEY,
+    UsuarioId      INT           NOT NULL,
+    CarreraId      INT           NOT NULL,
+    Anio           INT           NOT NULL,
+    Condicion      NVARCHAR(MAX) NOT NULL,
+    FechaDeIngreso DATETIME2     NOT NULL,
+    FechaDeEgreso  DATETIME2     NULL,
+    CONSTRAINT FK_Estudiantes_Usuarios FOREIGN KEY (UsuarioId) REFERENCES Usuarios(Id),
+    CONSTRAINT FK_Estudiantes_Carreras FOREIGN KEY (CarreraId) REFERENCES Carreras(Id),
+    CONSTRAINT UQ_Estudiantes_UsuarioId UNIQUE (UsuarioId)
+);
+
 CREATE TABLE Materias (
-    Id     INT IDENTITY(1,1) PRIMARY KEY,
-    Codigo NVARCHAR(20)  NOT NULL,
-    Nombre NVARCHAR(200) NOT NULL,
-    [Plan] NVARCHAR(20)  NOT NULL,
-    CONSTRAINT UQ_Materias_Codigo UNIQUE (Codigo)
+    Id        INT IDENTITY(1,1) PRIMARY KEY,
+    Codigo    NVARCHAR(20)  NOT NULL,
+    Nombre    NVARCHAR(200) NOT NULL,
+    CarreraId INT           NOT NULL,
+    Anio      TINYINT       NOT NULL,
+    CONSTRAINT FK_Materias_Carreras FOREIGN KEY (CarreraId) REFERENCES Carreras(Id),
+    CONSTRAINT UQ_Materias_Codigo   UNIQUE (Codigo)
 );
 
 CREATE TABLE Correlatividades (
-    Id                INT IDENTITY(1,1) PRIMARY KEY,
-    MateriaDestinoId  INT          NOT NULL,
-    MateriaRequisitoId INT         NOT NULL,
-    TipoRequerimiento NVARCHAR(50) NOT NULL,   -- 'Cursar' | 'Rendir'
-    CondicionAcademica NVARCHAR(50) NOT NULL,  -- 'Regularizado' | 'Aprobado'
+    Id                 INT IDENTITY(1,1) PRIMARY KEY,
+    MateriaDestinoId   INT           NOT NULL,
+    MateriaRequisitoId INT           NOT NULL,
+    TipoRequerimiento  NVARCHAR(50)  NOT NULL,   -- 'Cursar' | 'Rendir'
+    CondicionAcademica NVARCHAR(MAX) NOT NULL,   -- 'Regularizado' | 'Aprobado'
     CONSTRAINT FK_Corr_Destino   FOREIGN KEY (MateriaDestinoId)  REFERENCES Materias(Id),
     CONSTRAINT FK_Corr_Requisito FOREIGN KEY (MateriaRequisitoId) REFERENCES Materias(Id),
     CONSTRAINT UQ_Correlatividades UNIQUE (MateriaDestinoId, MateriaRequisitoId, TipoRequerimiento)
@@ -79,26 +91,42 @@ CREATE TABLE Correlatividades (
 
 CREATE TABLE Cursos (
     Id          INT IDENTITY(1,1) PRIMARY KEY,
-    Anio        INT          NOT NULL,
-    AnioLectivo INT          NOT NULL,
-    Comision    NVARCHAR(20) NOT NULL,
-    Cupo        INT          NOT NULL,
-    Estado      NVARCHAR(20) NOT NULL DEFAULT 'Activo',
-    PreceptorId INT          NOT NULL,
-    CONSTRAINT FK_Cursos_Preceptores FOREIGN KEY (PreceptorId) REFERENCES Preceptores(Id),
-    CONSTRAINT UQ_Cursos_AnioLectivoCom UNIQUE (Anio, AnioLectivo, Comision),
-    CONSTRAINT CK_Cursos_Cupo CHECK (Cupo > 0)
+    Anio        INT           NOT NULL,
+    AnioLectivo INT           NOT NULL,
+    Comision    NVARCHAR(20)  NOT NULL,
+    Cupo        INT           NOT NULL,
+    Estado      NVARCHAR(MAX) NOT NULL,
+    PreceptorId INT           NOT NULL,
+    CONSTRAINT FK_Cursos_Preceptores    FOREIGN KEY (PreceptorId) REFERENCES Preceptores(Id),
+    CONSTRAINT UQ_Cursos_AnioLectivoCom UNIQUE (Anio, AnioLectivo, Comision)
 );
 
 CREATE TABLE EspaciosCurriculares (
-    Id         INT IDENTITY(1,1) PRIMARY KEY,
-    MateriaId  INT NOT NULL,
-    DocenteId  INT NOT NULL,
-    CursoId    INT NOT NULL,
-    CONSTRAINT FK_EC_Materias  FOREIGN KEY (MateriaId) REFERENCES Materias(Id),
-    CONSTRAINT FK_EC_Docentes  FOREIGN KEY (DocenteId) REFERENCES Docentes(Id),
-    CONSTRAINT FK_EC_Cursos    FOREIGN KEY (CursoId)   REFERENCES Cursos(Id),
-    CONSTRAINT UQ_EC UNIQUE (MateriaId, DocenteId, CursoId)
+    Id        INT IDENTITY(1,1) PRIMARY KEY,
+    MateriaId INT NOT NULL,
+    DocenteId INT NOT NULL,
+    CursoId   INT NOT NULL,
+    CONSTRAINT FK_EC_Materias FOREIGN KEY (MateriaId) REFERENCES Materias(Id),
+    CONSTRAINT FK_EC_Docentes FOREIGN KEY (DocenteId) REFERENCES Docentes(Id),
+    CONSTRAINT FK_EC_Cursos   FOREIGN KEY (CursoId)   REFERENCES Cursos(Id),
+    CONSTRAINT UQ_EC          UNIQUE (MateriaId, DocenteId, CursoId)
+);
+
+-- ──────────────────────────────────────────────────────────
+-- CALENDARIO ACADÉMICO
+-- ──────────────────────────────────────────────────────────
+
+CREATE TABLE CalendarioAcademico (
+    Id           INT IDENTITY(1,1) PRIMARY KEY,
+    NombreEvento NVARCHAR(200) NOT NULL,
+    Comision     NVARCHAR(20)  NOT NULL,
+    FechaInicio  DATETIME2     NOT NULL,
+    FechaFin     DATETIME2     NOT NULL,
+    TipoEvento   NVARCHAR(MAX) NOT NULL,
+    MateriaId    INT           NULL,
+    CursoId      INT           NULL,
+    CONSTRAINT FK_Cal_Materia FOREIGN KEY (MateriaId) REFERENCES Materias(Id),
+    CONSTRAINT FK_Cal_Curso   FOREIGN KEY (CursoId)   REFERENCES Cursos(Id)
 );
 
 -- ──────────────────────────────────────────────────────────
@@ -107,39 +135,37 @@ CREATE TABLE EspaciosCurriculares (
 
 CREATE TABLE InscripcionesMateria (
     Id               INT IDENTITY(1,1) PRIMARY KEY,
-    EstudianteId     INT          NOT NULL,
-    MateriaId        INT          NOT NULL,
-    CursoId          INT          NOT NULL,
-    Estado           NVARCHAR(20) NOT NULL DEFAULT 'Activa',
-    FechaInscripcion DATETIME2    NOT NULL DEFAULT GETUTCDATE(),
+    EstudianteId     INT           NOT NULL,
+    MateriaId        INT           NOT NULL,
+    CursoId          INT           NOT NULL,
+    Estado           NVARCHAR(MAX) NOT NULL,
+    FechaInscripcion DATETIME2     NOT NULL,
     CONSTRAINT FK_InscMat_Estudiante FOREIGN KEY (EstudianteId) REFERENCES Estudiantes(Id),
     CONSTRAINT FK_InscMat_Materia    FOREIGN KEY (MateriaId)    REFERENCES Materias(Id),
     CONSTRAINT FK_InscMat_Curso      FOREIGN KEY (CursoId)      REFERENCES Cursos(Id),
-    CONSTRAINT UQ_InscMat UNIQUE (EstudianteId, MateriaId, CursoId)
+    CONSTRAINT UQ_InscMat            UNIQUE (EstudianteId, MateriaId, CursoId)
 );
 
 CREATE TABLE Examenes (
     Id          INT IDENTITY(1,1) PRIMARY KEY,
-    MateriaId   INT          NOT NULL,
-    FechaExamen DATE         NOT NULL,
-    Horario     NVARCHAR(50) NOT NULL,
-    Cupo        INT          NOT NULL,
-    TipoExamen  NVARCHAR(50) NOT NULL,
-    CONSTRAINT FK_Examenes_Materias FOREIGN KEY (MateriaId) REFERENCES Materias(Id),
-    CONSTRAINT CK_Examenes_Cupo CHECK (Cupo > 0)
+    MateriaId   INT           NOT NULL,
+    FechaExamen DATETIME2     NOT NULL,
+    Horario     NVARCHAR(50)  NOT NULL,
+    Cupo        INT           NOT NULL,
+    TipoExamen  NVARCHAR(MAX) NOT NULL,
+    CONSTRAINT FK_Examenes_Materias FOREIGN KEY (MateriaId) REFERENCES Materias(Id)
 );
 
 CREATE TABLE InscripcionesExamen (
     Id               INT IDENTITY(1,1) PRIMARY KEY,
     EstudianteId     INT           NOT NULL,
     ExamenId         INT           NOT NULL,
-    Estado           NVARCHAR(20)  NOT NULL DEFAULT 'Activa',
+    Estado           NVARCHAR(MAX) NOT NULL,
     NotaValor        DECIMAL(4,2)  NULL,
-    FechaInscripcion DATETIME2     NOT NULL DEFAULT GETUTCDATE(),
+    FechaInscripcion DATETIME2     NOT NULL,
     CONSTRAINT FK_InscEx_Estudiante FOREIGN KEY (EstudianteId) REFERENCES Estudiantes(Id),
     CONSTRAINT FK_InscEx_Examen     FOREIGN KEY (ExamenId)     REFERENCES Examenes(Id),
-    CONSTRAINT UQ_InscEx UNIQUE (EstudianteId, ExamenId),
-    CONSTRAINT CK_InscEx_Nota CHECK (NotaValor IS NULL OR (NotaValor >= 1 AND NotaValor <= 10))
+    CONSTRAINT UQ_InscEx            UNIQUE (EstudianteId, ExamenId)
 );
 
 -- ──────────────────────────────────────────────────────────
@@ -148,16 +174,16 @@ CREATE TABLE InscripcionesExamen (
 
 CREATE TABLE Asistencias (
     Id           INT IDENTITY(1,1) PRIMARY KEY,
-    EstudianteId INT          NOT NULL,
-    MateriaId    INT          NOT NULL,
-    CursoId      INT          NOT NULL,
-    Fecha        DATE         NOT NULL,
-    Estado       NVARCHAR(30) NOT NULL,
+    EstudianteId INT           NOT NULL,
+    MateriaId    INT           NOT NULL,
+    CursoId      INT           NOT NULL,
+    Fecha        DATETIME2     NOT NULL,
+    Estado       NVARCHAR(MAX) NOT NULL,
     Motivo       NVARCHAR(300) NULL,
     CONSTRAINT FK_Asist_Estudiante FOREIGN KEY (EstudianteId) REFERENCES Estudiantes(Id),
     CONSTRAINT FK_Asist_Materia    FOREIGN KEY (MateriaId)    REFERENCES Materias(Id),
     CONSTRAINT FK_Asist_Curso      FOREIGN KEY (CursoId)      REFERENCES Cursos(Id),
-    CONSTRAINT UQ_Asistencia UNIQUE (EstudianteId, MateriaId, CursoId, Fecha)
+    CONSTRAINT UQ_Asistencia       UNIQUE (EstudianteId, MateriaId, CursoId, Fecha)
 );
 
 -- ──────────────────────────────────────────────────────────
@@ -173,43 +199,44 @@ CREATE TABLE HistorialAcademico (
     Comision     NVARCHAR(20)  NOT NULL,
     EstadoFinal  NVARCHAR(50)  NOT NULL,
     NotaFinal    DECIMAL(4,2)  NULL,
-    Condicion    NVARCHAR(50)  NOT NULL,
+    Condicion    NVARCHAR(MAX) NOT NULL,
     CONSTRAINT FK_Hist_Estudiante FOREIGN KEY (EstudianteId) REFERENCES Estudiantes(Id),
     CONSTRAINT FK_Hist_Materia    FOREIGN KEY (MateriaId)    REFERENCES Materias(Id),
-    CONSTRAINT FK_Hist_Curso      FOREIGN KEY (CursoId)      REFERENCES Cursos(Id),
-    CONSTRAINT CK_Hist_Nota CHECK (NotaFinal IS NULL OR (NotaFinal >= 1 AND NotaFinal <= 10))
+    CONSTRAINT FK_Hist_Curso      FOREIGN KEY (CursoId)      REFERENCES Cursos(Id)
 );
+
+-- ──────────────────────────────────────────────────────────
+-- ALERTAS Y NOTIFICACIONES
+-- ──────────────────────────────────────────────────────────
 
 CREATE TABLE Alertas (
-    Id                  INT IDENTITY(1,1) PRIMARY KEY,
-    Anio                INT           NOT NULL,
-    Comision            NVARCHAR(20)  NOT NULL,
-    EstadoFinal         NVARCHAR(50)  NOT NULL,
-    NotaFinal           DECIMAL(4,2)  NULL,
-    Condicion           NVARCHAR(50)  NOT NULL,
-    Enviada             BIT           NOT NULL DEFAULT 0,
-    FechaCreacion       DATETIME2     NOT NULL DEFAULT GETUTCDATE(),
-    InscripcionExamenId INT           NULL,
-    InscripcionMateriaId INT          NULL,
-    ExamenId            INT           NULL,
-    CONSTRAINT FK_Alert_InscEx  FOREIGN KEY (InscripcionExamenId)  REFERENCES InscripcionesExamen(Id),
-    CONSTRAINT FK_Alert_InscMat FOREIGN KEY (InscripcionMateriaId) REFERENCES InscripcionesMateria(Id),
-    CONSTRAINT FK_Alert_Examen  FOREIGN KEY (ExamenId)             REFERENCES Examenes(Id)
+    Id                   INT IDENTITY(1,1) PRIMARY KEY,
+    Tipo                 NVARCHAR(50)  NOT NULL,   -- 'RiesgoAsistencia' | 'RiesgoInactividad' | 'VencimientoCargaNotas' | 'VencimientoInscripcion'
+    Mensaje              NVARCHAR(MAX) NOT NULL,
+    Destinatario         NVARCHAR(150) NOT NULL,
+    Enviada              BIT           NOT NULL DEFAULT 0,
+    FechaCreacion        DATETIME2     NOT NULL,
+    EstudianteId         INT           NULL,
+    CalendarioAcademicoId INT          NULL,
+    CONSTRAINT FK_Alert_Estudiante          FOREIGN KEY (EstudianteId)          REFERENCES Estudiantes(Id),
+    CONSTRAINT FK_Alert_CalendarioAcademico FOREIGN KEY (CalendarioAcademicoId) REFERENCES CalendarioAcademico(Id)
 );
 
-CREATE TABLE CalendarioAcademico (
-    Id           INT IDENTITY(1,1) PRIMARY KEY,
-    NombreEvento NVARCHAR(200) NOT NULL,
-    Comision     NVARCHAR(20)  NULL,
-    FechaInicio  DATE          NOT NULL,
-    FechaFin     DATE          NOT NULL,
-    TipoEvento   NVARCHAR(50)  NOT NULL,
-    MateriaId    INT           NULL,
-    CursoId      INT           NULL,
-    CONSTRAINT FK_Cal_Materia FOREIGN KEY (MateriaId) REFERENCES Materias(Id),
-    CONSTRAINT FK_Cal_Curso   FOREIGN KEY (CursoId)   REFERENCES Cursos(Id),
-    CONSTRAINT CK_Cal_Fechas CHECK (FechaFin >= FechaInicio)
+CREATE INDEX IX_Alertas_Estudiante  ON Alertas (EstudianteId, Tipo, FechaCreacion);
+CREATE INDEX IX_Alertas_Calendario  ON Alertas (CalendarioAcademicoId, Destinatario, FechaCreacion);
+
+CREATE TABLE Notificaciones (
+    Id            INT IDENTITY(1,1) PRIMARY KEY,
+    UsuarioId     INT           NOT NULL,
+    Titulo        NVARCHAR(200) NOT NULL,
+    Mensaje       NVARCHAR(MAX) NOT NULL,
+    Tipo          NVARCHAR(50)  NULL,
+    Leida         BIT           NOT NULL DEFAULT 0,
+    FechaCreacion DATETIME2     NOT NULL,
+    CONSTRAINT FK_Notif_Usuario FOREIGN KEY (UsuarioId) REFERENCES Usuarios(Id) ON DELETE CASCADE
 );
+
+CREATE INDEX IX_Notificaciones_Usuario ON Notificaciones (UsuarioId, Leida, FechaCreacion);
 
 -- ──────────────────────────────────────────────────────────
 -- ENCUESTAS (anónimas — sin FK al alumno)
@@ -217,21 +244,21 @@ CREATE TABLE CalendarioAcademico (
 
 CREATE TABLE Encuestas (
     Id            INT IDENTITY(1,1) PRIMARY KEY,
-    MateriaId     INT       NOT NULL,
-    DocenteId     INT       NOT NULL,
+    MateriaId     INT           NOT NULL,
+    DocenteId     INT           NOT NULL,
     Preguntas     NVARCHAR(MAX) NOT NULL,
-    Activa        BIT       NOT NULL DEFAULT 1,
-    FechaCreacion DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
-    CONSTRAINT FK_Enc_Materia  FOREIGN KEY (MateriaId) REFERENCES Materias(Id),
-    CONSTRAINT FK_Enc_Docente  FOREIGN KEY (DocenteId) REFERENCES Docentes(Id)
+    Activa        BIT           NOT NULL DEFAULT 1,
+    FechaCreacion DATETIME2     NOT NULL,
+    CONSTRAINT FK_Enc_Materia FOREIGN KEY (MateriaId) REFERENCES Materias(Id),
+    CONSTRAINT FK_Enc_Docente FOREIGN KEY (DocenteId) REFERENCES Docentes(Id)
 );
 
 CREATE TABLE RespuestasEncuesta (
-    Id          INT IDENTITY(1,1) PRIMARY KEY,
-    EncuestaId  INT           NOT NULL,
-    Preguntas   NVARCHAR(MAX) NOT NULL,
-    Respuestas  NVARCHAR(MAX) NOT NULL,
-    Fecha       DATETIME2     NOT NULL DEFAULT GETUTCDATE(),
+    Id         INT IDENTITY(1,1) PRIMARY KEY,
+    EncuestaId INT           NOT NULL,
+    Preguntas  NVARCHAR(MAX) NOT NULL,
+    Respuestas NVARCHAR(MAX) NOT NULL,
+    Fecha      DATETIME2     NOT NULL,
     -- Sin FK a alumno: anonimización CU-36/CU-40
     CONSTRAINT FK_Resp_Encuesta FOREIGN KEY (EncuestaId) REFERENCES Encuestas(Id)
 );
@@ -241,19 +268,19 @@ CREATE TABLE RespuestasEncuesta (
 -- ──────────────────────────────────────────────────────────
 
 CREATE TABLE AuditoriaCambios (
-    Id                  INT IDENTITY(1,1) PRIMARY KEY,
-    TablaAfectada       NVARCHAR(100) NOT NULL,
-    RegistroAfectado    NVARCHAR(50)  NOT NULL,
-    Accion              NVARCHAR(50)  NOT NULL,
-    FechaCambio         DATETIME2     NOT NULL DEFAULT GETUTCDATE(),
-    ValorAnterior       NVARCHAR(MAX) NULL,
-    ValorNuevo          NVARCHAR(MAX) NULL,
-    UsuarioId           INT           NOT NULL,
-    ExamenId            INT           NULL,
-    CalendarioId        INT           NULL,
-    InscripcionExamenId INT           NULL,
-    InscripcionMateriaId INT          NULL,
-    EncuestaId          INT           NULL,
+    Id                   INT IDENTITY(1,1) PRIMARY KEY,
+    TablaAfectada        NVARCHAR(100) NOT NULL,
+    RegistroAfectado     NVARCHAR(50)  NOT NULL,
+    Accion               NVARCHAR(50)  NOT NULL,
+    FechaCambio          DATETIME2     NOT NULL,
+    ValorAnterior        NVARCHAR(MAX) NULL,
+    ValorNuevo           NVARCHAR(MAX) NULL,
+    UsuarioId            INT           NOT NULL,
+    ExamenId             INT           NULL,
+    CalendarioId         INT           NULL,
+    InscripcionExamenId  INT           NULL,
+    InscripcionMateriaId INT           NULL,
+    EncuestaId           INT           NULL,
     CONSTRAINT FK_Aud_Usuario    FOREIGN KEY (UsuarioId)            REFERENCES Usuarios(Id),
     CONSTRAINT FK_Aud_Examen     FOREIGN KEY (ExamenId)             REFERENCES Examenes(Id),
     CONSTRAINT FK_Aud_Calendario FOREIGN KEY (CalendarioId)         REFERENCES CalendarioAcademico(Id),
@@ -266,7 +293,7 @@ CREATE INDEX IX_AuditoriaCambios_Tabla ON AuditoriaCambios (TablaAfectada);
 CREATE INDEX IX_AuditoriaCambios_Fecha ON AuditoriaCambios (FechaCambio);
 
 -- ──────────────────────────────────────────────────────────
--- AUDITORÍA LEGACY (logs de acceso y cambios de rol)
+-- AUDITORÍA DE ACCESO Y ROLES
 -- ──────────────────────────────────────────────────────────
 
 CREATE TABLE AuditoriaLogs (
@@ -278,8 +305,12 @@ CREATE TABLE AuditoriaLogs (
     EjecutorId    INT           NULL,
     ValorAnterior NVARCHAR(MAX) NULL,
     ValorNuevo    NVARCHAR(MAX) NULL,
-    Timestamp     DATETIME2     NOT NULL DEFAULT GETUTCDATE()
+    Timestamp     DATETIME2     NOT NULL
 );
+
+CREATE INDEX IX_AuditoriaLogs_Accion    ON AuditoriaLogs (Accion);
+CREATE INDEX IX_AuditoriaLogs_Entidad   ON AuditoriaLogs (EntidadTipo);
+CREATE INDEX IX_AuditoriaLogs_Timestamp ON AuditoriaLogs (Timestamp);
 
 CREATE TABLE AuditoriaCambiosRol (
     Id          INT IDENTITY(1,1) PRIMARY KEY,
@@ -287,7 +318,7 @@ CREATE TABLE AuditoriaCambiosRol (
     RolOriginal NVARCHAR(50) NOT NULL,
     RolVista    NVARCHAR(50) NOT NULL,
     Accion      NVARCHAR(20) NOT NULL,
-    Timestamp   DATETIME2    NOT NULL DEFAULT GETUTCDATE(),
+    Timestamp   DATETIME2    NOT NULL,
     CONSTRAINT FK_AuditRol_Usuario FOREIGN KEY (UsuarioId) REFERENCES Usuarios(Id)
 );
 
@@ -298,5 +329,9 @@ CREATE TABLE LogsSeguridad (
     MotivoFallo NVARCHAR(200) NULL,
     IpOrigen    NVARCHAR(45)  NOT NULL,
     UserAgent   NVARCHAR(500) NOT NULL,
-    Timestamp   DATETIME2     NOT NULL DEFAULT GETUTCDATE()
+    Timestamp   DATETIME2     NOT NULL
 );
+
+CREATE INDEX IX_LogsSeguridad_Email     ON LogsSeguridad (Email);
+CREATE INDEX IX_LogsSeguridad_Exitoso   ON LogsSeguridad (Exitoso);
+CREATE INDEX IX_LogsSeguridad_Timestamp ON LogsSeguridad (Timestamp);

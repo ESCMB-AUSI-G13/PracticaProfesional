@@ -12,6 +12,13 @@ public class PdfReporteService
 
     // ── Helpers comunes ──────────────────────────────────────────────────────────
 
+    private static readonly TimeZoneInfo ZonaArgentina =
+        TimeZoneInfo.FindSystemTimeZoneById(
+            OperatingSystem.IsWindows() ? "Argentina Standard Time" : "America/Argentina/Buenos_Aires");
+
+    private static DateTime AhoraArgentina =>
+        TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, ZonaArgentina);
+
     private static IDocument BuildDoc(string titulo, Action<ColumnDescriptor> body)
     {
         return Document.Create(container =>
@@ -34,7 +41,7 @@ public class PdfReporteService
                         row.AutoItem().AlignRight().Column(inner =>
                         {
                             inner.Item().Text(titulo).Bold().FontSize(11).FontColor("#1a2f5a").AlignRight();
-                            inner.Item().Text($"Generado: {DateTime.Now:dd/MM/yyyy HH:mm}").FontSize(7.5f).FontColor("#999999").AlignRight();
+                            inner.Item().Text($"Generado: {AhoraArgentina:dd/MM/yyyy HH:mm}").FontSize(7.5f).FontColor("#999999").AlignRight();
                         });
                     });
                     col.Item().PaddingTop(5).LineHorizontal(1.5f).LineColor("#2471a3");
