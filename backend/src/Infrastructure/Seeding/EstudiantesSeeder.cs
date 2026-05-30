@@ -74,18 +74,18 @@ public static class EstudiantesSeeder
         int CantPromocional
     );
 
-    // 365 alumnos en total | 93 Libres + 198 Regulares + 74 Promocionales
+    // 425 alumnos en total (incluye Año 4 Profesorado cohorte 2023)
     private static readonly Grupo[] Grupos =
     [
-        //                                                         L    R   P
+        //                                                              L    R   P
         new(1, 1, "A", 1,  [17,18,19,20,21,22,23,24,48],         2026, 10, 19,  3), // 32
         new(1, 1, "B", 2,  [17,18,19,20,21,22,23,24,48],         2026, 11, 17,  3), // 31
         new(1, 2, "A", 14, [25,26,27,28,29,30,31,49,50],         2025, 10, 15,  5), // 30
         new(1, 2, "B", 15, [25,26,27,28,29,30,31,49,50],         2025,  9, 15,  6), // 30
         new(1, 3, "A", 16, [32,33,34,35,36,37,38,39,51],         2024,  5, 17,  9), // 31
         new(1, 3, "B", 17, [32,33,34,35,36,37,38,39,51],         2024,  4, 17,  9), // 30
-        new(1, 4, "A", 18, [40,41,42,43,44,45,46,47,52,53],      2023,  6, 18,  6), // 30
-        new(1, 4, "B", 19, [40,41,42,43,44,45,46,47,52,53],      2023,  7, 17,  6), // 30
+        new(1, 4, "A", 18, [40,41,42,43,44,45,46,47,52,53],      2023,  5, 17,  8), // 30
+        new(1, 4, "B", 19, [40,41,42,43,44,45,46,47,52,53],      2023,  4, 18,  8), // 30
         new(2, 1, "A", 1,  [4,6,7,8,9,10,11],                    2026,  9, 16,  6), // 31
         new(2, 1, "B", 2,  [4,6,7,8,9,10,11],                    2026,  9, 16,  5), // 30
         new(2, 2, "A", 14, [12,13,14,15,16],                      2025,  6, 16,  8), // 30
@@ -112,11 +112,11 @@ public static class EstudiantesSeeder
             .ToListAsync(ct))
             .ToHashSet();
 
-        // Criterio de seed completo: ≥ 350 estudiantes ya tienen asistencias.
-        // Se usa idsConAsistencias como fuente de verdad porque el formato de legajo
-        // puede diferir entre versiones del seeder, haciendo que mapaExistentes sea 0
-        // aunque los alumnos ya existan en la BD.
-        if (idsConAsistencias.Count >= 350)
+        // Seed completo: ≥ 350 con asistencias Y existen alumnos de Año 4 del Profesorado 2023.
+        bool tieneAnio4 = await db.Estudiantes
+            .AnyAsync(e => e.Anio == 4 && e.CarreraId == 1 && e.FechaDeIngreso.Year == 2023, ct);
+
+        if (idsConAsistencias.Count >= 350 && tieneAnio4)
         {
             logger.LogInformation("EstudiantesSeeder: seed completo ({A} estudiantes con asistencias), omitido.",
                 idsConAsistencias.Count);
@@ -405,36 +405,30 @@ public static class EstudiantesSeeder
     public static async Task PatchCondicionesRetencionAsync(
         AppDbContext db, ILogger logger, CancellationToken ct = default)
     {
-        bool yaHayDesertores = await db.Estudiantes
-            .AnyAsync(e => e.Condicion == CondicionEstudiante.Desertor, ct);
-        bool yaHayEgresados  = await db.Estudiantes
-            .AnyAsync(e => e.Condicion == CondicionEstudiante.Egresado, ct);
-
-        if (yaHayDesertores && yaHayEgresados)
-        {
-            logger.LogInformation("PatchCondicionesRetencion: ya existen Desertores y Egresados, omitido.");
-            return;
-        }
-
         var rng = new Random(13);
 
-        // Porcentajes: (anioCohorte → (pctDesertor, pctEgresado))
-        var config = new Dictionary<int, (double PctDesertor, double PctEgresado)>
+        // Porcentajes por (anioCohorte, carreraId): solo cohortes del EstudiantesSeeder
+        // que no son cubiertas por el CohorteHistoricaSeeder.
+        var config = new List<(int Anio, int CarreraId, double PctDesertor, double PctEgresado)>
         {
-            { 2023, (0.15, 0.25) },
-            { 2024, (0.12, 0.00) },
-            { 2025, (0.08, 0.00) }
+            (2024, 1, 0.12, 0.00),  // Profesorado 2024 — año 3 en curso
+            (2025, 1, 0.08, 0.00),  // Profesorado 2025 — año 2 en curso
+            (2025, 2, 0.08, 0.00),  // Trayecto 2025    — año 2 en curso
         };
 
         int desertores = 0, egresados = 0;
 
-        foreach (var (anio, (pctD, pctE)) in config)
+        foreach (var (anio, carreraId, pctD, pctE) in config)
         {
             var deCohorte = await db.Estudiantes
-                .Where(e => e.FechaDeIngreso.Year == anio)
+                .Where(e => e.FechaDeIngreso.Year == anio && e.CarreraId == carreraId)
                 .ToListAsync(ct);
 
-            if (!yaHayDesertores && pctD > 0)
+            // Guarda por (cohorte × carrera): solo aplica si ese grupo aún no tiene la distribución
+            bool grupTieneDesertores = deCohorte.Any(e => e.Condicion == CondicionEstudiante.Desertor);
+            bool grupTieneEgresados  = deCohorte.Any(e => e.Condicion == CondicionEstudiante.Egresado);
+
+            if (!grupTieneDesertores && pctD > 0)
             {
                 var libres = deCohorte
                     .Where(e => e.Condicion == CondicionEstudiante.Libre)
@@ -449,7 +443,7 @@ public static class EstudiantesSeeder
                 }
             }
 
-            if (!yaHayEgresados && pctE > 0)
+            if (!grupTieneEgresados && pctE > 0)
             {
                 var promocionales = deCohorte
                     .Where(e => e.Condicion == CondicionEstudiante.Promocional)
@@ -564,6 +558,9 @@ public static class EstudiantesSeeder
         {
             asistenciaMap.TryGetValue(e.Id, out var asis);
             notasMap.TryGetValue(e.Id, out var nota);
+
+            // Sin datos de asistencia → no hay evidencia para reclasificar (ej: cohortes históricas)
+            if (asis is null || asis.Total == 0) continue;
 
             decimal pctAusencias = asis is { Total: > 0 }
                 ? Math.Round((decimal)asis.Ausentes / asis.Total * 100, 1)

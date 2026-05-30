@@ -26,6 +26,9 @@ public class TableroEjecutivoDto
     // Evolución por cohorte para el gráfico de barras
     public List<EvolucionCohorteResumenDto> EvolucionCohortes { get; init; } = [];
 
+    // Matrícula por año calendario
+    public List<PuntoMatriculaDto> EvolucionMatricula { get; init; } = [];
+
     public DateTime GeneradoEn { get; init; }
 }
 
@@ -36,4 +39,12 @@ public class EvolucionCohorteResumenDto
     public int Activos     { get; init; }
     public int Egresados   { get; init; }
     public int Desertores  { get; init; }
+}
+
+public class PuntoMatriculaDto
+{
+    public int Anio         { get; init; }
+    public int TotalActivos { get; init; }
+    public int Ingresantes  { get; init; }
+    public int Continuantes { get; init; }
 }

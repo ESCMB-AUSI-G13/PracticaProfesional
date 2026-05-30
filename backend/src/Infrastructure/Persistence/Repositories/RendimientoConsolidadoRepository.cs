@@ -481,6 +481,163 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // Deserción por año de cursada (1°, 2°, 3°, 4°)
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<List<(int AnioCursada, int Total, int Desertores)>> ObtenerDesercionPorAnioAsync(
+        int? carreraId, int? anioCohorte, CancellationToken ct = default)
+    {
+        var query = db.Estudiantes.AsQueryable();
+
+        if (carreraId.HasValue)
+            query = query.Where(e => e.CarreraId == carreraId.Value);
+
+        if (anioCohorte.HasValue)
+            query = query.Where(e => e.FechaDeIngreso.Year == anioCohorte.Value);
+
+        var raw = await query
+            .GroupBy(e => e.Anio)
+            .Select(g => new
+            {
+                AnioCursada = g.Key,
+                Total       = g.Count(),
+                Desertores  = g.Count(e => e.Condicion == CondicionEstudiante.Desertor)
+            })
+            .OrderBy(g => g.AnioCursada)
+            .ToListAsync(ct);
+
+        return raw.Select(r => (r.AnioCursada, r.Total, r.Desertores)).ToList();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Egresados por carrera y cohorte
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<List<(string Carrera, int AnioCohorte, int TotalEgresados, int TotalAlumnos, double? DuracionPromedioAnios)>> ObtenerEgresadosPorCarreraAsync(
+        int? carreraId, int? anioCohorte, CancellationToken ct = default)
+    {
+        // Base: todos los alumnos (para calcular total por cohorte)
+        var baseQuery = db.Estudiantes.AsQueryable();
+        if (carreraId.HasValue)
+            baseQuery = baseQuery.Where(e => e.CarreraId == carreraId.Value);
+        if (anioCohorte.HasValue)
+            baseQuery = baseQuery.Where(e => e.FechaDeIngreso.Year == anioCohorte.Value);
+
+        // Totales por cohorte (todos los alumnos, sin filtrar por condición)
+        var totalesPorCohorte = await baseQuery
+            .GroupBy(e => new { CarreraNombre = e.Carrera.Nombre, AnioCohorte = e.FechaDeIngreso.Year })
+            .Select(g => new { g.Key.CarreraNombre, g.Key.AnioCohorte, Total = g.Count() })
+            .ToListAsync(ct);
+
+        // Egresados: traemos a memoria FechaDeIngreso y FechaDeEgreso para calcular duración en C#
+        var egresadosRaw = await baseQuery
+            .Where(e => e.Condicion == CondicionEstudiante.Egresado)
+            .Select(e => new
+            {
+                CarreraNombre  = e.Carrera.Nombre,
+                AnioCohorte    = e.FechaDeIngreso.Year,
+                FechaIngreso   = e.FechaDeIngreso,
+                FechaEgreso    = e.FechaDeEgreso
+            })
+            .ToListAsync(ct);
+
+        var egresadosPorCohorte = egresadosRaw
+            .GroupBy(e => new { e.CarreraNombre, e.AnioCohorte })
+            .Select(g =>
+            {
+                var conDuracion = g.Where(x => x.FechaEgreso.HasValue).ToList();
+                double? duracionPromedio = conDuracion.Count > 0
+                    ? conDuracion.Average(x => (x.FechaEgreso!.Value - x.FechaIngreso).TotalDays) / 365.25
+                    : null;
+                return new
+                {
+                    g.Key.CarreraNombre,
+                    g.Key.AnioCohorte,
+                    TotalEgresados        = g.Count(),
+                    DuracionPromedioAnios = duracionPromedio.HasValue
+                        ? Math.Round(duracionPromedio.Value, 1)
+                        : (double?)null
+                };
+            })
+            .ToList();
+
+        var result = totalesPorCohorte
+            .Select(t =>
+            {
+                var eg = egresadosPorCohorte.FirstOrDefault(
+                    e => e.CarreraNombre == t.CarreraNombre && e.AnioCohorte == t.AnioCohorte);
+                return (
+                    Carrera:              t.CarreraNombre,
+                    AnioCohorte:          t.AnioCohorte,
+                    TotalEgresados:       eg?.TotalEgresados ?? 0,
+                    TotalAlumnos:         t.Total,
+                    DuracionPromedioAnios: eg?.DuracionPromedioAnios
+                );
+            })
+            .Where(r => r.TotalEgresados > 0)
+            .OrderBy(r => r.Carrera)
+            .ThenBy(r => r.AnioCohorte)
+            .ToList();
+
+        return result;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Evolución de matrícula por año calendario
+    // ─────────────────────────────────────────────────────────────────────────
+    public async Task<List<PuntoMatriculaDto>> ObtenerEvolucionMatriculaAsync(CancellationToken ct = default)
+    {
+        // Pares (EstudianteId, Anio) desde tres fuentes:
+        // 1. FechaDeIngreso → el ingresante SIEMPRE estuvo activo en su año de entrada
+        var desdeIngreso = await db.Estudiantes
+            .Select(e => new { EstudianteId = e.Id, Anio = e.FechaDeIngreso.Year })
+            .ToListAsync(ct);
+
+        // 2. HistorialAcademico → años cursados (cargados por el seeder para años anteriores)
+        var desdeHistorial = await db.HistorialAcademico
+            .Select(h => new { h.EstudianteId, h.Anio })
+            .ToListAsync(ct);
+
+        // 3. InscripcionesMateria → Cursos (cubre el año en curso)
+        var desdeInscripciones = await db.InscripcionesMateria
+            .Join(db.Cursos, im => im.CursoId, c => c.Id,
+                  (im, c) => new { im.EstudianteId, c.Anio })
+            .ToListAsync(ct);
+
+        // Total activos por año = unión de las 3 fuentes (distinct por EstudianteId)
+        var activosPorAnio = desdeIngreso
+            .Concat(desdeHistorial)
+            .Concat(desdeInscripciones)
+            .GroupBy(x => x.Anio)
+            .Select(g => new { Anio = g.Key, Count = g.Select(x => x.EstudianteId).Distinct().Count() })
+            .ToList();
+
+        // Ingresantes por año (solo para la columna de breakdown)
+        var ingresantesPorAnio = desdeIngreso
+            .GroupBy(x => x.Anio)
+            .Select(g => new { Anio = g.Key, Count = g.Count() })
+            .ToList();
+
+        var anios = activosPorAnio.Select(a => a.Anio)
+            .Distinct()
+            .OrderBy(a => a)
+            .ToList();
+
+        return anios.Select(a =>
+        {
+            int ingresantes  = ingresantesPorAnio.FirstOrDefault(x => x.Anio == a)?.Count ?? 0;
+            int totalActivos = activosPorAnio.FirstOrDefault(x => x.Anio == a)?.Count ?? 0;
+            int continuantes = Math.Max(0, totalActivos - ingresantes);
+
+            return new PuntoMatriculaDto
+            {
+                Anio         = a,
+                TotalActivos = totalActivos,
+                Ingresantes  = ingresantes,
+                Continuantes = continuantes
+            };
+        }).ToList();
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Retención por cohorte — agrupado por año de ingreso y carrera
     // ─────────────────────────────────────────────────────────────────────────
     public async Task<List<DatosCohorteDto>> ObtenerDatosCohorteAsync(

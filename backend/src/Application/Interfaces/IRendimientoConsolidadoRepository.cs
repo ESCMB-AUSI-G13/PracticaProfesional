@@ -16,6 +16,14 @@ public interface IRendimientoConsolidadoRepository
     Task<List<DatosRetencionAnualRawDto>> ObtenerDatosRetencionAnualAsync(
         int? carreraId, int? anioCohorte, CancellationToken ct = default);
 
+    Task<List<(int AnioCursada, int Total, int Desertores)>> ObtenerDesercionPorAnioAsync(
+        int? carreraId, int? anioCohorte, CancellationToken ct = default);
+
+    Task<List<(string Carrera, int AnioCohorte, int TotalEgresados, int TotalAlumnos, double? DuracionPromedioAnios)>> ObtenerEgresadosPorCarreraAsync(
+        int? carreraId, int? anioCohorte, CancellationToken ct = default);
+
+    Task<List<PuntoMatriculaDto>> ObtenerEvolucionMatriculaAsync(CancellationToken ct = default);
+
 
     Task<IEnumerable<FilaComparativoComisionDto>> ObtenerComparativoComisionesAsync(
         int? materiaId, int? anio, int? docenteId, CancellationToken ct = default);

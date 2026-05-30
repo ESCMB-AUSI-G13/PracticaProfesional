@@ -22,7 +22,7 @@ public class RiesgoAcademicoUseCase(IRendimientoConsolidadoRepository repo)
     {
         var datos = await repo.ObtenerDatosRiesgoAsync(filtro.AnioCohorte, filtro.CarreraId, ct);
 
-        var resultado = datos.Select(d =>
+        var todos = datos.Select(d =>
         {
             decimal pctInasistencias = d.TotalClases > 0
                 ? Math.Round((decimal)d.Ausencias / d.TotalClases * 100, 1)
@@ -46,20 +46,26 @@ public class RiesgoAcademicoUseCase(IRendimientoConsolidadoRepository repo)
                                           : null,
                 MateriasReprobadas      = d.Reprobadas
             };
-        })
-        .Where(r => filtro.NivelRiesgo is null
-                 || r.NivelRiesgo.Equals(filtro.NivelRiesgo, StringComparison.OrdinalIgnoreCase))
-        .OrderBy(r => r.NivelRiesgo == "Alto"  ? 0 :
-                      r.NivelRiesgo == "Medio" ? 1 : 2)
-        .ThenBy(r => r.NombreCompleto)
-        .ToList();
+        }).ToList();
+
+        int totalAlto  = todos.Count(r => r.NivelRiesgo == "Alto");
+        int totalMedio = todos.Count(r => r.NivelRiesgo == "Medio");
+        int totalBajo  = todos.Count(r => r.NivelRiesgo == "Bajo");
+
+        var resultado = todos
+            .Where(r => filtro.NivelRiesgo is null
+                     || r.NivelRiesgo.Equals(filtro.NivelRiesgo, StringComparison.OrdinalIgnoreCase))
+            .OrderBy(r => r.NivelRiesgo == "Alto"  ? 0 :
+                          r.NivelRiesgo == "Medio" ? 1 : 2)
+            .ThenBy(r => r.NombreCompleto)
+            .ToList();
 
         return new ReporteRiesgoAcademicoDto
         {
             Estudiantes = resultado,
-            TotalAlto   = resultado.Count(r => r.NivelRiesgo == "Alto"),
-            TotalMedio  = resultado.Count(r => r.NivelRiesgo == "Medio"),
-            TotalBajo   = resultado.Count(r => r.NivelRiesgo == "Bajo")
+            TotalAlto   = totalAlto,
+            TotalMedio  = totalMedio,
+            TotalBajo   = totalBajo
         };
     }
 

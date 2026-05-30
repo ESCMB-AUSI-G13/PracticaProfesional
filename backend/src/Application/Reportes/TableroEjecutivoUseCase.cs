@@ -13,9 +13,10 @@ public class TableroEjecutivoUseCase(IRendimientoConsolidadoRepository repo)
 
     public async Task<TableroEjecutivoDto> EjecutarAsync(CancellationToken ct = default)
     {
-        var datosRiesgo   = await repo.ObtenerDatosRiesgoAsync(null, null, ct);
-        var datosCohorte  = await repo.ObtenerDatosCohorteAsync(null, null, ct);
-        var datosCatedras = await repo.ObtenerPromediosCatedraAsync(null, null, null, ct);
+        var datosRiesgo      = await repo.ObtenerDatosRiesgoAsync(null, null, ct);
+        var datosCohorte     = await repo.ObtenerDatosCohorteAsync(null, null, ct);
+        var datosCatedras    = await repo.ObtenerPromediosCatedraAsync(null, null, null, ct);
+        var evolucionMatric  = await repo.ObtenerEvolucionMatriculaAsync(ct);
 
         // ── Matrícula histórica ───────────────────────────────────────────────
         int totalHistorico  = datosCohorte.Sum(c => c.Total);
@@ -27,6 +28,7 @@ public class TableroEjecutivoUseCase(IRendimientoConsolidadoRepository repo)
             ? Math.Round((decimal)totalDesertores / totalHistorico * 100, 1) : 0m;
         decimal tasaEgreso = totalHistorico > 0
             ? Math.Round((decimal)totalEgresados / totalHistorico * 100, 1) : 0m;
+        // Retención = activos + egresados (ambos grupos permanecieron vinculados al sistema).
         decimal tasaRetencion = totalHistorico > 0
             ? Math.Round((decimal)(totalMatriculados + totalEgresados) / totalHistorico * 100, 1) : 0m;
 
@@ -100,6 +102,7 @@ public class TableroEjecutivoUseCase(IRendimientoConsolidadoRepository repo)
             PromedioNotaGlobal         = promedioGlobal,
             PorcentajeAprobacionGlobal = pctAprobacion,
             EvolucionCohortes          = evolucion,
+            EvolucionMatricula         = evolucionMatric,
             GeneradoEn                 = DateTime.UtcNow,
         };
     }

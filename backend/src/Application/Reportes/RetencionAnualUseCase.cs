@@ -43,15 +43,25 @@ public class RetencionAnualUseCase(IRendimientoConsolidadoRepository repo)
                     // El año de ingreso siempre es la base → 100 %
                     tasas[1] = 100m;
                 }
+                else if (calendarioAnio == anioActual)
+                {
+                    // Año en curso: no existe historial cerrado todavía.
+                    // Se considera retenido a todo estudiante del cohorte que no desertó.
+                    int count = g.Where(r => !r.EsDesertor)
+                                  .Select(r => r.EstudianteId)
+                                  .Distinct()
+                                  .Count();
+                    tasas[n] = totalInicial > 0
+                        ? Math.Round((decimal)count / totalInicial * 100, 1)
+                        : 0m;
+                }
                 else
                 {
-                    // Para el año actual: excluir desertores (se inscribieron pero ya dejaron)
-                    // Para años pasados: contar a todos los que tuvieron actividad (histórico)
-                    var registrosAnio = g.Where(r => r.AnioHistorial == calendarioAnio);
-                    if (calendarioAnio == anioActual)
-                        registrosAnio = registrosAnio.Where(r => !r.EsDesertor);
-
-                    int count = registrosAnio.Select(r => r.EstudianteId).Distinct().Count();
+                    // Años pasados: contar a todos los que tuvieron actividad registrada.
+                    int count = g.Where(r => r.AnioHistorial == calendarioAnio)
+                                  .Select(r => r.EstudianteId)
+                                  .Distinct()
+                                  .Count();
                     tasas[n] = totalInicial > 0
                         ? Math.Round((decimal)count / totalInicial * 100, 1)
                         : 0m;

@@ -26,6 +26,7 @@ public class Estudiante : AggregateRoot
     public Carrera Carrera { get; private set; } = null!;
     public CondicionEstudiante Condicion { get; private set; }
     public DateTime FechaDeIngreso { get; private set; }
+    public DateTime? FechaDeEgreso { get; private set; }
 
     private Estudiante() { }
 
@@ -70,7 +71,10 @@ public class Estudiante : AggregateRoot
 
     /// <summary>El plan académico está 100% completo (CU-43: evento MateriaAprobada).</summary>
     public void Egresar()
-        => Transicionar(CondicionEstudiante.Egresado, "Aprobación total del plan académico");
+    {
+        Transicionar(CondicionEstudiante.Egresado, "Aprobación total del plan académico");
+        FechaDeEgreso = DateTime.UtcNow.Date;
+    }
 
     /// <summary>Se detecta abandono (sin actividad en N períodos).</summary>
     public void Desertar()

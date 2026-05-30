@@ -229,7 +229,58 @@ export interface TableroEjecutivo {
   promedioNotaGlobal:         number | null;
   porcentajeAprobacionGlobal: number;
   evolucionCohortes:          EvolucionCohorteResumen[];
+  evolucionMatricula:         PuntoMatricula[];
   generadoEn:                 string;
+}
+
+// ── Modelos Egresados por Carrera ────────────────────────────────────────────
+
+export interface FilaEgresadoCarrera {
+  carrera:               string;
+  anioCohorte:           number;
+  totalEgresados:        number;
+  totalAlumnosCohorte:   number;
+  tasaEgreso:            number;
+  duracionPromedioAnios: number | null;
+}
+
+export interface ResumenCarreraEgresados {
+  carrera: string;
+  total:   number;
+}
+
+export interface ReporteEgresadosPorCarrera {
+  filas:                 FilaEgresadoCarrera[];
+  porCarrera:            ResumenCarreraEgresados[];
+  totalGeneral:          number;
+  tasaEgresoGlobal:      number;
+  duracionPromedioGlobal: number | null;
+}
+
+// ── Modelos Evolución de Matrícula (Tablero) ──────────────────────────────────
+
+export interface PuntoMatricula {
+  anio:         number;
+  totalActivos: number;
+  ingresantes:  number;
+  continuantes: number;
+}
+
+// ── Modelos Deserción por Año de Cursada ─────────────────────────────────────
+
+export interface DesercionPorAnio {
+  anioCursada:      number;
+  totalEstudiantes: number;
+  desertores:       number;
+  tasaDesercion:    number;
+  nivelRiesgo:      'Bajo' | 'Medio' | 'Alto';
+}
+
+export interface ReporteDesercionPorAnio {
+  filas:            DesercionPorAnio[];
+  totalEstudiantes: number;
+  totalDesertores:  number;
+  tasaGlobal:       number;
 }
 
 // ── Servicio ─────────────────────────────────────────────────────────────────
@@ -323,6 +374,22 @@ export class ReportesService {
     if (carreraId)   params['carreraId']   = String(carreraId);
     if (anioCohorte) params['anioCohorte'] = String(anioCohorte);
     return this.http.get<ReporteRetencionAnual>(`${this.apiUrl}/retencion-anual`, { params });
+  }
+
+  /** Egresados agrupados por carrera y año de cohorte. */
+  obtenerEgresadosPorCarrera(carreraId?: number, anioCohorte?: number): Observable<ReporteEgresadosPorCarrera> {
+    const params: Record<string, string> = {};
+    if (carreraId)   params['carreraId']   = String(carreraId);
+    if (anioCohorte) params['anioCohorte'] = String(anioCohorte);
+    return this.http.get<ReporteEgresadosPorCarrera>(`${this.apiUrl}/egresados-por-carrera`, { params });
+  }
+
+  /** Deserción por año de cursada (1°, 2°, 3°, 4°). */
+  obtenerDesercionPorAnio(carreraId?: number, anioCohorte?: number): Observable<ReporteDesercionPorAnio> {
+    const params: Record<string, string> = {};
+    if (carreraId)   params['carreraId']   = String(carreraId);
+    if (anioCohorte) params['anioCohorte'] = String(anioCohorte);
+    return this.http.get<ReporteDesercionPorAnio>(`${this.apiUrl}/desercion-por-anio`, { params });
   }
 
   // ── Descargas PDF ─────────────────────────────────────────────────────────────

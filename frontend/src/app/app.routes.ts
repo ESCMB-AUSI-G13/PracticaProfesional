@@ -382,6 +382,20 @@ export const routes: Routes = [
           import('./features/reportes/panel-retencion-anual/panel-retencion-anual.component')
             .then(m => m.PanelRetencionAnualComponent)
       },
+      {
+        path: 'reportes/desercion-por-anio',
+        canActivate: [roleGuard('Direccion')],
+        loadComponent: () =>
+          import('./features/reportes/panel-desercion-anio/panel-desercion-anio.component')
+            .then(m => m.PanelDesercionAnioComponent)
+      },
+      {
+        path: 'reportes/egresados-por-carrera',
+        canActivate: [roleGuard('Direccion')],
+        loadComponent: () =>
+          import('./features/reportes/panel-egresados/panel-egresados.component')
+            .then(m => m.PanelEgresadosComponent)
+      },
     ]
   },
 

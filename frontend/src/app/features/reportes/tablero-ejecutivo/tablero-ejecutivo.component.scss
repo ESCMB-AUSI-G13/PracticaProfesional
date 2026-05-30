@@ -72,9 +72,12 @@ thead th { background: #f5f5f5; padding: 0.55rem 0.75rem; text-align: left; font
 tbody td { padding: 0.5rem 0.75rem; border-bottom: 1px solid #f0f0f0; color: #333; }
 tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover { background: #fafafa; }
-.num-azul  { color: #2471a3; font-weight: 600; }
-.num-verde { color: #1e8449; font-weight: 600; }
-.num-rojo  { color: #c0392b; font-weight: 600; }
+.num-azul    { color: #2471a3; font-weight: 600; }
+.num-verde   { color: #1e8449; font-weight: 600; }
+.num-rojo    { color: #c0392b; font-weight: 600; }
+.num-purpura { color: #7d3c98; font-weight: 600; }
+
+.seccion-subtitulo { font-size: 0.8rem; color: #999; margin: -0.5rem 0 0.8rem; }
 
 @media (max-width: 900px) {
   .kpi-grid, .tasas-grid { grid-template-columns: 1fr 1fr; }

@@ -18,6 +18,8 @@ public class ReportesCohorteController(
     RetencionPorCohorteUseCase  retencionUseCase,
     TableroEjecutivoUseCase     tableroUseCase,
     RetencionAnualUseCase       retencionAnualUseCase,
+    DesercionPorAnioUseCase     desercionPorAnioUseCase,
+    EgresadosPorCarreraUseCase  egresadosUseCase,
     PdfReporteService           pdfService) : ControllerBase
 {
     /// <summary>
@@ -92,6 +94,36 @@ public class ReportesCohorteController(
         CancellationToken cancellationToken)
     {
         var resultado = await retencionAnualUseCase.EjecutarAsync(carreraId, anioCohorte, cancellationToken);
+        return Ok(resultado);
+    }
+
+    /// <summary>
+    /// Tasa de deserción agrupada por año de cursada (1°, 2°, 3°, 4°).
+    /// GET api/reportes/desercion-por-anio?carreraId=1&amp;anioCohorte=2022
+    /// </summary>
+    [HttpGet("desercion-por-anio")]
+    [ProducesResponseType(typeof(ReporteDesercionPorAnioDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> DesercionPorAnio(
+        [FromQuery] int?  carreraId,
+        [FromQuery] int?  anioCohorte,
+        CancellationToken cancellationToken)
+    {
+        var resultado = await desercionPorAnioUseCase.EjecutarAsync(carreraId, anioCohorte, cancellationToken);
+        return Ok(resultado);
+    }
+
+    /// <summary>
+    /// Egresados agrupados por carrera y año de cohorte.
+    /// GET api/reportes/egresados-por-carrera?carreraId=1&amp;anioCohorte=2020
+    /// </summary>
+    [HttpGet("egresados-por-carrera")]
+    [ProducesResponseType(typeof(ReporteEgresadosPorCarreraDto), StatusCodes.Status200OK)]
+    public async Task<IActionResult> EgresadosPorCarrera(
+        [FromQuery] int?  carreraId,
+        [FromQuery] int?  anioCohorte,
+        CancellationToken cancellationToken)
+    {
+        var resultado = await egresadosUseCase.EjecutarAsync(carreraId, anioCohorte, cancellationToken);
         return Ok(resultado);
     }
 

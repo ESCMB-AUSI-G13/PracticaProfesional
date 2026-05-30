@@ -16,6 +16,8 @@ public class RetencionPorCohorteUseCase(IRendimientoConsolidadoRepository repo)
 
         var cohortes = datos.Select(d =>
         {
+            // Retención = quienes siguen vinculados (activos + egresados) / total ingresado.
+            // Los egresados representan el máximo logro del sistema: se los retiene hasta el título.
             decimal tasaRetencion = d.Total > 0
                 ? Math.Round((decimal)(d.Activos + d.Egresados) / d.Total * 100, 1)
                 : 0m;

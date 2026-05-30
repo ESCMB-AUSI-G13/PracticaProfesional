@@ -190,6 +190,8 @@ builder.Services.AddScoped<RiesgoAcademicoUseCase>();
 builder.Services.AddScoped<RetencionPorCohorteUseCase>();
 builder.Services.AddScoped<TableroEjecutivoUseCase>();
 builder.Services.AddScoped<RetencionAnualUseCase>();
+builder.Services.AddScoped<DesercionPorAnioUseCase>();
+builder.Services.AddScoped<EgresadosPorCarreraUseCase>();
 
 // PDF
 builder.Services.AddSingleton<PdfReporteService>();
@@ -301,6 +303,11 @@ var app = builder.Build();
     try
     {
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        // Detecta y repara migraciones registradas en historia sin DDL ejecutado.
+        // Causa: EnableRetryOnFailure interfiere con transacciones DDL de migrations.
+        await RepararMigracionesInconsistentesAsync(db, logger);
+
         db.Database.Migrate();
 
         if (!db.Usuarios.Any())
@@ -334,9 +341,14 @@ var app = builder.Build();
         await EstudiantesSeeder.SeedAsync(db, logger);
         await EstudiantesSeeder.FixNombresAsync(db, logger);
         await EstudiantesSeeder.PatchJustificacionesAsync(db, logger);
+        await CohorteHistoricaSeeder.SeedAsync(db, logger);
+        await CohorteHistoricaSeeder.RepararAsync(db, logger);
+        await CohorteHistoricaSeeder.SeedHistorialAsync(db, logger);
+        await CohorteHistoricaSeeder.SeedDesertoresActivosAsync(db, logger);
         await HistorialAnteriorSeeder.SeedAsync(db, logger);
         await ExamenesSeeder.SeedAsync(db, logger);
         await NotasExamenesSeeder.SeedAsync(db, logger);
+        await NotasHistoricasSeeder.SeedAsync(db, logger);
         await EncuestaSeeder.SeedAsync(db);
         await EncuestaRespuestasSeeder.SeedAsync(db, app.Configuration["Encuestas:Salt"] ?? "pp-salt-2026");
     }
@@ -356,6 +368,17 @@ var app = builder.Build();
         logger.LogWarning(ex, "CorregirCondiciones: error no crítico, se continúa.");
     }
 
+    // Garantiza que los desertores históricos EST-D no sean revertidos por CorregirCondicionesAsync.
+    try
+    {
+        var dbD = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await CohorteHistoricaSeeder.AsegurarDesertoresActivosAsync(dbD, logger);
+    }
+    catch (Exception ex)
+    {
+        logger.LogWarning(ex, "AsegurarDesertoresActivos: error no crítico, se continúa.");
+    }
+
     // Patch de condiciones de retención (Desertores) — corre después de corregir condiciones.
     try
     {
@@ -365,6 +388,17 @@ var app = builder.Build();
     catch (Exception ex)
     {
         logger.LogWarning(ex, "PatchCondicionesRetencion: error no crítico, se continúa.");
+    }
+
+    // Corrección de distribución Profesorado 2023 (cohorte casi completa, alta deserción acumulada).
+    try
+    {
+        var db4 = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        await CohorteHistoricaSeeder.CorregirDistribucionProf2023Async(db4, logger);
+    }
+    catch (Exception ex)
+    {
+        logger.LogWarning(ex, "CorregirDistribucionProf2023: error no crítico, se continúa.");
     }
 }
 
@@ -410,3 +444,44 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+// ── Reparación de migraciones con DDL no aplicado ──────────────────────────────
+// Si una migración está en __EFMigrationsHistory pero su DDL no se ejecutó
+// (causado por EnableRetryOnFailure + transacciones DDL), la eliminamos para que
+// db.Database.Migrate() la vuelva a aplicar correctamente.
+static async Task RepararMigracionesInconsistentesAsync(
+    PracticaProfesional.Infrastructure.Persistence.AppDbContext db,
+    ILogger logger)
+{
+    // Mapa: (id de migración) → (SQL que verifica si el DDL se aplicó)
+    var verificaciones = new Dictionary<string, string>
+    {
+        ["20260529000001_AddFechaDeEgresoEstudiante"]  =
+            "SELECT COUNT(1) FROM sys.columns WHERE Name = N'FechaDeEgreso' AND Object_ID = Object_ID(N'Estudiantes')",
+        ["20260529000002_EnsureFechaDeEgresoEstudiante"] =
+            "SELECT COUNT(1) FROM sys.columns WHERE Name = N'FechaDeEgreso' AND Object_ID = Object_ID(N'Estudiantes')",
+    };
+
+    var conn = db.Database.GetDbConnection();
+    if (conn.State != System.Data.ConnectionState.Open)
+        await conn.OpenAsync();
+
+    foreach (var (migrationId, sql) in verificaciones)
+    {
+        using var checkCmd = conn.CreateCommand();
+        checkCmd.CommandText = sql;
+        int existe = Convert.ToInt32(await checkCmd.ExecuteScalarAsync());
+
+        if (existe == 0)
+        {
+            // DDL nunca se ejecutó → borrar el registro fantasma para que Migrate() lo re-aplique
+            using var delCmd = conn.CreateCommand();
+            delCmd.CommandText =
+                $"DELETE FROM [__EFMigrationsHistory] WHERE [MigrationId] = '{migrationId}'";
+            await delCmd.ExecuteNonQueryAsync();
+            logger.LogWarning(
+                "DB-Fix: migración '{Id}' tenía DDL sin aplicar — registro eliminado de historia para re-aplicación.",
+                migrationId);
+        }
+    }
+}

@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import {
-  ReportesService, TableroEjecutivo, EvolucionCohorteResumen
+  ReportesService, TableroEjecutivo
 } from '../reportes.service';
 import {
   Chart,
@@ -27,11 +27,11 @@ Chart.register(
   styleUrl: './tablero-ejecutivo.component.scss'
 })
 export class TableroEjecutivoComponent implements OnInit, OnDestroy {
-  @ViewChild('barrasCanvas')  barrasCanvas!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('riesgoCanvas')  riesgoCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('riesgoCanvas')    riesgoCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('matriculaCanvas') matriculaCanvas!: ElementRef<HTMLCanvasElement>;
 
-  private barrasChart: Chart | null = null;
-  private riesgoChart: Chart | null = null;
+  private riesgoChart:    Chart | null = null;
+  private matriculaChart: Chart | null = null;
 
   tablero     = signal<TableroEjecutivo | null>(null);
   cargando    = signal(true);
@@ -49,8 +49,8 @@ export class TableroEjecutivoComponent implements OnInit, OnDestroy {
         this.tablero.set(data);
         this.cargando.set(false);
         afterNextRender(() => {
-          this.renderBarras(data.evolucionCohortes);
           this.renderRiesgo(data);
+          this.renderMatricula(data);
         }, { injector: this.injector });
       },
       error: () => {
@@ -61,8 +61,8 @@ export class TableroEjecutivoComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.barrasChart?.destroy();
     this.riesgoChart?.destroy();
+    this.matriculaChart?.destroy();
   }
 
   descargarPdf(): void {
@@ -81,29 +81,32 @@ export class TableroEjecutivoComponent implements OnInit, OnDestroy {
     });
   }
 
-  private renderBarras(cohortes: EvolucionCohorteResumen[]): void {
-    if (!this.barrasCanvas) return;
-    this.barrasChart?.destroy();
+  private renderMatricula(t: TableroEjecutivo): void {
+    if (!t.evolucionMatricula?.length || !this.matriculaCanvas) return;
+    this.matriculaChart?.destroy();
 
-    this.barrasChart = new Chart(this.barrasCanvas.nativeElement, {
+    this.matriculaChart = new Chart(this.matriculaCanvas.nativeElement, {
       type: 'bar',
       data: {
-        labels: cohortes.map(c => String(c.anioCohorte)),
+        labels: t.evolucionMatricula.map(p => String(p.anio)),
         datasets: [
           {
-            label: 'Activos',
-            data: cohortes.map(c => c.activos),
+            label: 'Total activos',
+            data: t.evolucionMatricula.map(p => p.totalActivos),
             backgroundColor: '#3498db',
+            borderRadius: 4,
           },
           {
-            label: 'Egresados',
-            data: cohortes.map(c => c.egresados),
+            label: 'Ingresantes',
+            data: t.evolucionMatricula.map(p => p.ingresantes),
             backgroundColor: '#2ecc71',
+            borderRadius: 4,
           },
           {
-            label: 'Desertores',
-            data: cohortes.map(c => c.desertores),
-            backgroundColor: '#e74c3c',
+            label: 'Continuantes',
+            data: t.evolucionMatricula.map(p => p.continuantes),
+            backgroundColor: '#9b59b6',
+            borderRadius: 4,
           },
         ]
       },
@@ -112,10 +115,13 @@ export class TableroEjecutivoComponent implements OnInit, OnDestroy {
         maintainAspectRatio: false,
         plugins: {
           legend: { position: 'top', labels: { font: { size: 12 }, padding: 12 } },
+          tooltip: {
+            callbacks: { label: ctx => ` ${ctx.dataset.label}: ${ctx.raw} estudiantes` }
+          }
         },
         scales: {
-          x: { stacked: false },
-          y: { beginAtZero: true, ticks: { stepSize: 1 } }
+          x: { grid: { color: '#f0f0f0' } },
+          y: { beginAtZero: true, grid: { color: '#f0f0f0' } }
         }
       }
     });

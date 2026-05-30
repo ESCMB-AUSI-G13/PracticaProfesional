@@ -93,18 +93,24 @@ const NAV: NavItem[] = [
     icon: 'reportes',
     roles: ['Direccion', 'Docente', 'Preceptor'],
     children: [
-      { label: 'Tablero Ejecutivo',  ruta: '/reportes/tablero-ejecutivo',  icon: '', roles: ['Direccion'] },
-      { label: 'Inasistencias',      ruta: '/reportes/inasistencias',      icon: '', roles: ['Direccion', 'Preceptor', 'Docente'] },
-      { label: 'Control por Legajo', ruta: '/reportes/control-legajo',     icon: '', roles: ['Direccion', 'Preceptor'] },
-      { label: 'Comisiones',         ruta: '/reportes/comisiones',         icon: '', roles: ['Direccion', 'Docente'] },
-      { label: 'Evolución de Notas', ruta: '/reportes/evolucion',          icon: '', roles: ['Direccion', 'Docente'] },
-      { label: 'Promedios Cátedra',  ruta: '/reportes/catedras',           icon: '', roles: ['Direccion', 'Docente'] },
-      { label: 'Riesgo de Deserción',  ruta: '/reportes/riesgo-academico',        icon: '', roles: ['Direccion'] },
-      { label: 'Retención Cohorte',   ruta: '/reportes/retencion-cohorte',       icon: '', roles: ['Direccion'] },
-      { label: 'Resultados Encuesta', ruta: '/reportes/encuestas-satisfaccion',  icon: '', roles: ['Direccion'] },
-      { label: 'Comparativo Encuestas', ruta: '/reportes/encuestas-comparativo', icon: '', roles: ['Direccion'] },
-      { label: 'Resultados Mis Encuestas',    ruta: '/mis-encuestas/resultados',  icon: '', roles: ['Docente'] },
-      { label: 'Comparativo Mis Encuestas',   ruta: '/mis-encuestas/comparativo', icon: '', roles: ['Docente'] },
+      // ── Visión institucional ──────────────────────────────────────────────
+      { label: 'Tablero Ejecutivo',     ruta: '/reportes/tablero-ejecutivo',       icon: '', roles: ['Direccion'] },
+      { label: 'Egresados por Carrera', ruta: '/reportes/egresados-por-carrera',  icon: '', roles: ['Direccion'] },
+      { label: 'Retención Cohorte',     ruta: '/reportes/retencion-cohorte',      icon: '', roles: ['Direccion'] },
+      { label: 'Deserción por Año',     ruta: '/reportes/desercion-por-anio',     icon: '', roles: ['Direccion'] },
+      { label: 'Riesgo de Deserción',   ruta: '/reportes/riesgo-academico',       icon: '', roles: ['Direccion'] },
+      // ── Seguimiento individual ────────────────────────────────────────────
+      { label: 'Inasistencias',         ruta: '/reportes/inasistencias',          icon: '', roles: ['Direccion', 'Preceptor', 'Docente'] },
+      { label: 'Control por Legajo',    ruta: '/reportes/control-legajo',         icon: '', roles: ['Direccion', 'Preceptor'] },
+      // ── Rendimiento académico ─────────────────────────────────────────────
+      { label: 'Comisiones',            ruta: '/reportes/comisiones',             icon: '', roles: ['Direccion', 'Docente'] },
+      { label: 'Evolución de Notas',    ruta: '/reportes/evolucion',              icon: '', roles: ['Direccion', 'Docente'] },
+      { label: 'Promedios Cátedra',     ruta: '/reportes/catedras',               icon: '', roles: ['Direccion', 'Docente'] },
+      // ── Encuestas ─────────────────────────────────────────────────────────
+      { label: 'Resultados Encuesta',      ruta: '/reportes/encuestas-satisfaccion',  icon: '', roles: ['Direccion'] },
+      { label: 'Comparativo Encuestas',    ruta: '/reportes/encuestas-comparativo',   icon: '', roles: ['Direccion'] },
+      { label: 'Resultados Mis Encuestas', ruta: '/mis-encuestas/resultados',         icon: '', roles: ['Docente'] },
+      { label: 'Comparativo Mis Encuestas',ruta: '/mis-encuestas/comparativo',        icon: '', roles: ['Docente'] },
     ]
   },
   {

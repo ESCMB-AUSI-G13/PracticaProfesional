@@ -1,0 +1,137 @@
+<div class="page">
+  <header class="page-header">
+    <div>
+      <h1>Egresados por Carrera</h1>
+      <p class="subtitulo">Cantidad de graduados agrupados por carrera y cohorte</p>
+    </div>
+  </header>
+
+  <!-- Filtros -->
+  <section class="filtros-panel">
+    <h2>Filtros</h2>
+    <div class="filtros-grid">
+      <div class="campo">
+        <label>Carrera</label>
+        <select [ngModel]="carreraId()" (ngModelChange)="carreraId.set($event ? +$event : null)">
+          <option [value]="null">— Todas las carreras —</option>
+          @for (c of carreras(); track c.id) {
+            <option [value]="c.id">{{ c.nombre }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="campo">
+        <label>Año de cohorte</label>
+        <select [ngModel]="anioCohorte()" (ngModelChange)="anioCohorte.set($event ? +$event : null)">
+          <option [value]="null">— Todas las cohortes —</option>
+          @for (a of cohortes(); track a) {
+            <option [value]="a">{{ a }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <div class="filtros-acciones">
+      <button class="btn-primario" (click)="buscar()" [disabled]="cargando()">
+        {{ cargando() ? 'Generando...' : 'Generar reporte' }}
+      </button>
+      <button class="btn-secundario" (click)="limpiar()">Limpiar</button>
+    </div>
+  </section>
+
+  @if (error()) {
+    <div class="alerta-error">{{ error() }}</div>
+  }
+
+  @if (reporte(); as r) {
+
+    <!-- KPIs globales -->
+    <section class="kpi-total">
+      <div class="kpi-card verde">
+        <span class="kpi-num">{{ r.totalGeneral }}</span>
+        <span class="kpi-label">Total egresados</span>
+      </div>
+      <div class="kpi-card azul">
+        <span class="kpi-num">{{ r.tasaEgresoGlobal | number:'1.1-1' }}%</span>
+        <span class="kpi-label">Tasa de egreso (cohortes mostradas)</span>
+      </div>
+      @if (r.duracionPromedioGlobal !== null) {
+        <div class="kpi-card naranja">
+          <span class="kpi-num">{{ r.duracionPromedioGlobal | number:'1.1-1' }} años</span>
+          <span class="kpi-label">Duración promedio</span>
+        </div>
+      }
+      @for (c of r.porCarrera; track c.carrera) {
+        <div class="kpi-card">
+          <span class="kpi-num">{{ c.total }}</span>
+          <span class="kpi-label">{{ c.carrera }}</span>
+        </div>
+      }
+    </section>
+
+    @if (r.filas.length > 0) {
+
+      <!-- Gráfico comparativo interanual -->
+      <section class="grafico-seccion">
+        <h3>Egresados por cohorte y carrera</h3>
+        <div class="grafico-wrap">
+          <canvas #barrasCanvas></canvas>
+        </div>
+      </section>
+
+      <!-- Tabla detalle -->
+      <section class="tabla-seccion">
+        <h3>Detalle por cohorte</h3>
+        <div class="tabla-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Carrera</th>
+                <th>Año de Cohorte</th>
+                <th>Total alumnos</th>
+                <th>Egresados</th>
+                <th>Tasa de egreso</th>
+                <th>Duración promedio</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (f of r.filas; track trackFila($index, f)) {
+                <tr>
+                  <td>{{ f.carrera }}</td>
+                  <td class="td-centro">{{ f.anioCohorte }}</td>
+                  <td class="td-centro">{{ f.totalAlumnosCohorte }}</td>
+                  <td class="td-centro num-verde">{{ f.totalEgresados }}</td>
+                  <td class="td-centro">
+                    <span class="badge-tasa" [class.alta]="f.tasaEgreso >= 50" [class.media]="f.tasaEgreso >= 20 && f.tasaEgreso < 50">
+                      {{ f.tasaEgreso | number:'1.1-1' }}%
+                    </span>
+                  </td>
+                  <td class="td-centro">
+                    {{ f.duracionPromedioAnios !== null ? (f.duracionPromedioAnios | number:'1.1-1') + ' años' : '—' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+            <tfoot>
+              <tr class="fila-total">
+                <td colspan="3"><strong>Total general</strong></td>
+                <td class="td-centro"><strong>{{ r.totalGeneral }}</strong></td>
+                <td class="td-centro"><strong>{{ r.tasaEgresoGlobal | number:'1.1-1' }}%</strong></td>
+                <td class="td-centro">
+                  <strong>{{ r.duracionPromedioGlobal !== null ? (r.duracionPromedioGlobal | number:'1.1-1') + ' años' : '—' }}</strong>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </section>
+
+    } @else {
+      <div class="sin-resultados">No hay egresados para los filtros seleccionados.</div>
+    }
+  }
+
+  @if (buscado() && !reporte() && !cargando() && !error()) {
+    <div class="sin-resultados">Sin resultados para los filtros seleccionados.</div>
+  }
+</div>

@@ -125,41 +125,38 @@
       </div>
     </section>
 
-    <!-- Sección 4: Evolución por cohorte -->
-    <section class="seccion">
-      <h2 class="seccion-titulo">Evolución por Cohorte</h2>
-      <div class="grafico-barras-wrap">
-        <canvas #barrasCanvas></canvas>
-      </div>
-
-      <div class="tabla-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>Cohorte</th>
-              <th>Total</th>
-              <th>Activos</th>
-              <th>Egresados</th>
-              <th>Desertores</th>
-              <th>% Retención</th>
-              <th>% Deserción</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (c of t.evolucionCohortes; track c.anioCohorte) {
+    <!-- Sección 4: Evolución de Matrícula por Año -->
+    @if (t.evolucionMatricula?.length) {
+      <section class="seccion">
+        <h2 class="seccion-titulo">Evolución de Matrícula por Año</h2>
+        <p class="seccion-subtitulo">Activos totales, ingresantes nuevos y continuantes por año calendario</p>
+        <div class="grafico-barras-wrap">
+          <canvas #matriculaCanvas></canvas>
+        </div>
+        <div class="tabla-wrap" style="margin-top:1rem">
+          <table>
+            <thead>
               <tr>
-                <td><strong>{{ c.anioCohorte }}</strong></td>
-                <td>{{ c.total }}</td>
-                <td class="num-azul">{{ c.activos }}</td>
-                <td class="num-verde">{{ c.egresados }}</td>
-                <td class="num-rojo">{{ c.desertores }}</td>
-                <td>{{ c.total > 0 ? ((c.activos + c.egresados) / c.total * 100 | number:'1.1-1') : '—' }}%</td>
-                <td>{{ c.total > 0 ? (c.desertores / c.total * 100 | number:'1.1-1') : '—' }}%</td>
+                <th>Año</th>
+                <th>Total Activos</th>
+                <th>Ingresantes</th>
+                <th>Continuantes</th>
               </tr>
-            }
-          </tbody>
-        </table>
-      </div>
-    </section>
+            </thead>
+            <tbody>
+              @for (p of t.evolucionMatricula; track p.anio) {
+                <tr>
+                  <td><strong>{{ p.anio }}</strong></td>
+                  <td class="num-azul">{{ p.totalActivos }}</td>
+                  <td class="num-verde">{{ p.ingresantes }}</td>
+                  <td class="num-purpura">{{ p.continuantes }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+
   }
 </div>

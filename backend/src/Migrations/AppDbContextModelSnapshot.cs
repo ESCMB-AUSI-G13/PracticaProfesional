@@ -513,6 +513,9 @@ namespace PracticaProfesional.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("FechaDeEgreso")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("FechaDeIngreso")
                         .HasColumnType("datetime2");
 

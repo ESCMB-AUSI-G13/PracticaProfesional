@@ -170,6 +170,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(e => e.CarreraId).IsRequired();
             entity.Property(e => e.Condicion).IsRequired().HasConversion<string>();
             entity.Property(e => e.FechaDeIngreso).IsRequired();
+            entity.Property(e => e.FechaDeEgreso).IsRequired(false);
             entity.HasOne(e => e.Usuario)
                 .WithOne()
                 .HasForeignKey<Estudiante>(e => e.UsuarioId)
