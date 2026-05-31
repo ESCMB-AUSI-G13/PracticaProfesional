@@ -9,9 +9,22 @@
 
 1. [Acceso al sistema](#1-acceso-al-sistema)
 2. [Administrador / Dirección](#2-administrador--dirección)
+   - [2.1 Gestión de usuarios](#21-gestión-de-usuarios)
+   - [2.2 Gestión académica](#22-gestión-académica)
+   - [2.3 Reportes](#23-reportes)
+   - [2.4 Alertas académicas](#24-alertas-académicas)
+   - [2.5 Encuestas académicas](#25-encuestas-académicas)
+   - [2.6 Auditoría](#26-auditoría)
 3. [Docente](#3-docente)
+   - [3.1 Mis materias](#31-mis-materias)
+   - [3.2 Registro de asistencias](#32-registro-de-asistencias)
+   - [3.3 Carga de notas de examen](#33-carga-de-notas-de-examen)
+   - [3.4 Encuestas de evaluación](#34-encuestas-de-evaluación)
 4. [Preceptor](#4-preceptor)
 5. [Estudiante](#5-estudiante)
+   - [5.1 Inscripción a materias](#51-inscripción-a-materias)
+   - [5.2 Encuesta pendiente](#52-encuesta-pendiente)
+   - [5.3 Inscripción a exámenes finales](#53-inscripción-a-exámenes-finales)
 
 ---
 
@@ -238,7 +251,54 @@ Ir a **Alertas** → **Historial** para ver todas las alertas generadas, filtrad
 
 ---
 
-### 2.5 Auditoría
+### 2.5 Encuestas académicas
+
+#### Crear una encuesta
+
+1. Ir a **Encuestas** en el menú lateral.
+2. Hacer clic en **Nueva encuesta**.
+3. Completar:
+   - **Título** — nombre de la encuesta.
+   - **Descripción** — opcional.
+   - **Tipo** — `Evaluación Docente` (vinculada a una materia) o `Satisfacción General`.
+   - **Ciclo lectivo** — año académico al que corresponde.
+4. Guardar.
+
+#### Agregar preguntas
+
+1. Dentro de la encuesta creada, hacer clic en **Agregar pregunta**.
+2. Completar:
+   - **Texto** de la pregunta.
+   - **Tipo** — `Escala Likert` (valores del 1 al 5) o `Texto libre` (respuesta abierta).
+   - **¿Es obligatoria?**
+3. Repetir para cada pregunta. El orden se asigna automáticamente.
+
+#### Activar / desactivar una encuesta
+
+- **Activar:** la encuesta queda disponible para ser asignada a los estudiantes.
+- **Desactivar:** deja de mostrarse; las respuestas ya registradas se conservan.
+
+> Una encuesta activa se presenta al estudiante como requisito previo al inscribirse a materias o exámenes. Solo se muestra si está activa.
+
+#### Ver resultados (RR-03)
+
+1. Ir a **Reportes → Encuestas de satisfacción**.
+2. Seleccionar la encuesta a analizar.
+3. El panel muestra:
+   - Total de respuestas recibidas y promedio global.
+   - Resultados por pregunta con gráfico de barras (el color indica el nivel: verde ≥ 4, naranja ≥ 3, rojo < 3).
+   - Comentarios de preguntas de texto libre (expandibles).
+   - Evolución mensual: respuestas y promedio por período.
+
+#### Comparativo de encuestas (RR-04)
+
+1. Ir a **Reportes → Comparativo de encuestas**.
+2. Ver tabla con todas las encuestas: tipo, ciclo, total de respuestas y promedio general.
+3. El sistema destaca la encuesta con mejor promedio.
+
+---
+
+### 2.6 Auditoría
 
 #### Log de auditoría
 
@@ -301,6 +361,33 @@ Al iniciar sesión, el panel muestra las materias asignadas al docente en el añ
 1. En la lista de inscriptos al examen, hacer clic en **Rectificar** junto a la nota a corregir.
 2. Ingresar la nueva nota y el motivo de la rectificación.
 3. Guardar.
+
+---
+
+### 3.4 Encuestas de evaluación
+
+El docente puede crear encuestas de evaluación asociadas a sus propias materias y consultar los resultados de forma anónima.
+
+#### Crear una encuesta de evaluación
+
+1. Ir a **Mis encuestas** en el menú lateral.
+2. Hacer clic en **Nueva encuesta**.
+3. Seleccionar la materia a evaluar y completar título y descripción.
+4. Agregar preguntas (Escala Likert o Texto libre).
+5. Activar la encuesta cuando esté lista.
+
+> Solo podés crear encuestas para materias que tenés asignadas como espacio curricular.
+
+#### Ver resultados de tus encuestas
+
+1. Ir a **Mis encuestas → Resultados**.
+2. Seleccionar la encuesta.
+3. Ver: total de respuestas, promedio global, resultado por pregunta y comentarios.
+
+#### Comparativo de tus encuestas
+
+1. Ir a **Mis encuestas → Comparativo**.
+2. Ver el promedio de cada encuesta tuya y cuál tuvo mejor puntuación.
 
 ---
 
@@ -380,7 +467,24 @@ El estudiante puede autogestionar sus inscripciones y consultar su situación ac
 
 ---
 
-### 5.2 Inscripción a exámenes finales
+### 5.2 Encuesta pendiente
+
+Antes de inscribirse a una materia o examen, el sistema puede presentar una encuesta obligatoria que debe completarse primero.
+
+**Cómo funciona:**
+
+1. Al intentar inscribirte, si hay una encuesta activa pendiente, aparece automáticamente un **modal con la encuesta**.
+2. Respondé todas las preguntas obligatorias:
+   - **Escala Likert:** elegí un valor del 1 (Muy malo) al 5 (Muy bueno).
+   - **Texto libre:** escribí tu respuesta en el campo de texto.
+3. Hacé clic en **Enviar respuesta**.
+4. Una vez enviada, la inscripción continúa normalmente.
+
+> Las respuestas son **anónimas**: el sistema no registra quién respondió qué. Solo se guarda que ya completaste la encuesta para no volverte a molestar con ella.
+
+---
+
+### 5.3 Inscripción a exámenes finales
 
 1. Ir a **Exámenes** → **Inscribirme a un final**.
 2. El sistema muestra los exámenes disponibles para materias que el estudiante tiene **regularizadas** (condición necesaria para rendir).
