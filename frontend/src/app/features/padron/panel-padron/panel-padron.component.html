@@ -1,0 +1,120 @@
+<div class="padron-page">
+  <h1 class="page-title">Padrón de Alumnos Habilitados</h1>
+  <p class="page-subtitle">Solo los DNIs cargados aquí pueden registrarse. Una vez que el alumno crea su cuenta, el DNI desaparece de esta lista automáticamente.</p>
+
+  <!-- Alta manual -->
+  <section class="card">
+    <h2 class="card-title">Agregar DNI manualmente</h2>
+    <div class="form-row">
+      <input
+        type="text"
+        class="input"
+        placeholder="Ej: 44123456"
+        [ngModel]="dniManual()"
+        (ngModelChange)="dniManual.set($event)"
+        (keyup.enter)="agregarManual()"
+        maxlength="10"
+      />
+      <button
+        class="btn btn-primary"
+        (click)="agregarManual()"
+        [disabled]="!dniManual().trim() || guardandoManual()"
+      >
+        {{ guardandoManual() ? 'Guardando...' : 'Agregar' }}
+      </button>
+    </div>
+    @if (mensajeManual()) {
+      <p class="msg-ok">{{ mensajeManual() }}</p>
+    }
+    @if (errorManual()) {
+      <p class="msg-error">{{ errorManual() }}</p>
+    }
+  </section>
+
+  <!-- Importar CSV -->
+  <section class="card">
+    <h2 class="card-title">Importar desde archivo CSV</h2>
+    <p class="card-hint">Un DNI por línea, o separados por coma. Filas duplicadas o con errores se reportan sin detener la carga.</p>
+    <div class="form-row">
+      <label class="file-label">
+        <input type="file" accept=".csv,.txt" (change)="onArchivoSeleccionado($event)" />
+        <span>{{ archivoSeleccionado()?.name ?? 'Seleccionar archivo (.csv / .txt)' }}</span>
+      </label>
+      <button
+        class="btn btn-primary"
+        (click)="importar()"
+        [disabled]="!archivoSeleccionado() || importando()"
+      >
+        {{ importando() ? 'Importando...' : 'Importar' }}
+      </button>
+    </div>
+
+    @if (resultadoImport(); as r) {
+      <div class="resultado-import">
+        <div class="resultado-resumen">
+          <span class="badge badge-ok">Cargados: {{ r.cargados }}</span>
+          <span class="badge badge-err">Fallidos: {{ r.fallidos }}</span>
+          <span class="badge badge-total">Total: {{ r.total }}</span>
+        </div>
+        @if (r.errores.length > 0) {
+          <details class="errores-detalle">
+            <summary>Ver {{ r.errores.length }} errores</summary>
+            <table class="table-errores">
+              <thead>
+                <tr><th>DNI</th><th>Motivo</th></tr>
+              </thead>
+              <tbody>
+                @for (e of r.errores; track e.dni) {
+                  <tr><td>{{ e.dni }}</td><td>{{ e.motivo }}</td></tr>
+                }
+              </tbody>
+            </table>
+          </details>
+        }
+      </div>
+    }
+  </section>
+
+  <!-- Listado -->
+  <section class="card">
+    <div class="card-header-row">
+      <h2 class="card-title">Pendientes de registro ({{ padron().length }})</h2>
+      <input
+        type="search"
+        class="input input-sm"
+        placeholder="Buscar DNI..."
+        [ngModel]="busqueda()"
+        (ngModelChange)="busqueda.set($event)"
+      />
+    </div>
+
+    @if (cargando()) {
+      <p class="loading">Cargando...</p>
+    } @else if (error()) {
+      <p class="msg-error">{{ error() }}</p>
+    } @else if (padronFiltrado().length === 0) {
+      <p class="empty">No hay DNIs cargados aún.</p>
+    } @else {
+      <table class="tabla">
+        <thead>
+          <tr>
+            <th>DNI</th>
+            <th>Fecha de carga</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of padronFiltrado(); track item.dni) {
+            <tr>
+              <td>{{ item.dni }}</td>
+              <td>{{ item.fechaCarga | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td>
+                <button class="btn btn-danger-sm" (click)="eliminar(item.dni)">Eliminar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+</div>

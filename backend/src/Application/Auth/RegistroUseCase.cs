@@ -9,10 +9,14 @@ namespace PracticaProfesional.Application.Auth;
 public class RegistroUseCase(
     IUsuarioRepository usuarioRepository,
     IEstudianteRepository estudianteRepository,
-    ICarreraRepository carreraRepository)
+    ICarreraRepository carreraRepository,
+    IPadronRepository padronRepository)
 {
     public async Task EjecutarAsync(RegistroRequestDto dto, CancellationToken cancellationToken = default)
     {
+        if (!await padronRepository.ExisteDniAsync(dto.DNI.Trim(), cancellationToken))
+            throw new BusinessException("El DNI no está habilitado para el registro. Comunicate con la dirección del instituto.", 403);
+
         if (await usuarioRepository.ExistePorDniAsync(dto.DNI, cancellationToken))
             throw new InvalidOperationException("Ya existe un usuario con ese DNI.");
 
@@ -30,5 +34,7 @@ public class RegistroUseCase(
 
         var estudiante = Estudiante.Crear(usuario.Id, dto.Anio, dto.CarreraId, dto.FechaDeIngreso);
         await estudianteRepository.AgregarAsync(estudiante, cancellationToken);
+
+        await padronRepository.EliminarAsync(dto.DNI.Trim(), cancellationToken);
     }
 }

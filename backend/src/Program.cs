@@ -23,6 +23,7 @@ using PracticaProfesional.Application.Examenes;
 using PracticaProfesional.Application.Alertas;
 using PracticaProfesional.Application.Notificaciones;
 using PracticaProfesional.Application.Encuestas;
+using PracticaProfesional.Application.Padron;
 using PracticaProfesional.Infrastructure.BackgroundServices;
 using PracticaProfesional.Infrastructure.Persistence.Repositories;
 using PracticaProfesional.Application.Interfaces;
@@ -75,11 +76,18 @@ builder.Services.AddScoped<IAsistenciaRepository, AsistenciaRepository>();
 builder.Services.AddScoped<IMateriaRepository, MateriaRepository>();
 builder.Services.AddScoped<ICarreraRepository, CarreraRepository>();
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IPadronRepository, PadronRepository>();
 
 // ── Use Cases ──────────────────────────────────────────────────────────────────
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<LoginUseCase>();
 builder.Services.AddScoped<RegistroUseCase>();
+
+// Padrón
+builder.Services.AddScoped<CargarPadronUseCase>();
+builder.Services.AddScoped<AgregarDniUseCase>();
+builder.Services.AddScoped<ListarPadronUseCase>();
+builder.Services.AddScoped<EliminarDniUseCase>();
 builder.Services.AddScoped<SolicitarRestablecimientoUseCase>();
 builder.Services.AddScoped<RestablecerPasswordUseCase>();
 builder.Services.AddScoped<RegistrarCambioRolUseCase>();

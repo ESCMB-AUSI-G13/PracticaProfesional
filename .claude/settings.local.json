@@ -53,7 +53,8 @@
       "Bash(Get-ChildItem -Path \"d:\\\\facum\\\\GITHUB TESIS\\\\PracticaProfesional\" -Recurse -Directory)",
       "PowerShell(Get-ChildItem -Path \"d:\\\\facum\\\\GITHUB TESIS\\\\PracticaProfesional\" -Recurse -Directory | Select-Object -First 30 | ForEach-Object { $_.FullName })",
       "Bash(Select-String -Pattern \"error\" -CaseSensitive)",
-      "Bash(grep -E \"^.*error CS|0 Errores|Errores$\")"
+      "Bash(grep -E \"^.*error CS|0 Errores|Errores$\")",
+      "Bash(Get-ChildItem -Path \"d:\\\\Documents\\\\3A\\\\PRACTICA PROFESIONAL\\\\PracticaProfesional\" -Directory)"
     ]
   }
 }

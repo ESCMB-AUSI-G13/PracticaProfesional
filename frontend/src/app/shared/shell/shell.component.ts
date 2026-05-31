@@ -47,6 +47,7 @@ const NAV: NavItem[] = [
       { label: 'Cátedras',      ruta: '/espacios-curriculares', icon: '', roles: ['Direccion'] },
       { label: 'Inscripciones', ruta: '/inscripciones-materia', icon: '', roles: ['Direccion'] },
       { label: 'Encuestas',    ruta: '/encuestas',             icon: '', roles: ['Direccion'] },
+      { label: 'Padrón',       ruta: '/padron',                icon: '', roles: ['Direccion'] },
     ]
   },
   {

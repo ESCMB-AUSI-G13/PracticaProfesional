@@ -46,6 +46,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<AuditoriaLog> AuditoriaLogs => Set<AuditoriaLog>();
     public DbSet<LogSeguridad> LogsSeguridad => Set<LogSeguridad>();
 
+    // Padrón de alumnos habilitados para registro
+    public DbSet<PadronAlumno> PadronAlumnos => Set<PadronAlumno>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -443,6 +446,16 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
                   .WithMany()
                   .HasForeignKey(ec => ec.EncuestaId)
                   .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ──────────────────────────────────────────────
+        // PadronAlumno
+        // ──────────────────────────────────────────────
+        modelBuilder.Entity<PadronAlumno>(entity =>
+        {
+            entity.HasKey(p => p.DNI);
+            entity.Property(p => p.DNI).IsRequired().HasMaxLength(10);
+            entity.Property(p => p.FechaCarga).IsRequired();
         });
 
         // ──────────────────────────────────────────────

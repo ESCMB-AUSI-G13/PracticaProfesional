@@ -120,6 +120,14 @@ export const routes: Routes = [
           import('./features/estudiantes/editar-estudiante/editar-estudiante.component').then(m => m.EditarEstudianteComponent)
       },
 
+      // Padrón de alumnos — solo Dirección
+      {
+        path: 'padron',
+        canActivate: [roleGuard('Direccion')],
+        loadComponent: () =>
+          import('./features/padron/panel-padron/panel-padron.component').then(m => m.PanelPadronComponent)
+      },
+
       // Logs de seguridad — solo Dirección
       {
         path: 'logs-seguridad',
