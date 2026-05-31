@@ -271,14 +271,11 @@ public static class CohorteHistoricaSeeder
 
         if (estudiantesH2023.Count > 0)
         {
-            await db.Database.ExecuteSqlRawAsync(
-                $"DELETE FROM HistorialAcademico WHERE EstudianteId IN ({string.Join(",", estudiantesH2023)})", ct);
-            await db.Database.ExecuteSqlRawAsync(
-                $"DELETE FROM Estudiantes WHERE Id IN ({string.Join(",", estudiantesH2023)})", ct);
+            await db.HistorialAcademico.Where(h => estudiantesH2023.Contains(h.EstudianteId)).ExecuteDeleteAsync(ct);
+            await db.Estudiantes.Where(e => estudiantesH2023.Contains(e.Id)).ExecuteDeleteAsync(ct);
         }
         if (legajosH2023.Count > 0)
-            await db.Database.ExecuteSqlRawAsync(
-                $"DELETE FROM Usuarios WHERE Id IN ({string.Join(",", legajosH2023)})", ct);
+            await db.Usuarios.Where(u => legajosH2023.Contains(u.Id)).ExecuteDeleteAsync(ct);
 
         logger.LogInformation(
             "CohorteHistoricaSeeder.Reparar: {E} sobrantes EST-H2023-C1 eliminados.", estudiantesH2023.Count);
@@ -296,16 +293,11 @@ public static class CohorteHistoricaSeeder
 
         if (estudiantesHistoricos.Count > 0)
         {
-            await db.Database.ExecuteSqlRawAsync(
-                $"DELETE FROM HistorialAcademico WHERE EstudianteId IN ({string.Join(",", estudiantesHistoricos)})",
-                ct);
-            await db.Database.ExecuteSqlRawAsync(
-                $"DELETE FROM Estudiantes WHERE Id IN ({string.Join(",", estudiantesHistoricos)})",
-                ct);
+            await db.HistorialAcademico.Where(h => estudiantesHistoricos.Contains(h.EstudianteId)).ExecuteDeleteAsync(ct);
+            await db.Estudiantes.Where(e => estudiantesHistoricos.Contains(e.Id)).ExecuteDeleteAsync(ct);
         }
         if (legajosHistoricos.Count > 0)
-            await db.Database.ExecuteSqlRawAsync(
-                $"DELETE FROM Usuarios WHERE Id IN ({string.Join(",", legajosHistoricos)})", ct);
+            await db.Usuarios.Where(u => legajosHistoricos.Contains(u.Id)).ExecuteDeleteAsync(ct);
 
         logger.LogInformation(
             "CohorteHistoricaSeeder.Reparar: {E} estudiantes y {U} usuarios históricos eliminados.",
@@ -644,13 +636,9 @@ public static class CohorteHistoricaSeeder
         await db.SaveChangesAsync(ct);
 
         // Corregir FechaInscripcion a la fecha real de inicio del ciclo 2021
-        if (cursoIds2021.Count > 0)
-        {
-            var ids = string.Join(",", cursoIds2021);
-            await db.Database.ExecuteSqlRawAsync(
-                $"UPDATE InscripcionesMateria SET FechaInscripcion = '2021-03-01' WHERE CursoId IN ({ids})",
-                ct);
-        }
+        await db.InscripcionesMateria
+            .Where(i => cursoIds2021.Contains(i.CursoId))
+            .ExecuteUpdateAsync(s => s.SetProperty(i => i.FechaInscripcion, new DateTime(2021, 3, 1)), ct);
 
         logger.LogInformation(
             "SeedInscripcionesCohorte2021: {I} inscripciones creadas para {E} estudiantes.",

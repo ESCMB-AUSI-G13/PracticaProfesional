@@ -141,10 +141,10 @@ public static class Examenes2021Seeder
         db.InscripcionesExamen.AddRange(todasInscripciones);
         await db.SaveChangesAsync(ct);
 
-        var examenIds = string.Join(",", todosLosExamenes.Select(e => e.Id));
-        await db.Database.ExecuteSqlRawAsync(
-            $"UPDATE InscripcionesExamen SET FechaInscripcion = '2021-03-01' WHERE ExamenId IN ({examenIds})",
-            ct);
+        var examenIds = todosLosExamenes.Select(e => e.Id).ToList();
+        await db.InscripcionesExamen
+            .Where(ie => examenIds.Contains(ie.ExamenId))
+            .ExecuteUpdateAsync(s => s.SetProperty(ie => ie.FechaInscripcion, new DateTime(2021, 3, 1)), ct);
 
         logger.LogInformation(
             "Examenes2021Seeder: {T} inscripciones — {A} activas, {B} baja.",

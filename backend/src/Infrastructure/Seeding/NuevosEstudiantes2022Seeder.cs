@@ -123,10 +123,9 @@ public static class NuevosEstudiantes2022Seeder
 
         // Ajustar FechaInscripcion histórica
         var cursosIds = cursosPorCarreraComision.Values.ToList();
-        var ids       = string.Join(",", cursosIds);
-        await db.Database.ExecuteSqlRawAsync(
-            $"UPDATE InscripcionesMateria SET FechaInscripcion = '2022-03-01' WHERE CursoId IN ({ids})",
-            ct);
+        await db.InscripcionesMateria
+            .Where(i => cursosIds.Contains(i.CursoId))
+            .ExecuteUpdateAsync(s => s.SetProperty(i => i.FechaInscripcion, new DateTime(2022, 3, 1)), ct);
 
         logger.LogInformation("NuevosEstudiantes2022Seeder: {N} estudiantes cohorte 2022 creados.", creados);
     }
