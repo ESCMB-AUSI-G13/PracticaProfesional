@@ -14,6 +14,7 @@ public class AuditoriaController(
     ListarAuditoriaLogsUseCase listarLogs) : ControllerBase
 {
     [HttpPost("cambio-rol")]
+    [Authorize(Roles = "Direccion")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RegistrarCambioRol(

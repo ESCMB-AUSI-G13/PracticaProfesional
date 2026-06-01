@@ -78,6 +78,7 @@ cd backend && dotnet test
 | `Examen` | Validaciones de fecha futura, horario no vacío, cupo positivo |
 | `Correlatividad` | No auto-referencia, tipo de requerimiento obligatorio, condición Regularizado vs Aprobado |
 | `InscripcionMateria` | Ciclo de vida: Activa → Baja / Aprobada / Desaprobada |
+| `PadronAlumno` | Validación de formato DNI (solo dígitos, 7-10 caracteres), trim de espacios, fecha de carga |
 
 ### Por qué solo dominio
 

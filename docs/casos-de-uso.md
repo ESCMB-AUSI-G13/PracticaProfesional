@@ -52,8 +52,11 @@
 | Comparativo entre comisiones (RR-05) | Implementado | Docente, Administrador |
 | Evolución de notas por período (RR-06) | Implementado | Docente, Administrador |
 | Promedios por cátedra (RR-07) | Implementado | Docente, Administrador |
-| Riesgo de deserción académica | Implementado | Administrador |
-| Retención y deserción por cohorte | Implementado | Administrador |
+| Evaluación docente por encuesta (RR-02) | Implementado | Docente, Administrador |
+| Satisfacción estudiantil con evolución mensual (RR-03) | Implementado | Administrador |
+| Comparativo institucional de encuestas (RR-04) | Implementado | Administrador |
+| Riesgo de deserción académica (RR-10) | Implementado | Administrador |
+| Retención y deserción por cohorte (RR-11, RR-12) | Implementado | Administrador |
 
 ---
 
@@ -85,9 +88,19 @@
 
 ---
 
-## Módulos Pendientes
+---
 
-| Módulo | Estado |
-|---|---|
-| Encuestas académicas anónimas (CU-36, CU-40) | Pendiente |
-| Certificados con Hash SHA-256 / QR (CU-38) | Pendiente |
+## Módulo 7 — Encuestas Académicas (CU-36, CU-40)
+
+| Caso de uso | Estado | Roles habilitados |
+|---|---|---|
+| Crear encuesta (EvaluacionDocente / SatisfaccionGeneral) | Implementado | Docente, Administrador |
+| Agregar preguntas (Likert 1-5 / texto libre) | Implementado | Docente, Administrador |
+| Activar / desactivar encuesta | Implementado | Docente, Administrador |
+| Responder encuesta (anónima) | Implementado | Estudiante |
+| Ver encuesta pendiente | Implementado | Estudiante |
+
+**Reglas de negocio:** Las respuestas son completamente anónimas — se usa un token SHA-256 derivado de `(estudianteId | encuestaId | salt)` para evitar duplicados sin vincular la identidad. No existe FK al alumno en la tabla de respuestas.
+
+---
+

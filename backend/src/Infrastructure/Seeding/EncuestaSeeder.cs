@@ -70,12 +70,16 @@ public static class EncuestaSeeder
         await db.SaveChangesAsync(ct);
 
         db.PreguntasEncuesta.AddRange(
-            PreguntaEncuesta.Crear(encuesta.Id, "¿Cómo calificás la claridad en las explicaciones del/la docente?",            1, TipoPregunta.EscalaLikert),
-            PreguntaEncuesta.Crear(encuesta.Id, "¿Cómo calificás la predisposición del/la docente para responder consultas?",  2, TipoPregunta.EscalaLikert),
-            PreguntaEncuesta.Crear(encuesta.Id, "¿Cómo calificás la organización y planificación de la materia?",              3, TipoPregunta.EscalaLikert),
-            PreguntaEncuesta.Crear(encuesta.Id, "¿Los contenidos tienen una dificultad adecuada al tiempo disponible?",        4, TipoPregunta.EscalaLikert),
-            PreguntaEncuesta.Crear(encuesta.Id, "¿El/la docente fomenta la participación y el pensamiento crítico?",           5, TipoPregunta.EscalaLikert),
-            PreguntaEncuesta.Crear(encuesta.Id, "¿Qué aspectos de la materia o del/la docente mejorarías? (opcional)",        6, TipoPregunta.TextoLibre, esObligatoria: false)
+            PreguntaEncuesta.Crear(encuesta.Id, "¿Cómo calificás la claridad en las explicaciones del/la docente?",                          1, TipoPregunta.EscalaLikert),
+            PreguntaEncuesta.Crear(encuesta.Id, "¿Cómo calificás la predisposición del/la docente para responder consultas?",                 2, TipoPregunta.EscalaLikert),
+            PreguntaEncuesta.Crear(encuesta.Id, "¿Cómo calificás la organización y planificación de la materia?",                            3, TipoPregunta.EscalaLikert),
+            PreguntaEncuesta.Crear(encuesta.Id, "¿Los contenidos tienen una dificultad adecuada al tiempo disponible?",                      4, TipoPregunta.EscalaLikert),
+            PreguntaEncuesta.Crear(encuesta.Id, "¿El/la docente fomenta la participación y el pensamiento crítico?",                          5, TipoPregunta.EscalaLikert),
+            PreguntaEncuesta.Crear(encuesta.Id, "¿La/el docente mantuvo coherencia entre los temas desarrollados y los temas evaluados?",     6, TipoPregunta.EscalaLikert),
+            PreguntaEncuesta.Crear(encuesta.Id, "¿La/el docente explicitó previamente los criterios de evaluación?",                         7, TipoPregunta.EscalaLikert),
+            PreguntaEncuesta.Crear(encuesta.Id, "¿La/el docente entregó los resultados de las evaluaciones en tiempo adecuado?",              8, TipoPregunta.EscalaLikert),
+            PreguntaEncuesta.Crear(encuesta.Id, "¿La/el docente cumplió con los horarios previstos?",                                        9, TipoPregunta.EscalaLikert),
+            PreguntaEncuesta.Crear(encuesta.Id, "¿Qué aspectos de la materia o del/la docente mejorarías? (opcional)",                      10, TipoPregunta.TextoLibre, esObligatoria: false)
         );
         await db.SaveChangesAsync(ct);
     }
