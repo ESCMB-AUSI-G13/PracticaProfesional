@@ -9729,23 +9729,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\carra\\.nuget\\packages\\": {},
+    "C:\\Users\\facum\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\Documents\\3A\\PRACTICA PROFESIONAL\\PracticaProfesional\\backend\\tests\\PracticaProfesional.Tests.csproj",
+      "projectUniqueName": "D:\\facum\\GITHUB TESIS\\PracticaProfesional\\backend\\tests\\PracticaProfesional.Tests.csproj",
       "projectName": "PracticaProfesional.Tests",
-      "projectPath": "D:\\Documents\\3A\\PRACTICA PROFESIONAL\\PracticaProfesional\\backend\\tests\\PracticaProfesional.Tests.csproj",
-      "packagesPath": "C:\\Users\\carra\\.nuget\\packages\\",
-      "outputPath": "D:\\Documents\\3A\\PRACTICA PROFESIONAL\\PracticaProfesional\\backend\\tests\\obj\\",
+      "projectPath": "D:\\facum\\GITHUB TESIS\\PracticaProfesional\\backend\\tests\\PracticaProfesional.Tests.csproj",
+      "packagesPath": "C:\\Users\\facum\\.nuget\\packages\\",
+      "outputPath": "D:\\facum\\GITHUB TESIS\\PracticaProfesional\\backend\\tests\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\carra\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\facum\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -9754,15 +9754,14 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "D:\\Documents\\3A\\PRACTICA PROFESIONAL\\PracticaProfesional\\backend\\src\\PracticaProfesional.csproj": {
-              "projectPath": "D:\\Documents\\3A\\PRACTICA PROFESIONAL\\PracticaProfesional\\backend\\src\\PracticaProfesional.csproj"
+            "D:\\facum\\GITHUB TESIS\\PracticaProfesional\\backend\\src\\PracticaProfesional.csproj": {
+              "projectPath": "D:\\facum\\GITHUB TESIS\\PracticaProfesional\\backend\\src\\PracticaProfesional.csproj"
             }
           }
         }
@@ -9777,7 +9776,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.300"
+      "SdkAnalysisLevel": "10.0.200"
     },
     "frameworks": {
       "net8.0": {
@@ -9814,7 +9813,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.300/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.204/PortableRuntimeIdentifierGraph.json"
       }
     }
   },
@@ -9823,7 +9822,7 @@
       "code": "NU1603",
       "level": "Warning",
       "warningLevel": 1,
-      "message": "PracticaProfesional depende de QuestPDF (>= 2024.10.5), pero no se encontró QuestPDF 2024.10.5. QuestPDF 2024.12.0 se resolvió en su lugar.",
+      "message": "PracticaProfesional depends on QuestPDF (>= 2024.10.5) but QuestPDF 2024.10.5 was not found. QuestPDF 2024.12.0 was resolved instead.",
       "libraryId": "QuestPDF",
       "targetGraphs": [
         "net8.0"
