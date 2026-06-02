@@ -35,13 +35,11 @@
       </div>
 
       <div class="campo">
-        <label>Año</label>
+        <label>Año lectivo</label>
         <select [ngModel]="anioLectivoFiltro()" (ngModelChange)="anioLectivoFiltro.set($event ? +$event : null)">
           <option [value]="null">— Todos —</option>
           @for (a of aniosDisponibles(); track a) {
-            <option [value]="a" [disabled]="anioFijadoPorMateria() !== null && anioFijadoPorMateria() !== a">
-              {{ a }}° año
-            </option>
+            <option [value]="a">{{ a }}</option>
           }
         </select>
       </div>
@@ -130,12 +128,6 @@
           <h3>{{ reporte()!.totalPresentes > 0 ? 'Distribución de asistencias' : 'Tipo de ausencias' }}</h3>
           <div class="canvas-wrapper dona-wrapper">
             <canvas #donaCanvas></canvas>
-          </div>
-        </div>
-        <div class="grafico-card">
-          <h3>Top alumnos con más inasistencias</h3>
-          <div class="canvas-wrapper barras-wrapper">
-            <canvas #barrasCanvas></canvas>
           </div>
         </div>
         <div class="grafico-card grafico-full">

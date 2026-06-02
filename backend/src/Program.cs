@@ -367,6 +367,16 @@ var app = builder.Build();
         //         Exámenes, Notas, HistorialAcademico, Encuestas, Estados) ──
         await Anio2022ActividadesSeeder.SeedAsync(db, logger);
 
+        // ── 2023 Paso 1: nueva cohorte Profesorado (Trayecto 2023 ya existe) ──
+        await NuevosEstudiantes2023Seeder.SeedAsync(db, logger);
+
+        // ── 2023 Actividades + inscripciones continuantes ────────────────────
+        await Anio2023ActividadesSeeder.SeedAsync(db, logger);
+
+        // ── 2023 Trayecto Año 1: cohorte 2023 creada a posteriori ────────────
+        await NuevosEstudiantes2023TrayectoSeeder.SeedAsync(db, logger);
+        await Anio2023ActividadesSeeder.SeedTrayecto2023Año1CompletarAsync(db, logger);
+
         // await EstudiantesSeeder.SeedAsync(db, logger);
         // await EstudiantesSeeder.FixNombresAsync(db, logger);
         // await EstudiantesSeeder.PatchJustificacionesAsync(db, logger);

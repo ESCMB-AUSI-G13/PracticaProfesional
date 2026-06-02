@@ -486,26 +486,52 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
     public async Task<List<(int AnioCursada, int Total, int Desertores)>> ObtenerDesercionPorAnioAsync(
         int? carreraId, int? anioCohorte, CancellationToken ct = default)
     {
-        var query = db.Estudiantes.AsQueryable();
+        // Denominador: estudiantes DISTINTOS que cursaron cada año lectivo
+        // (via InscripcionesMateria → Cursos.AnioLectivo)
+        var inscBase = db.InscripcionesMateria
+            .Join(db.Estudiantes, im => im.EstudianteId, e => e.Id,
+                  (im, e) => new { im.EstudianteId, im.CursoId, e.CarreraId, e.FechaDeIngreso })
+            .Join(db.Cursos, x => x.CursoId, c => c.Id,
+                  (x, c) => new { x.EstudianteId, x.CarreraId, x.FechaDeIngreso, c.AnioLectivo });
 
         if (carreraId.HasValue)
-            query = query.Where(e => e.CarreraId == carreraId.Value);
+            inscBase = inscBase.Where(x => x.CarreraId == carreraId.Value);
 
         if (anioCohorte.HasValue)
-            query = query.Where(e => e.FechaDeIngreso.Year == anioCohorte.Value);
+            inscBase = inscBase.Where(x => x.FechaDeIngreso.Year == anioCohorte.Value);
 
-        var raw = await query
-            .GroupBy(e => e.Anio)
-            .Select(g => new
-            {
-                AnioCursada = g.Key,
-                Total       = g.Count(),
-                Desertores  = g.Count(e => e.Condicion == CondicionEstudiante.Desertor)
-            })
-            .OrderBy(g => g.AnioCursada)
+        var denominador = await inscBase
+            .Select(x => new { x.EstudianteId, x.AnioLectivo })
+            .Distinct()
+            .GroupBy(x => x.AnioLectivo)
+            .Select(g => new { AnioLectivo = g.Key, Total = g.Count() })
             .ToListAsync(ct);
 
-        return raw.Select(r => (r.AnioCursada, r.Total, r.Desertores)).ToList();
+        // Numerador: desertores agrupados por el año en que abandonaron (Estudiante.Anio)
+        var estBase = db.Estudiantes
+            .Where(e => e.Condicion == CondicionEstudiante.Desertor);
+
+        if (carreraId.HasValue)
+            estBase = estBase.Where(e => e.CarreraId == carreraId.Value);
+
+        if (anioCohorte.HasValue)
+            estBase = estBase.Where(e => e.FechaDeIngreso.Year == anioCohorte.Value);
+
+        var numerador = await estBase
+            .GroupBy(e => e.Anio)
+            .Select(g => new { Anio = g.Key, Desertores = g.Count() })
+            .ToListAsync(ct);
+
+        var desertoresPorAnio = numerador.ToDictionary(n => n.Anio, n => n.Desertores);
+
+        return denominador
+            .Select(d => (
+                AnioCursada: d.AnioLectivo,
+                Total:       d.Total,
+                Desertores:  desertoresPorAnio.GetValueOrDefault(d.AnioLectivo, 0)
+            ))
+            .OrderBy(r => r.AnioCursada)
+            .ToList();
     }
 
     // ─────────────────────────────────────────────────────────────────────────

@@ -35,11 +35,9 @@ Chart.register(DoughnutController, ArcElement, Tooltip, Legend, BarController, C
 })
 export class PanelInasistenciasComponent implements OnInit, OnDestroy {
   @ViewChild('donaCanvas')    donaCanvas!:    ElementRef<HTMLCanvasElement>;
-  @ViewChild('barrasCanvas')  barrasCanvas!:  ElementRef<HTMLCanvasElement>;
   @ViewChild('materiasCanvas') materiasCanvas?: ElementRef<HTMLCanvasElement>;
 
   private donaChart:    Chart | null = null;
-  private barrasChart:  Chart | null = null;
   private materiasChart: Chart | null = null;
 
   // ── Opciones para selects ──────────────────────────────────────────────────
@@ -74,12 +72,6 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
   aniosDisponibles = computed(() =>
     [...new Set(this.cursos().map(c => c.anioLectivo))].sort((a, b) => a - b)
   );
-
-  anioFijadoPorMateria = computed(() => {
-    const mid = this.materiaId();
-    if (!mid) return null;
-    return this.materias().find(m => m.id === mid)?.anio ?? null;
-  });
 
   // ── Estado ─────────────────────────────────────────────────────────────────
   reporte     = signal<ReporteInasistencias | null>(null);
@@ -184,7 +176,6 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.donaChart?.destroy();
-    this.barrasChart?.destroy();
     this.materiasChart?.destroy();
   }
 
@@ -220,7 +211,6 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
     if (!r || r.registros.length === 0) return;
 
     this.donaChart?.destroy();
-    this.barrasChart?.destroy();
     this.materiasChart?.destroy();
 
     // ── Dona: presentes / justificadas / injustificadas ──────────────────────
@@ -256,40 +246,10 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
               label: ctx => {
                 const total = r.totalRegistros;
                 const pct = total > 0 ? Math.round((ctx.raw as number) / total * 100) : 0;
-                return ` ${ctx.label}: ${ctx.raw} (${pct}%)`;
+                return ` ${ctx.label}: ${pct}%`;
               }
             }
           }
-        }
-      }
-    });
-
-    // ── Barras horizontales: top 10 alumnos ─────────────────────────────────
-    const conteoAlumnos = new Map<string, number>();
-    for (const reg of r.registros) {
-      conteoAlumnos.set(reg.nombreCompleto, (conteoAlumnos.get(reg.nombreCompleto) ?? 0) + 1);
-    }
-    const top = [...conteoAlumnos.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
-
-    this.barrasChart = new Chart(this.barrasCanvas.nativeElement, {
-      type: 'bar',
-      data: {
-        labels: top.map(([name]) => name),
-        datasets: [{
-          label: 'Inasistencias',
-          data: top.map(([, count]) => count),
-          backgroundColor: '#3498db',
-          borderRadius: 4,
-        }]
-      },
-      options: {
-        indexAxis: 'y',
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
-        scales: {
-          x: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f0f0f0' } },
-          y: { ticks: { font: { size: 11 } } }
         }
       }
     });
@@ -322,9 +282,13 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
     const comisiones = [...comisionesSet].sort();
     const coloresComision = ['#8e44ad', '#3498db', '#e67e22', '#2ecc71', '#e74c3c'];
 
+    const totalRegistros = r.totalRegistros;
     const datasetsMateria = comisiones.map((com, i) => ({
       label: `Com. ${com}`,
-      data: materiasOrdenadas.map(m => comisionesMap.get(m)?.get(com) ?? 0),
+      data: materiasOrdenadas.map(m => {
+        const count = comisionesMap.get(m)?.get(com) ?? 0;
+        return totalRegistros > 0 ? Math.round(count / totalRegistros * 1000) / 10 : 0;
+      }),
       backgroundColor: coloresComision[i % coloresComision.length],
       borderRadius: 4,
     }));
@@ -344,10 +308,19 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
             display: true,
             position: 'top',
             labels: { font: { size: 12 }, padding: 10 }
+          },
+          tooltip: {
+            callbacks: {
+              label: ctx => ` ${ctx.dataset.label}: ${ctx.raw}%`
+            }
           }
         },
         scales: {
-          x: { beginAtZero: true, ticks: { stepSize: 1 }, grid: { color: '#f0f0f0' } },
+          x: {
+            beginAtZero: true,
+            ticks: { callback: (v: any) => `${v}%` },
+            grid: { color: '#f0f0f0' }
+          },
           y: { ticks: { font: { size: 11 } } }
         }
       }
@@ -391,8 +364,6 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
 
   onMateriaChange(id: number | null): void {
     this.materiaId.set(id);
-    const anio = id ? (this.materias().find(m => m.id === id)?.anio ?? null) : null;
-    this.anioLectivoFiltro.set(anio);
   }
 
   limpiar(): void {
@@ -411,10 +382,8 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
     this.buscado.set(false);
     this.error.set(null);
     this.donaChart?.destroy();
-    this.barrasChart?.destroy();
     this.materiasChart?.destroy();
     this.donaChart    = null;
-    this.barrasChart  = null;
     this.materiasChart = null;
   }
 
