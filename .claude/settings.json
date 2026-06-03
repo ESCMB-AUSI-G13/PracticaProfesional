@@ -1,7 +1,14 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git show *)"
+      "Bash(git show *)",
+      "Bash(git -C \"d:/facum/GITHUB TESIS/PracticaProfesional\" show --stat a240fb5)",
+      "Bash(git -C \"d:/facum/GITHUB TESIS/PracticaProfesional\" diff --stat HEAD)",
+      "Bash(git -C \"d:/facum/GITHUB TESIS/PracticaProfesional\" diff HEAD -- backend/src/Program.cs)",
+      "Bash(taskkill /PID 16512 /F)",
+      "PowerShell(Stop-Process -Id 16512 -Force -ErrorAction SilentlyContinue)",
+      "PowerShell(Get-NetTCPConnection -LocalPort 5000 -State Listen)",
+      "PowerShell(Stop-Process -Id 21928 -Force)"
     ]
   }
 }

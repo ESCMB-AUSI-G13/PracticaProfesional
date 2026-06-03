@@ -340,43 +340,46 @@ var app = builder.Build();
             db.SaveChanges();
         }
 
-        var calendarioRepo = scope.ServiceProvider.GetRequiredService<ICalendarioAcademicoRepository>();
-        await CalendarioSeeder.SeedAsync(calendarioRepo);
+        // ── SEEDERS DESHABILITADOS — no tocar datos sin consentimiento explícito ──
+        // Para rehabilitar alguno, descomentar la línea correspondiente.
 
-        await CorrelativiadadesSeeder.SeedCarrera1Async(db, logger);
-        await CorrelativiadadesSeeder.SeedCarrera2Async(db, logger);
-
-        // ✅ HECHO: CursosSeeder ya corrió — 58 cursos 2021-2026 creados.
+        // -- Estructurales (calendario, correlatividades, encuesta base) --
+        // var calendarioRepo = scope.ServiceProvider.GetRequiredService<ICalendarioAcademicoRepository>();
+        // await CalendarioSeeder.SeedAsync(calendarioRepo);
+        // await CorrelativiadadesSeeder.SeedCarrera1Async(db, logger);
+        // await CorrelativiadadesSeeder.SeedCarrera2Async(db, logger);
         // await CursosSeeder.SeedAsync(db, logger);
+        // await EncuestaSeeder.SeedAsync(db);
 
-        // ── Estudiantes cohorte histórica 2021 ───────────────────────────────
-        // ✅ 2021 completo — todos idempotentes
-        await CohorteHistoricaSeeder.SeedAsync(db, logger);
-        await CohorteHistoricaSeeder.SeedInscripcionesCohorte2021Async(db, logger);
-        await Examenes2021Seeder.SeedAsync(db, logger);
-        await Notas2021Seeder.SeedAsync(db, logger);
-        await Encuestas2021Seeder.SeedAsync(db, logger);
-        await Asistencias2021Seeder.SeedAsync(db, logger);
-        await EspaciosCurriculares2021Seeder.SeedAsync(db, logger);
-        await HistorialAcademico2021Seeder.SeedAsync(db, logger);
+        // -- Cohorte histórica 2021 --
+        // await CohorteHistoricaSeeder.SeedAsync(db, logger);
+        // await CohorteHistoricaSeeder.SeedInscripcionesCohorte2021Async(db, logger);
+        // await Examenes2021Seeder.SeedAsync(db, logger);
+        // await Notas2021Seeder.SeedAsync(db, logger);
+        // await Encuestas2021Seeder.SeedAsync(db, logger);
+        // await Asistencias2021Seeder.SeedAsync(db, logger);
+        // await EspaciosCurriculares2021Seeder.SeedAsync(db, logger);
+        // await HistorialAcademico2021Seeder.SeedAsync(db, logger);
 
-        // ── 2022 Paso 2a: nueva cohorte ─────────────────────────────────────
-        await NuevosEstudiantes2022Seeder.SeedAsync(db, logger);
+        // -- Cohorte 2022 --
+        // await NuevosEstudiantes2022Seeder.SeedAsync(db, logger);
+        // await Anio2022ActividadesSeeder.SeedAsync(db, logger);
 
-        // ── 2022 Actividades académicas (EspaciosCurriculares, Asistencias,
-        //         Exámenes, Notas, HistorialAcademico, Encuestas, Estados) ──
-        await Anio2022ActividadesSeeder.SeedAsync(db, logger);
+        // -- Cohorte 2023 --
+        // await NuevosEstudiantes2023Seeder.SeedAsync(db, logger);
+        // await Anio2023ActividadesSeeder.SeedAsync(db, logger);
+        // await NuevosEstudiantes2023TrayectoSeeder.SeedAsync(db, logger);
+        // await Anio2023ActividadesSeeder.SeedTrayecto2023Año1CompletarAsync(db, logger);
 
-        // ── 2023 Paso 1: nueva cohorte Profesorado (Trayecto 2023 ya existe) ──
-        await NuevosEstudiantes2023Seeder.SeedAsync(db, logger);
+        // -- Cohorte 2024 --
+        // await NuevosEstudiantes2024Seeder.SeedAsync(db, logger);
+        // await Anio2024ActividadesSeeder.SeedAsync(db, logger);
+        // await NuevosEstudiantes2024TrayectoSeeder.SeedAsync(db, logger);
+        // await Anio2024ActividadesSeeder.SeedTrayecto2024Año1CompletarAsync(db, logger);
 
-        // ── 2023 Actividades + inscripciones continuantes ────────────────────
-        await Anio2023ActividadesSeeder.SeedAsync(db, logger);
-
-        // ── 2023 Trayecto Año 1: cohorte 2023 creada a posteriori ────────────
-        await NuevosEstudiantes2023TrayectoSeeder.SeedAsync(db, logger);
-        await Anio2023ActividadesSeeder.SeedTrayecto2023Año1CompletarAsync(db, logger);
-
+        // -- Correcciones / patches --
+        // await CondicionRealistaSeeder.SeedAsync(db, logger);
+        // await CohorteHistoricaSeeder.CapFechasEgresoFuturaAsync(db, logger);
         // await EstudiantesSeeder.SeedAsync(db, logger);
         // await EstudiantesSeeder.FixNombresAsync(db, logger);
         // await EstudiantesSeeder.PatchJustificacionesAsync(db, logger);
@@ -387,7 +390,6 @@ var app = builder.Build();
         // await ExamenesSeeder.SeedAsync(db, logger);
         // await NotasExamenesSeeder.SeedAsync(db, logger);
         // await NotasHistoricasSeeder.SeedAsync(db, logger);
-        await EncuestaSeeder.SeedAsync(db);
         // await EncuestaRespuestasSeeder.SeedAsync(db, app.Configuration["Encuestas:Salt"] ?? "pp-salt-2026");
     }
     catch (Exception ex)

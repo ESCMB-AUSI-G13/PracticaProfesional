@@ -200,6 +200,41 @@ public static class CohorteHistoricaSeeder
             logger.LogInformation("AsegurarDesertoresActivos: todos los EST-D ya estaban como Desertor, sin cambios.");
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // CapFechasEgresoFuturaAsync — corrige egresados cuya FechaDeEgreso está en
+    // el futuro (ocurre con Trayecto 2024, cuyo rango calculado es Oct 2026–Mar 2027).
+    // Los reasigna a un rango realista: Oct 2025–May 2026.
+    // Idempotente: no hace nada si no hay fechas futuras.
+    // ─────────────────────────────────────────────────────────────────────────
+    public static async Task CapFechasEgresoFuturaAsync(AppDbContext db, ILogger logger, CancellationToken ct = default)
+    {
+        var hoy = DateTime.Today;
+        var futuros = await db.Estudiantes
+            .Where(e => e.Condicion == CondicionEstudiante.Egresado && e.FechaDeEgreso > hoy)
+            .Select(e => e.Id)
+            .ToListAsync(ct);
+
+        if (futuros.Count == 0)
+        {
+            logger.LogInformation("CapFechasEgresoFutura: sin fechas futuras, omitido.");
+            return;
+        }
+
+        var rng      = new Random(42);
+        var desde    = new DateTime(2025, 10, 1);
+        int rangoDias = (new DateTime(2026, 5, 31) - desde).Days;
+
+        foreach (var id in futuros)
+        {
+            var fecha = desde.AddDays(rng.Next(rangoDias + 1));
+            await db.Database.ExecuteSqlRawAsync(
+                "UPDATE Estudiantes SET FechaDeEgreso = {0} WHERE Id = {1}", fecha, id);
+        }
+
+        logger.LogInformation(
+            "CapFechasEgresoFutura: {N} fechas futuras corregidas al rango Oct 2025–May 2026.", futuros.Count);
+    }
+
     private static int AnioMaxCarrera(int carreraId) => carreraId == 1 ? 4 : 2;
 
     // El egreso ocurre al final del año (cohorte + duración de carrera)

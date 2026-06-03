@@ -38,10 +38,14 @@ public class EgresadosPorCarreraUseCase(IRendimientoConsolidadoRepository repo)
 
         int totalEgresados  = filas.Sum(f => f.TotalEgresados);
         int totalAlumnos    = filas.Sum(f => f.TotalAlumnosCohorte);
-        var duracionesValidas = filas
-            .Where(f => f.DuracionPromedioAnios.HasValue)
-            .Select(f => f.DuracionPromedioAnios!.Value)
+        var filasConDuracion = filas
+            .Where(f => f.DuracionPromedioAnios.HasValue && f.TotalEgresados > 0)
             .ToList();
+
+        double? duracionPonderada = filasConDuracion.Any()
+            ? filasConDuracion.Sum(f => f.DuracionPromedioAnios!.Value * f.TotalEgresados)
+              / filasConDuracion.Sum(f => f.TotalEgresados)
+            : null;
 
         return new ReporteEgresadosPorCarreraDto
         {
@@ -51,8 +55,8 @@ public class EgresadosPorCarreraUseCase(IRendimientoConsolidadoRepository repo)
             TasaEgresoGlobal       = totalAlumnos > 0
                 ? Math.Round((double)totalEgresados / totalAlumnos * 100, 1)
                 : 0,
-            DuracionPromedioGlobal = duracionesValidas.Any()
-                ? Math.Round(duracionesValidas.Average(), 1)
+            DuracionPromedioGlobal = duracionPonderada.HasValue
+                ? Math.Round(duracionPonderada.Value, 1)
                 : null,
         };
     }
