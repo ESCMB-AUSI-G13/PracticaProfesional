@@ -123,12 +123,11 @@ public class PdfReporteService
                    .Text($"Promedio institucional de notas: {dto.PromedioNotaGlobal:F2} / 10")
                    .FontSize(9).FontColor("#444444");
 
-            SectionTitle(col, "Riesgo Académico (Estudiantes Activos)");
+            SectionTitle(col, "Condición Académica (Estudiantes Activos)");
             KpiRow(col,
-                ("Riesgo Alto",      dto.RiesgoAlto.ToString(),              "#c0392b"),
-                ("Riesgo Medio",     dto.RiesgoMedio.ToString(),             "#d68910"),
-                ("Riesgo Bajo",      dto.RiesgoBajo.ToString(),              "#1e8449"),
-                ("% en riesgo alto", $"{dto.PorcentajeRiesgoAlto:F1}%",     "#6c3483"));
+                ("Promocionales", dto.Promocionales.ToString(), "#1e8449"),
+                ("Regulares",     dto.Regulares.ToString(),     "#2980b9"),
+                ("Libres",        dto.Libres.ToString(),        "#c0392b"));
 
             SectionTitle(col, "Evolución por Cohorte");
             col.Item().Table(table =>

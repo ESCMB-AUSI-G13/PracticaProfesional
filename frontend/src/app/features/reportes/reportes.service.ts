@@ -219,10 +219,9 @@ export interface TableroEjecutivo {
   totalEgresados:             number;
   totalDesertores:            number;
   totalHistorico:             number;
-  riesgoAlto:                 number;
-  riesgoMedio:                number;
-  riesgoBajo:                 number;
-  porcentajeRiesgoAlto:       number;
+  promocionales:              number;
+  regulares:                  number;
+  libres:                     number;
   tasaRetencionGlobal:        number;
   tasaDesercionGlobal:        number;
   tasaEgresoGlobal:           number;
@@ -329,10 +328,11 @@ export class ReportesService {
   }
 
   /** RR-07: Promedios por cátedra. */
-  obtenerPromediosCatedra(anio?: number, cursoId?: number): Observable<ReportePromediosCatedra> {
+  obtenerPromediosCatedra(anio?: number, cursoId?: number, carreraId?: number): Observable<ReportePromediosCatedra> {
     const params: Record<string, string> = {};
-    if (anio)    params['anio']    = String(anio);
-    if (cursoId) params['cursoId'] = String(cursoId);
+    if (anio)      params['anio']      = String(anio);
+    if (cursoId)   params['cursoId']   = String(cursoId);
+    if (carreraId) params['carreraId'] = String(carreraId);
     return this.http.get<ReportePromediosCatedra>(`${this.apiUrl}/rendimiento/catedras`, { params });
   }
 
@@ -417,10 +417,11 @@ export class ReportesService {
     return this.http.post(`${this.apiUrl}/inasistencias/pdf`, filtro, { responseType: 'blob' });
   }
 
-  descargarPromediosCatedraPdf(anio?: number, cursoId?: number): Observable<Blob> {
+  descargarPromediosCatedraPdf(anio?: number, cursoId?: number, carreraId?: number): Observable<Blob> {
     const params: Record<string, string> = {};
-    if (anio)    params['anio']    = String(anio);
-    if (cursoId) params['cursoId'] = String(cursoId);
+    if (anio)      params['anio']      = String(anio);
+    if (cursoId)   params['cursoId']   = String(cursoId);
+    if (carreraId) params['carreraId'] = String(carreraId);
     return this.http.get(`${this.apiUrl}/rendimiento/catedras/pdf`, { params, responseType: 'blob' });
   }
 

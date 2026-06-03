@@ -514,13 +514,13 @@ public static class Anio2023ActividadesSeeder
         int seed = estudianteId * 31 + examenId;
         return (c, tipo) switch
         {
-            (CondicionEstudiante.Promocional, _)               => 8 + seed % 3,
-            (CondicionEstudiante.Egresado,    _)               => 8 + seed % 3,
-            (CondicionEstudiante.Regular,     TipoExamen.Final) => 6 + seed % 3,
-            (CondicionEstudiante.Regular,     _)               => 5 + seed % 3,
-            (CondicionEstudiante.Libre,       TipoExamen.Final) => 2 + seed % 5,
-            (CondicionEstudiante.Libre,       _)               => 1 + seed % 4,
-            _                                                  => 3
+            (CondicionEstudiante.Promocional, _)                 => 8 + seed % 3,   // 8-10
+            (CondicionEstudiante.Egresado,    _)                 => 8 + seed % 3,   // 8-10
+            (CondicionEstudiante.Regular,     TipoExamen.Final)  => 5 + seed % 4,   // 5-8 (aprueba el final)
+            (CondicionEstudiante.Regular,     _)                 => 3 + seed % 5,   // 3-7 (~20% desaprueba parcial)
+            (CondicionEstudiante.Libre,       TipoExamen.Final)  => 2 + seed % 4,   // 2-5 (muy pocos pasan)
+            (CondicionEstudiante.Libre,       _)                 => 1 + seed % 3,   // 1-3 (todos desaprueban parciales)
+            _                                                    => 3
         };
     }
 
@@ -561,6 +561,7 @@ public static class Anio2023ActividadesSeeder
             var encuesta = Encuesta.Crear(
                 $"Evaluación Docente 2023 — {materia.Nombre}",
                 TipoEncuesta.EvaluacionDocente, Anio, materiaId: materia.Id);
+            encuesta.Desactivar();
             db.Encuestas.Add(encuesta);
             await db.SaveChangesAsync(ct);
 

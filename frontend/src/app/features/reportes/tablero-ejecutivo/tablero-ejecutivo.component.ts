@@ -134,10 +134,10 @@ export class TableroEjecutivoComponent implements OnInit, OnDestroy {
     this.riesgoChart = new Chart(this.riesgoCanvas.nativeElement, {
       type: 'doughnut',
       data: {
-        labels: ['Riesgo Alto', 'Riesgo Medio', 'Riesgo Bajo'],
+        labels: ['Promocionales', 'Regulares', 'Libres'],
         datasets: [{
-          data: [t.riesgoAlto, t.riesgoMedio, t.riesgoBajo],
-          backgroundColor: ['#e74c3c', '#f39c12', '#2ecc71'],
+          data: [t.promocionales, t.regulares, t.libres],
+          backgroundColor: ['#2ecc71', '#3498db', '#e74c3c'],
           borderWidth: 2,
           borderColor: '#fff',
         }]
@@ -146,11 +146,29 @@ export class TableroEjecutivoComponent implements OnInit, OnDestroy {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { position: 'bottom', labels: { font: { size: 12 }, padding: 12 } },
+          legend: {
+            position: 'bottom',
+            labels: {
+              font: { size: 12 },
+              padding: 12,
+              generateLabels: (chart) => {
+                const data   = chart.data;
+                const colors = data.datasets[0].backgroundColor as string[];
+                return (data.labels as string[]).map((label, i) => ({
+                  text:        `${label}: ${data.datasets[0].data[i]}`,
+                  fillStyle:   colors[i],
+                  strokeStyle: colors[i],
+                  lineWidth:   0,
+                  hidden:      false,
+                  index:       i,
+                }));
+              },
+            },
+          },
           tooltip: {
             callbacks: {
               label: ctx => {
-                const total = t.riesgoAlto + t.riesgoMedio + t.riesgoBajo;
+                const total = t.promocionales + t.regulares + t.libres;
                 const pct   = total > 0 ? Math.round((ctx.raw as number) / total * 100) : 0;
                 return ` ${ctx.label}: ${ctx.raw} (${pct}%)`;
               }

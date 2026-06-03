@@ -61,6 +61,9 @@ public static class Anio2022ActividadesSeeder
             return;
         }
 
+        // Paso 1: inscripciones para grupos continuantes de 2021 (idempotente por sí misma)
+        await SeedInscripcionesContinuantes(db, cursoIds, logger, ct);
+
         if (await db.EspaciosCurriculares.AnyAsync(ec => cursoIds.Contains(ec.CursoId), ct))
         {
             logger.LogInformation("Anio2022ActividadesSeeder: ya existe, omitido.");
@@ -77,7 +80,7 @@ public static class Anio2022ActividadesSeeder
             .ToListAsync(ct);
 
         var materias2022 = materias
-            .Where(m => inscripciones.Any(im => im.MateriaId == m.Id))
+            .Where(m => cursos.Any(c => c.CarreraId == m.CarreraId && c.AnioLectivo == m.Anio))
             .ToList();
 
         var materiaDocenteMap = await SeedEspaciosCurriculares(db, cursos, materias, docenteIds, ct);
@@ -152,6 +155,7 @@ public static class Anio2022ActividadesSeeder
     private static EstadoAsistencia CalcularAsistencia(CondicionEstudiante c, int idx) => c switch
     {
         CondicionEstudiante.Promocional => idx < 15 ? EstadoAsistencia.Presente : EstadoAsistencia.Ausente,
+        CondicionEstudiante.Egresado    => idx < 15 ? EstadoAsistencia.Presente : EstadoAsistencia.Ausente,
         CondicionEstudiante.Regular     => idx % 3 != 2 ? EstadoAsistencia.Presente : EstadoAsistencia.Ausente,
         CondicionEstudiante.Libre       => idx < 9 ? EstadoAsistencia.Presente : EstadoAsistencia.Ausente,
         CondicionEstudiante.Desertor    => idx < 4 ? EstadoAsistencia.Presente : EstadoAsistencia.Ausente,
@@ -212,12 +216,12 @@ public static class Anio2022ActividadesSeeder
         int seed = estudianteId * 31 + examenId;
         return (c, tipo) switch
         {
-            (CondicionEstudiante.Promocional, _)              => 8 + seed % 3,   // 8-10
-            (CondicionEstudiante.Regular,     TipoExamen.Final)  => 6 + seed % 3,   // 6-8 (aprueba el final)
-            (CondicionEstudiante.Regular,     _)              => 5 + seed % 3,   // 5-7 (parciales)
-            (CondicionEstudiante.Libre,       TipoExamen.Final)  => 2 + seed % 5,   // 2-6 (algunos pasan)
-            (CondicionEstudiante.Libre,       _)              => 1 + seed % 4,   // 1-4 (parciales)
-            _                                                 => 3
+            (CondicionEstudiante.Promocional, _)                 => 8 + seed % 3,   // 8-10
+            (CondicionEstudiante.Regular,     TipoExamen.Final)  => 5 + seed % 4,   // 5-8 (aprueba el final)
+            (CondicionEstudiante.Regular,     _)                 => 3 + seed % 5,   // 3-7 (~20% desaprueba parcial)
+            (CondicionEstudiante.Libre,       TipoExamen.Final)  => 2 + seed % 4,   // 2-5 (muy pocos pasan)
+            (CondicionEstudiante.Libre,       _)                 => 1 + seed % 3,   // 1-3 (todos desaprueban parciales)
+            _                                                    => 3
         };
     }
 
@@ -257,6 +261,7 @@ public static class Anio2022ActividadesSeeder
             var encuesta = Encuesta.Crear(
                 $"Evaluación Docente 2022 — {materia.Nombre}",
                 TipoEncuesta.EvaluacionDocente, Anio, materiaId: materia.Id);
+            encuesta.Desactivar();
             db.Encuestas.Add(encuesta);
             await db.SaveChangesAsync(ct);
 
@@ -301,6 +306,7 @@ public static class Anio2022ActividadesSeeder
             {
                 case CondicionEstudiante.Promocional:
                 case CondicionEstudiante.Regular:
+                case CondicionEstudiante.Egresado:
                     insc.MarcarAprobada();
                     break;
                 case CondicionEstudiante.Libre:
@@ -312,5 +318,249 @@ public static class Anio2022ActividadesSeeder
             }
         }
         await db.SaveChangesAsync(ct);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────────
+    // Crea InscripcionesMateria para los grupos continuantes de la cohorte 2021:
+    //   a) Profesorado 2021 (no-desertor Año1) → AnioLectivo=2, CarreraId=1
+    //   b) Trayecto 2021   (no-desertor Año1) → AnioLectivo=2, CarreraId=2
+    // Idempotente: se omite si ya existen inscripciones en cursos 2022 AnioLectivo=2.
+    private static async Task SeedInscripcionesContinuantes(
+        AppDbContext db, List<int> cursoIds2022, ILogger logger, CancellationToken ct)
+    {
+        var cursosAnio2Ids = await db.Cursos
+            .Where(c => c.Anio == Anio && c.AnioLectivo == 2)
+            .Select(c => c.Id)
+            .ToListAsync(ct);
+
+        if (cursosAnio2Ids.Count == 0)
+        {
+            logger.LogWarning("Anio2022ActividadesSeeder.Continuantes: no hay cursos AnioLectivo=2 en 2022.");
+            return;
+        }
+
+        bool yaExisten = await db.InscripcionesMateria
+            .AnyAsync(im => cursosAnio2Ids.Contains(im.CursoId), ct);
+
+        if (yaExisten)
+        {
+            logger.LogInformation("Anio2022ActividadesSeeder.Continuantes: ya existen, omitido.");
+            return;
+        }
+
+        var cursos2022Map = (await db.Cursos
+            .Where(c => c.Anio == Anio)
+            .ToListAsync(ct))
+            .ToDictionary(c => (c.CarreraId, c.AnioLectivo, c.Comision), c => c.Id);
+
+        var materiaMap = (await db.Materias.ToListAsync(ct))
+            .GroupBy(m => (m.CarreraId, m.Anio))
+            .ToDictionary(g => g.Key, g => g.Select(m => m.Id).ToList());
+
+        // Desertores de Año 1 de la cohorte 2021 (no avanzaron)
+        var desertoresAnio1 = await db.Estudiantes
+            .Where(e => e.FechaDeIngreso.Year == 2021
+                && e.Condicion == CondicionEstudiante.Desertor && e.Anio == 1)
+            .Select(e => e.Id)
+            .ToListAsync(ct);
+
+        var est2021 = await db.Estudiantes
+            .Include(e => e.Usuario)
+            .Where(e => e.FechaDeIngreso.Year == 2021
+                && !desertoresAnio1.Contains(e.Id))
+            .ToListAsync(ct);
+
+        var nuevas = new List<InscripcionMateria>();
+
+        foreach (var est in est2021)
+        {
+            if (!TryParsarLegajo(est.Usuario.Legajo, out int carreraId, out string comision))
+                continue;
+
+            if (!cursos2022Map.TryGetValue((carreraId, 2, comision), out var cursoId))
+                continue;
+
+            if (!materiaMap.TryGetValue((carreraId, 2), out var matIds))
+                continue;
+
+            foreach (var matId in matIds)
+                nuevas.Add(InscripcionMateria.Crear(est.Id, matId, cursoId));
+        }
+
+        if (nuevas.Count == 0)
+        {
+            logger.LogWarning("Anio2022ActividadesSeeder.Continuantes: sin inscripciones nuevas para continuantes.");
+            return;
+        }
+
+        db.InscripcionesMateria.AddRange(nuevas);
+        await db.SaveChangesAsync(ct);
+
+        var nuevosCursoIds = nuevas.Select(n => n.CursoId).Distinct().ToList();
+        await db.InscripcionesMateria
+            .Where(im => nuevosCursoIds.Contains(im.CursoId))
+            .ExecuteUpdateAsync(s => s.SetProperty(i => i.FechaInscripcion, new DateTime(Anio, 3, 1)), ct);
+
+        logger.LogInformation(
+            "Anio2022ActividadesSeeder.Continuantes: {N} inscripciones creadas para continuantes.", nuevas.Count);
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────────
+    // Para DBs que ya ejecutaron el seeder principal:
+    // Crea inscripciones + actividades completas para los continuantes 2021→2022.
+    // Idempotente: se omite si ya existen Asistencias de 2022 para estudiantes 2021.
+    public static async Task SeedContinuantes2022Async(AppDbContext db, ILogger logger, CancellationToken ct = default)
+    {
+        var cursosAnio2 = await db.Cursos
+            .Where(c => c.Anio == Anio && c.AnioLectivo == 2)
+            .ToListAsync(ct);
+
+        if (cursosAnio2.Count == 0)
+        {
+            logger.LogWarning("SeedContinuantes2022: sin cursos AnioLectivo=2 en 2022.");
+            return;
+        }
+
+        var est2021Ids = await db.Estudiantes
+            .Where(e => e.FechaDeIngreso.Year == 2021)
+            .Select(e => e.Id)
+            .ToListAsync(ct);
+
+        bool yaExiste = await db.Asistencias
+            .AnyAsync(a => est2021Ids.Contains(a.EstudianteId) && a.Fecha.Year == Anio, ct);
+
+        if (yaExiste)
+        {
+            logger.LogInformation("SeedContinuantes2022: actividades ya existen, omitido.");
+            return;
+        }
+
+        var cursosAnio2Ids = cursosAnio2.Select(c => c.Id).ToList();
+        var cursoIds2022   = await db.Cursos.Where(c => c.Anio == Anio).Select(c => c.Id).ToListAsync(ct);
+
+        // Crear inscripciones si faltan
+        await SeedInscripcionesContinuantes(db, cursoIds2022, logger, ct);
+
+        var inscripciones = await db.InscripcionesMateria
+            .Include(im => im.Estudiante)
+            .Where(im => cursosAnio2Ids.Contains(im.CursoId) && est2021Ids.Contains(im.EstudianteId))
+            .ToListAsync(ct);
+
+        if (inscripciones.Count == 0)
+        {
+            logger.LogWarning("SeedContinuantes2022: sin inscripciones de continuantes en Año 2.");
+            return;
+        }
+
+        // Asistencias
+        int batch = 0;
+        foreach (var insc in inscripciones)
+        {
+            for (int i = 0; i < FechasClase.Length; i++)
+                db.Asistencias.Add(Asistencia.Registrar(
+                    insc.EstudianteId, insc.MateriaId, insc.CursoId,
+                    FechasClase[i], CalcularAsistencia(insc.Estudiante.Condicion, i)));
+            if (++batch % 100 == 0) await db.SaveChangesAsync(ct);
+        }
+        await db.SaveChangesAsync(ct);
+        logger.LogInformation("SeedContinuantes2022: Asistencias — OK.");
+
+        // Exámenes (solo materias de estos continuantes, si no existen)
+        var materiasContinuantes = inscripciones.Select(im => im.MateriaId).Distinct().ToList();
+        var examenesPorMateria = new Dictionary<int, List<Examen>>();
+
+        foreach (var matId in materiasContinuantes)
+        {
+            var yaHayExamenes = await db.Examenes
+                .AnyAsync(e => e.MateriaId == matId && e.FechaExamen.Year == Anio, ct);
+
+            if (yaHayExamenes)
+            {
+                examenesPorMateria[matId] = await db.Examenes
+                    .Where(e => e.MateriaId == matId && e.FechaExamen.Year == Anio)
+                    .ToListAsync(ct);
+                continue;
+            }
+
+            examenesPorMateria[matId] = [];
+            foreach (var fecha in (DateTime[])[FechaParcial1, FechaParcial2, FechaParcial3])
+            {
+                var p = Examen.CrearHistorico(matId, fecha, "08:00", 60, TipoExamen.Parcial);
+                db.Examenes.Add(p);
+                examenesPorMateria[matId].Add(p);
+            }
+            var f = Examen.CrearHistorico(matId, FechaFinal, "08:00", 60, TipoExamen.Final);
+            db.Examenes.Add(f);
+            examenesPorMateria[matId].Add(f);
+        }
+        await db.SaveChangesAsync(ct);
+        logger.LogInformation("SeedContinuantes2022: Exámenes — OK.");
+
+        // InscripcionesExamen
+        foreach (var insc in inscripciones)
+        {
+            if (insc.Estudiante.Condicion == CondicionEstudiante.Desertor) continue;
+            if (!examenesPorMateria.TryGetValue(insc.MateriaId, out var examenes)) continue;
+            foreach (var examen in examenes)
+            {
+                if (examen.TipoExamen == TipoExamen.Final && insc.Estudiante.Condicion == CondicionEstudiante.Promocional)
+                    continue;
+                var ie = InscripcionExamen.Crear(insc.EstudianteId, examen.Id);
+                ie.CargarNota(Nota.Crear(GenerarNota(insc.Estudiante.Condicion, insc.EstudianteId, examen.Id, examen.TipoExamen)));
+                db.InscripcionesExamen.Add(ie);
+            }
+        }
+        await db.SaveChangesAsync(ct);
+        logger.LogInformation("SeedContinuantes2022: InscripcionesExamen — OK.");
+
+        // HistorialAcademico
+        var cursoPorId = cursosAnio2.ToDictionary(c => c.Id);
+        foreach (var insc in inscripciones)
+        {
+            if (!cursoPorId.TryGetValue(insc.CursoId, out var curso)) continue;
+            var (estado, nota) = EstadoFinal(insc.Estudiante.Condicion, insc.EstudianteId);
+            db.HistorialAcademico.Add(HistorialAcademico.Crear(
+                insc.EstudianteId, insc.MateriaId, insc.CursoId,
+                Anio, curso.Comision, estado, nota, insc.Estudiante.Condicion));
+        }
+        await db.SaveChangesAsync(ct);
+        logger.LogInformation("SeedContinuantes2022: HistorialAcademico — OK.");
+
+        // UpdateEstados
+        foreach (var insc in inscripciones)
+        {
+            switch (insc.Estudiante.Condicion)
+            {
+                case CondicionEstudiante.Promocional:
+                case CondicionEstudiante.Regular:
+                case CondicionEstudiante.Egresado:
+                    insc.MarcarAprobada(); break;
+                case CondicionEstudiante.Libre:
+                    insc.MarcarDesaprobada(); break;
+                case CondicionEstudiante.Desertor:
+                    insc.DarDeBaja(); break;
+            }
+        }
+        await db.SaveChangesAsync(ct);
+
+        logger.LogInformation(
+            "SeedContinuantes2022: completado — {N} inscripciones de continuantes procesadas.", inscripciones.Count);
+    }
+
+    // Parsea legajos históricos: EST-H2021-C1A-001, EST-H2022-C2B-030, etc.
+    private static bool TryParsarLegajo(string legajo, out int carreraId, out string comision)
+    {
+        carreraId = 0;
+        comision  = string.Empty;
+        var partes = legajo.Split('-');
+        if (partes.Length < 4 || !partes[2].StartsWith('C'))
+            return false;
+        var carreraComision = partes[2][1..];
+        if (carreraComision.Length < 2)
+            return false;
+        if (!int.TryParse(carreraComision[..^1], out carreraId))
+            return false;
+        comision = carreraComision[^1..].ToUpperInvariant();
+        return true;
     }
 }

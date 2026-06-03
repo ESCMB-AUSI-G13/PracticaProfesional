@@ -120,12 +120,12 @@ public static class HistorialAcademico2021Seeder
             switch (condicion)
             {
                 case CondicionEstudiante.Promocional:
-                    estadoFinal = "Aprobado";
+                    estadoFinal = "Promocional";
                     notaFinal   = promParcialesPorEstMat.GetValueOrDefault(key);
                     break;
 
                 case CondicionEstudiante.Regular:
-                    estadoFinal = "Aprobado";
+                    estadoFinal = "Regularizado";
                     notaFinal   = notaFinalPorEstMat.ContainsKey(key)
                         ? notaFinalPorEstMat[key]
                         : promParcialesPorEstMat.GetValueOrDefault(key);
@@ -137,12 +137,12 @@ public static class HistorialAcademico2021Seeder
                     break;
 
                 case CondicionEstudiante.Desertor:
-                    estadoFinal = "Abandono";
+                    estadoFinal = "Abandonó";
                     notaFinal   = null;
                     break;
 
                 default:
-                    estadoFinal = "Aprobado";
+                    estadoFinal = "Regularizado";
                     notaFinal   = promParcialesPorEstMat.GetValueOrDefault(key);
                     break;
             }

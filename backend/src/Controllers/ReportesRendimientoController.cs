@@ -76,11 +76,12 @@ public class ReportesRendimientoController(
     public async Task<IActionResult> PromediosCatedra(
         [FromQuery] int? anio,
         [FromQuery] int? cursoId,
+        [FromQuery] int? carreraId,
         CancellationToken cancellationToken)
     {
         var docenteId = await ResolverDocenteIdSiAplicaAsync(cancellationToken);
 
-        var filtro = new FiltroPromediosCatedraDto(docenteId, anio, cursoId);
+        var filtro = new FiltroPromediosCatedraDto(docenteId, anio, cursoId, carreraId);
         var resultado = await promediosUseCase.EjecutarAsync(filtro, cancellationToken);
         return Ok(resultado);
     }
@@ -113,10 +114,11 @@ public class ReportesRendimientoController(
     public async Task<IActionResult> PromediosCatedraPdf(
         [FromQuery] int? anio,
         [FromQuery] int? cursoId,
+        [FromQuery] int? carreraId,
         CancellationToken cancellationToken)
     {
         var docenteId = await ResolverDocenteIdSiAplicaAsync(cancellationToken);
-        var filtro    = new FiltroPromediosCatedraDto(docenteId, anio, cursoId);
+        var filtro    = new FiltroPromediosCatedraDto(docenteId, anio, cursoId, carreraId);
         var data      = await promediosUseCase.EjecutarAsync(filtro, cancellationToken);
         var pdf       = pdfService.GenerarPromediosCatedra(data);
         return File(pdf, "application/pdf", "promedios-catedra.pdf");

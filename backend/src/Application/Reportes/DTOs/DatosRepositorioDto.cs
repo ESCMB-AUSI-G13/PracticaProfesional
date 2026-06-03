@@ -15,6 +15,7 @@ public class DatosRiesgoEstudianteDto
     public int     Ausencias      { get; init; }
     public decimal? PromedioNotas { get; init; }
     public int     Reprobadas     { get; init; }
+    public int     TotalExamenes  { get; init; }
     public DateTime? UltimaAsistencia { get; init; }
 }
 

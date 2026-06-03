@@ -12,6 +12,7 @@ export interface Curso {
   estado:           string;
   preceptorId:      number;
   preceptorNombre:  string;
+  carreraId:        number;
 }
 
 export interface CrearCursoRequest {

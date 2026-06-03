@@ -203,7 +203,7 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
     // RR-07: Promedios por cátedra (EspacioCurricular)
     // ─────────────────────────────────────────────────────────────────────────
     public async Task<IEnumerable<FilaPromedioCatedraDto>> ObtenerPromediosCatedraAsync(
-        int? docenteId, int? anio, int? cursoId, CancellationToken ct = default)
+        int? docenteId, int? anio, int? cursoId, int? carreraId, CancellationToken ct = default)
     {
         // 1. Cátedras con datos de navegación
         var espaciosQuery = db.EspaciosCurriculares
@@ -212,9 +212,10 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
             .Include(ec => ec.Curso)
             .AsQueryable();
 
-        if (docenteId.HasValue) espaciosQuery = espaciosQuery.Where(ec => ec.DocenteId == docenteId.Value);
-        if (anio.HasValue)      espaciosQuery = espaciosQuery.Where(ec => ec.Curso.Anio == anio.Value);
-        if (cursoId.HasValue)   espaciosQuery = espaciosQuery.Where(ec => ec.CursoId == cursoId.Value);
+        if (docenteId.HasValue)  espaciosQuery = espaciosQuery.Where(ec => ec.DocenteId == docenteId.Value);
+        if (anio.HasValue)       espaciosQuery = espaciosQuery.Where(ec => ec.Curso.Anio == anio.Value);
+        if (cursoId.HasValue)    espaciosQuery = espaciosQuery.Where(ec => ec.CursoId == cursoId.Value);
+        if (carreraId.HasValue)  espaciosQuery = espaciosQuery.Where(ec => ec.Materia.CarreraId == carreraId.Value);
 
         var espacios = await espaciosQuery.ToListAsync(ct);
 
@@ -326,34 +327,56 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
 
         var ids = estudiantes.Select(e => e.Id).ToList();
 
-        // Asistencias agregadas por estudiante
-        var asistencias = await db.Asistencias
+        // Asistencias por (estudiante, año) — luego en memoria se usa solo el año más reciente por estudiante
+        var asistenciasPorAnio = await db.Asistencias
             .Where(a => ids.Contains(a.EstudianteId))
-            .GroupBy(a => a.EstudianteId)
+            .GroupBy(a => new { a.EstudianteId, a.Fecha.Year })
             .Select(g => new
             {
-                EstudianteId    = g.Key,
-                Total           = g.Count(),
-                Ausencias       = g.Count(a => a.Estado != EstadoAsistencia.Presente),
+                g.Key.EstudianteId,
+                g.Key.Year,
+                Total            = g.Count(),
+                Ausencias        = g.Count(a => a.Estado != EstadoAsistencia.Presente),
                 UltimaAsistencia = g.Max(a => a.Fecha)
             })
             .ToListAsync(ct);
 
-        var asistenciaMap = asistencias.ToDictionary(a => a.EstudianteId);
+        var asistenciaMap = asistenciasPorAnio
+            .GroupBy(a => a.EstudianteId)
+            .ToDictionary(
+                g => g.Key,
+                g =>
+                {
+                    var ultimo = g.OrderByDescending(a => a.Year).First();
+                    return new
+                    {
+                        ultimo.Total,
+                        ultimo.Ausencias,
+                        UltimaAsistencia = g.Max(a => a.UltimaAsistencia)
+                    };
+                });
 
-        // Notas de exámenes por estudiante
-        var notas = await db.InscripcionesExamen
-            .Where(ie => ids.Contains(ie.EstudianteId) && ie.NotaValor != null)
-            .GroupBy(ie => ie.EstudianteId)
-            .Select(g => new
+        // Notas por (estudiante, año) — se usa solo el año más reciente por estudiante
+        var notasPorAnio = await (
+            from ie in db.InscripcionesExamen
+            join ex in db.Examenes on ie.ExamenId equals ex.Id
+            where ids.Contains(ie.EstudianteId) && ie.NotaValor != null
+            group new { ie.NotaValor, ex.FechaExamen.Year } by new { ie.EstudianteId, ex.FechaExamen.Year } into g
+            select new
             {
-                EstudianteId = g.Key,
-                Promedio     = g.Average(ie => ie.NotaValor!.Value),
-                Reprobadas   = g.Count(ie => ie.NotaValor < 4m)
-            })
-            .ToListAsync(ct);
+                g.Key.EstudianteId,
+                g.Key.Year,
+                Promedio      = g.Average(x => x.NotaValor!.Value),
+                Reprobadas    = g.Count(x => x.NotaValor < 4m),
+                TotalExamenes = g.Count()
+            }
+        ).ToListAsync(ct);
 
-        var notasMap = notas.ToDictionary(n => n.EstudianteId);
+        var notasMap = notasPorAnio
+            .GroupBy(n => n.EstudianteId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.OrderByDescending(n => n.Year).First());
 
         var hoy = DateTime.UtcNow.Date;
 
@@ -376,7 +399,8 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
                 Ausencias        = asis?.Ausencias ?? 0,
                 PromedioNotas    = nota is not null ? (decimal?)nota.Promedio : null,
                 Reprobadas       = nota?.Reprobadas ?? 0,
-                UltimaAsistencia = asis?.UltimaAsistencia
+                TotalExamenes    = nota?.TotalExamenes ?? 0,
+                UltimaAsistencia = (DateTime?)asis?.UltimaAsistencia
             };
         }).ToList();
     }
@@ -483,11 +507,10 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
     // ─────────────────────────────────────────────────────────────────────────
     // Deserción por año de cursada (1°, 2°, 3°, 4°)
     // ─────────────────────────────────────────────────────────────────────────
-    public async Task<List<(int AnioCursada, int Total, int Desertores)>> ObtenerDesercionPorAnioAsync(
+    public async Task<(List<(int AnioCursada, int Total, int Desertores)> Filas, int TotalGlobal, int DesertoresGlobal)> ObtenerDesercionPorAnioAsync(
         int? carreraId, int? anioCohorte, CancellationToken ct = default)
     {
-        // Denominador: estudiantes DISTINTOS que cursaron cada año lectivo
-        // (via InscripcionesMateria → Cursos.AnioLectivo)
+        // Denominador por año: estudiantes DISTINTOS que cursaron cada nivel (via inscripciones)
         var inscBase = db.InscripcionesMateria
             .Join(db.Estudiantes, im => im.EstudianteId, e => e.Id,
                   (im, e) => new { im.EstudianteId, im.CursoId, e.CarreraId, e.FechaDeIngreso })
@@ -507,9 +530,8 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
             .Select(g => new { AnioLectivo = g.Key, Total = g.Count() })
             .ToListAsync(ct);
 
-        // Numerador: desertores agrupados por el año en que abandonaron (Estudiante.Anio)
-        var estBase = db.Estudiantes
-            .Where(e => e.Condicion == CondicionEstudiante.Desertor);
+        // Numerador por año: desertores agrupados por el año en que abandonaron
+        var estBase = db.Estudiantes.AsQueryable();
 
         if (carreraId.HasValue)
             estBase = estBase.Where(e => e.CarreraId == carreraId.Value);
@@ -518,13 +540,14 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
             estBase = estBase.Where(e => e.FechaDeIngreso.Year == anioCohorte.Value);
 
         var numerador = await estBase
+            .Where(e => e.Condicion == CondicionEstudiante.Desertor)
             .GroupBy(e => e.Anio)
             .Select(g => new { Anio = g.Key, Desertores = g.Count() })
             .ToListAsync(ct);
 
         var desertoresPorAnio = numerador.ToDictionary(n => n.Anio, n => n.Desertores);
 
-        return denominador
+        var filas = denominador
             .Select(d => (
                 AnioCursada: d.AnioLectivo,
                 Total:       d.Total,
@@ -532,6 +555,13 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
             ))
             .OrderBy(r => r.AnioCursada)
             .ToList();
+
+        // Totales globales reales: desde Estudiantes (sin doble conteo por años)
+        int totalGlobal      = await estBase.CountAsync(ct);
+        int desertoresGlobal = await estBase
+            .CountAsync(e => e.Condicion == CondicionEstudiante.Desertor, ct);
+
+        return (filas, totalGlobal, desertoresGlobal);
     }
 
     // ─────────────────────────────────────────────────────────────────────────

@@ -8,11 +8,10 @@ public class TableroEjecutivoDto
     public int TotalDesertores    { get; init; }
     public int TotalHistorico     { get; init; }   // todos los ingresados
 
-    // Riesgo académico (sobre activos)
-    public int     RiesgoAlto              { get; init; }
-    public int     RiesgoMedio             { get; init; }
-    public int     RiesgoBajo              { get; init; }
-    public decimal PorcentajeRiesgoAlto    { get; init; }
+    // Condición académica (sobre activos)
+    public int Promocionales { get; init; }
+    public int Regulares     { get; init; }
+    public int Libres        { get; init; }
 
     // Tasas institucionales
     public decimal TasaRetencionGlobal  { get; init; }

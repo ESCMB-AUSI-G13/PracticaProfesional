@@ -5,17 +5,11 @@ namespace PracticaProfesional.Application.Reportes;
 
 public class TableroEjecutivoUseCase(IRendimientoConsolidadoRepository repo)
 {
-    // Mismos umbrales que RiesgoAcademicoUseCase
-    private const decimal UmbralAsistMedio    = 20m;
-    private const decimal UmbralAsistAlto     = 35m;
-    private const decimal UmbralNotaAprobado  = 4m;
-    private const decimal UmbralNotaSuficiente = 6m;
-
     public async Task<TableroEjecutivoDto> EjecutarAsync(CancellationToken ct = default)
     {
-        var datosRiesgo      = await repo.ObtenerDatosRiesgoAsync(null, null, ct);
+        var datosActivos     = await repo.ObtenerDatosRiesgoAsync(null, null, ct);
         var datosCohorte     = await repo.ObtenerDatosCohorteAsync(null, null, ct);
-        var datosCatedras    = await repo.ObtenerPromediosCatedraAsync(null, null, null, ct);
+        var datosCatedras    = await repo.ObtenerPromediosCatedraAsync(null, null, null, null, ct);
         var evolucionMatric  = await repo.ObtenerEvolucionMatriculaAsync(ct);
 
         // ── Matrícula histórica ───────────────────────────────────────────────
@@ -32,23 +26,10 @@ public class TableroEjecutivoUseCase(IRendimientoConsolidadoRepository repo)
         decimal tasaRetencion = totalHistorico > 0
             ? Math.Round((decimal)(totalMatriculados + totalEgresados) / totalHistorico * 100, 1) : 0m;
 
-        // ── Riesgo académico ─────────────────────────────────────────────────
-        int alto = 0, medio = 0, bajo = 0;
-
-        foreach (var d in datosRiesgo)
-        {
-            decimal pct = d.TotalClases > 0
-                ? Math.Round((decimal)d.Ausencias / d.TotalClases * 100, 1) : 0m;
-
-            var nivel = CalcularNivel(d.Condicion, pct, d.PromedioNotas, d.Reprobadas);
-            if (nivel == "Alto")       alto++;
-            else if (nivel == "Medio") medio++;
-            else                       bajo++;
-        }
-
-        int totalActivos = alto + medio + bajo;
-        decimal pctAlto  = totalActivos > 0
-            ? Math.Round((decimal)alto / totalActivos * 100, 1) : 0m;
+        // ── Condición académica (activos) ─────────────────────────────────────
+        int promocionales = datosActivos.Count(d => d.Condicion == "Promocional");
+        int regulares     = datosActivos.Count(d => d.Condicion == "Regular");
+        int libres        = datosActivos.Count(d => d.Condicion == "Libre");
 
         // ── Rendimiento global ───────────────────────────────────────────────
         var catedrasList = datosCatedras.ToList();
@@ -92,10 +73,9 @@ public class TableroEjecutivoUseCase(IRendimientoConsolidadoRepository repo)
             TotalEgresados             = totalEgresados,
             TotalDesertores            = totalDesertores,
             TotalHistorico             = totalHistorico,
-            RiesgoAlto                 = alto,
-            RiesgoMedio                = medio,
-            RiesgoBajo                 = bajo,
-            PorcentajeRiesgoAlto       = pctAlto,
+            Promocionales              = promocionales,
+            Regulares                  = regulares,
+            Libres                     = libres,
             TasaRetencionGlobal        = tasaRetencion,
             TasaDesercionGlobal        = tasaDesercion,
             TasaEgresoGlobal           = tasaEgreso,
@@ -107,26 +87,4 @@ public class TableroEjecutivoUseCase(IRendimientoConsolidadoRepository repo)
         };
     }
 
-    private static string CalcularNivel(
-        string condicion, decimal pctInasistencias, decimal? promedio, int reprobadas)
-    {
-        if (condicion == "Libre") return "Alto";
-
-        var dimA = pctInasistencias > UmbralAsistAlto   ? "Alto"  :
-                   pctInasistencias >= UmbralAsistMedio ? "Medio" : "Bajo";
-
-        string dimB;
-        if (promedio is null)
-            dimB = "Bajo";
-        else if (promedio < UmbralNotaAprobado || reprobadas >= 2)
-            dimB = "Alto";
-        else if (promedio < UmbralNotaSuficiente || reprobadas == 1)
-            dimB = "Medio";
-        else
-            dimB = "Bajo";
-
-        if (dimA == "Alto"  || dimB == "Alto")  return "Alto";
-        if (dimA == "Medio" || dimB == "Medio") return "Medio";
-        return "Bajo";
-    }
 }

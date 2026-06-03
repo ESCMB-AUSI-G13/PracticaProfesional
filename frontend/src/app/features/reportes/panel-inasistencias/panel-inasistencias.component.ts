@@ -154,7 +154,7 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
             ...new Map(espacios.map(e => [e.cursoId, {
               id: e.cursoId, anio: e.cursoAnio, anioLectivo: e.cursoAnioLectivo,
               comision: e.cursoComision, cupo: 0, estado: 'Activo',
-              preceptorId: 0, preceptorNombre: ''
+              preceptorId: 0, preceptorNombre: '', carreraId: e.carreraId
             }])).values()
           ];
           this.materias.set(uniqueMaterias);

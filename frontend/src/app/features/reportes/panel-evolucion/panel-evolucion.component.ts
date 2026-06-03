@@ -148,7 +148,7 @@ export class PanelEvolucionComponent implements OnInit, OnDestroy {
     if (puntos.length === 1) {
       this.initBarChart(puntos[0]);
     } else {
-      this.initLineChart(puntos);
+      this.initGroupedBarChart(puntos);
     }
   }
 
@@ -196,7 +196,7 @@ export class PanelEvolucionComponent implements OnInit, OnDestroy {
                   return `Aprobados: ${punto.aprobados}/${punto.totalEvaluados} (${punto.porcentajeAprobacion.toFixed(1)}%)`;
                 }
                 const c = (punto.porCarrera ?? [])[idx - 1];
-                return c ? `Aprobados: ${c.totalEvaluados} eval. (${c.porcentajeAprobacion.toFixed(1)}%)` : '';
+                return c ? `${c.carreraNombre}: ${c.totalEvaluados} eval. (${c.porcentajeAprobacion.toFixed(1)}% aprobados)` : '';
               }
             }
           }
@@ -214,49 +214,40 @@ export class PanelEvolucionComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Gráfico de líneas para múltiples períodos
-  private initLineChart(puntos: PuntoEvolucionNota[]): void {
+  // Gráfico de barras agrupadas para múltiples períodos
+  private initGroupedBarChart(puntos: PuntoEvolucionNota[]): void {
     const carrerasMap = new Map<number, string>();
     puntos.forEach(p => p.porCarrera?.forEach(c => carrerasMap.set(c.carreraId, c.carreraNombre)));
     const carreras = Array.from(carrerasMap.entries());
 
     const palette = [
-      { border: 'rgba(142, 68, 173, 1)', bg: 'rgba(142, 68, 173, 0.08)' },
-      { border: 'rgba(230, 126, 34, 1)', bg: 'rgba(230, 126, 34, 0.08)' },
-      { border: 'rgba(22, 160, 133, 1)', bg: 'rgba(22, 160, 133, 0.08)' },
-      { border: 'rgba(231, 76, 60, 1)',  bg: 'rgba(231, 76, 60,  0.08)' },
+      { bg: 'rgba(142, 68, 173, 0.75)', border: 'rgba(142, 68, 173, 1)' },
+      { bg: 'rgba(230, 126, 34, 0.75)', border: 'rgba(230, 126, 34, 1)' },
+      { bg: 'rgba(22, 160, 133, 0.75)', border: 'rgba(22, 160, 133, 1)' },
+      { bg: 'rgba(231, 76, 60,  0.75)', border: 'rgba(231, 76, 60,  1)' },
     ];
 
     const datasets: any[] = [
       {
         label: 'Promedio general',
         data: puntos.map(p => p.promedioGeneral),
+        backgroundColor: 'rgba(44, 62, 80, 0.75)',
         borderColor: 'rgba(44, 62, 80, 1)',
-        backgroundColor: 'rgba(44, 62, 80, 0.06)',
-        borderWidth: 3,
-        borderDash: [7, 4],
-        tension: 0.35,
-        pointRadius: 5,
-        pointHoverRadius: 7,
-        fill: false,
-        spanGaps: true,
+        borderWidth: 1,
+        borderRadius: 4,
       },
       ...carreras.map(([id, nombre], i) => ({
         label: nombre,
         data: puntos.map(p => p.porCarrera?.find(c => c.carreraId === id)?.promedio ?? null),
-        borderColor: palette[i % palette.length].border,
         backgroundColor: palette[i % palette.length].bg,
-        borderWidth: 2,
-        tension: 0.35,
-        pointRadius: 4,
-        pointHoverRadius: 6,
-        fill: false,
-        spanGaps: true,
+        borderColor: palette[i % palette.length].border,
+        borderWidth: 1,
+        borderRadius: 4,
       })),
     ];
 
     this.chart = new Chart(this.canvasRef!.nativeElement, {
-      type: 'line',
+      type: 'bar',
       data: { labels: puntos.map(p => p.periodo), datasets },
       options: {
         responsive: true,
@@ -304,9 +295,10 @@ export class PanelEvolucionComponent implements OnInit, OnDestroy {
       p.distribucionNotas?.forEach(d => { cantidades[d.nota] += d.cantidad; })
     );
 
-    const labels  = Array.from({ length: 10 }, (_, i) => String(i + 1));
-    const data    = Array.from({ length: 10 }, (_, i) => cantidades[i + 1]);
-    const bgColors = Array.from({ length: 10 }, (_, i) =>
+    const total = cantidades.reduce((s, v) => s + v, 0);
+    const labels    = Array.from({ length: 10 }, (_, i) => String(i + 1));
+    const data      = Array.from({ length: 10 }, (_, i) => total > 0 ? +(cantidades[i + 1] / total * 100).toFixed(2) : 0);
+    const bgColors  = Array.from({ length: 10 }, (_, i) =>
       i + 1 >= 4 ? 'rgba(39, 174, 96, 0.75)' : 'rgba(231, 76, 60, 0.75)'
     );
 
@@ -315,7 +307,7 @@ export class PanelEvolucionComponent implements OnInit, OnDestroy {
       data: {
         labels,
         datasets: [{
-          label: 'Estudiantes',
+          label: '% del total',
           data,
           backgroundColor: bgColors,
           borderRadius: 4,
@@ -334,7 +326,7 @@ export class PanelEvolucionComponent implements OnInit, OnDestroy {
           },
           tooltip: {
             callbacks: {
-              label: (item) => ` ${item.raw} estudiante${(item.raw as number) !== 1 ? 's' : ''}`,
+              label: (item) => ` ${item.raw}% del total (${cantidades[(item.dataIndex) + 1]} estudiantes)`,
             }
           }
         },
@@ -344,8 +336,11 @@ export class PanelEvolucionComponent implements OnInit, OnDestroy {
             grid: { display: false },
           },
           y: {
-            title: { display: true, text: 'Estudiantes', color: '#555' },
-            ticks: { stepSize: 1, color: '#555' },
+            title: { display: true, text: '% del total', color: '#555' },
+            ticks: {
+              color: '#555',
+              callback: (value) => `${value}%`,
+            },
             grid: { color: 'rgba(0,0,0,0.06)' },
             beginAtZero: true,
           },

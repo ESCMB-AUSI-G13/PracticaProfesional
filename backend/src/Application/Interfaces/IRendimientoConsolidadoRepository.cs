@@ -16,7 +16,7 @@ public interface IRendimientoConsolidadoRepository
     Task<List<DatosRetencionAnualRawDto>> ObtenerDatosRetencionAnualAsync(
         int? carreraId, int? anioCohorte, CancellationToken ct = default);
 
-    Task<List<(int AnioCursada, int Total, int Desertores)>> ObtenerDesercionPorAnioAsync(
+    Task<(List<(int AnioCursada, int Total, int Desertores)> Filas, int TotalGlobal, int DesertoresGlobal)> ObtenerDesercionPorAnioAsync(
         int? carreraId, int? anioCohorte, CancellationToken ct = default);
 
     Task<List<(string Carrera, int AnioCohorte, int TotalEgresados, int TotalAlumnos, double? DuracionPromedioAnios)>> ObtenerEgresadosPorCarreraAsync(
@@ -35,7 +35,7 @@ public interface IRendimientoConsolidadoRepository
         CancellationToken ct = default);
 
     Task<IEnumerable<FilaPromedioCatedraDto>> ObtenerPromediosCatedraAsync(
-        int? docenteId, int? anio, int? cursoId, CancellationToken ct = default);
+        int? docenteId, int? anio, int? cursoId, int? carreraId, CancellationToken ct = default);
 
     Task<string?> ObtenerNombreMateriaAsync(int materiaId, CancellationToken ct = default);
 }

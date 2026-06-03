@@ -13,8 +13,10 @@ public class RiesgoAcademicoUseCase(IRendimientoConsolidadoRepository repo)
     private const decimal UmbralAsistAlto  = 35m;
 
     // Umbrales DimB — rendimiento
-    private const decimal UmbralNotaAprobado  = 4m;
+    private const decimal UmbralNotaAprobado   = 4m;
     private const decimal UmbralNotaSuficiente = 6m;
+    private const decimal UmbralPctReprobAlto  = 40m;  // >40 % reprobadas → Alto
+    private const decimal UmbralPctReprobMedio = 10m;  // >10 % reprobadas → Medio
 
     public async Task<ReporteRiesgoAcademicoDto> EjecutarAsync(
         FiltroRiesgoAcademicoDto filtro,
@@ -28,7 +30,11 @@ public class RiesgoAcademicoUseCase(IRendimientoConsolidadoRepository repo)
                 ? Math.Round((decimal)d.Ausencias / d.TotalClases * 100, 1)
                 : 0m;
 
-            var nivel = CalcularNivel(d.Condicion, pctInasistencias, d.PromedioNotas, d.Reprobadas);
+            decimal pctReprobadas = d.TotalExamenes > 0
+                ? Math.Round((decimal)d.Reprobadas / d.TotalExamenes * 100, 1)
+                : 0m;
+
+            var nivel = CalcularNivel(d.Condicion, pctInasistencias, d.PromedioNotas, pctReprobadas);
 
             return new RiesgoAcademicoDto
             {
@@ -73,7 +79,7 @@ public class RiesgoAcademicoUseCase(IRendimientoConsolidadoRepository repo)
         string condicion,
         decimal pctInasistencias,
         decimal? promedio,
-        int reprobadas)
+        decimal pctReprobadas)
     {
         // Libre = ya perdió regularidad → riesgo máximo siempre
         if (condicion == "Libre") return "Alto";
@@ -86,9 +92,9 @@ public class RiesgoAcademicoUseCase(IRendimientoConsolidadoRepository repo)
         string dimB;
         if (promedio is null)
             dimB = "Bajo";
-        else if (promedio < UmbralNotaAprobado || reprobadas >= 2)
+        else if (promedio < UmbralNotaAprobado || pctReprobadas > UmbralPctReprobAlto)
             dimB = "Alto";
-        else if (promedio < UmbralNotaSuficiente || reprobadas == 1)
+        else if (promedio < UmbralNotaSuficiente || pctReprobadas > UmbralPctReprobMedio)
             dimB = "Medio";
         else
             dimB = "Bajo";

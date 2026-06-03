@@ -97,26 +97,22 @@
       }
     </section>
 
-    <!-- Sección 3: Riesgo académico + Gráfico dona -->
+    <!-- Sección 3: Condición académica + Gráfico dona -->
     <section class="seccion">
-      <h2 class="seccion-titulo">Riesgo Académico (Activos)</h2>
+      <h2 class="seccion-titulo">Condición de Alumnos Activos</h2>
       <div class="riesgo-grid">
         <div class="riesgo-cards">
-          <div class="stat-card alto">
-            <span class="stat-num">{{ t.riesgoAlto }}</span>
-            <span class="stat-label">Riesgo Alto</span>
+          <div class="stat-card bajo">
+            <span class="stat-num">{{ t.promocionales }}</span>
+            <span class="stat-label">Promocionales</span>
           </div>
           <div class="stat-card medio">
-            <span class="stat-num">{{ t.riesgoMedio }}</span>
-            <span class="stat-label">Riesgo Medio</span>
+            <span class="stat-num">{{ t.regulares }}</span>
+            <span class="stat-label">Regulares</span>
           </div>
-          <div class="stat-card bajo">
-            <span class="stat-num">{{ t.riesgoBajo }}</span>
-            <span class="stat-label">Riesgo Bajo</span>
-          </div>
-          <div class="stat-card alerta">
-            <span class="stat-num">{{ t.porcentajeRiesgoAlto | number:'1.1-1' }}%</span>
-            <span class="stat-label">en riesgo alto</span>
+          <div class="stat-card alto">
+            <span class="stat-num">{{ t.libres }}</span>
+            <span class="stat-label">Libres</span>
           </div>
         </div>
         <div class="dona-wrap">

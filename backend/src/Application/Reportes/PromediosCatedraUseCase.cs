@@ -16,7 +16,7 @@ public class PromediosCatedraUseCase(IRendimientoConsolidadoRepository repositor
         CancellationToken cancellationToken = default)
     {
         var catedras = await repository.ObtenerPromediosCatedraAsync(
-            filtro.DocenteId, filtro.Anio, filtro.CursoId, cancellationToken);
+            filtro.DocenteId, filtro.Anio, filtro.CursoId, filtro.CarreraId, cancellationToken);
 
         return new ReportePromediosCatedraDto(
             GeneradoEn: DateTime.UtcNow,

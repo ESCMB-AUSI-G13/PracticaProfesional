@@ -13,7 +13,8 @@ public class DesercionPorAnioUseCase(IRendimientoConsolidadoRepository repo)
     public async Task<ReporteDesercionPorAnioDto> EjecutarAsync(
         int? carreraId, int? anioCohorte, CancellationToken ct = default)
     {
-        var raw = await repo.ObtenerDesercionPorAnioAsync(carreraId, anioCohorte, ct);
+        var (raw, totalGlobal, desertoresGlobal) =
+            await repo.ObtenerDesercionPorAnioAsync(carreraId, anioCohorte, ct);
 
         var filas = raw
             .OrderBy(r => r.AnioCursada)
@@ -37,17 +38,15 @@ public class DesercionPorAnioUseCase(IRendimientoConsolidadoRepository repo)
             })
             .ToList();
 
-        int totalEst  = filas.Sum(f => f.TotalEstudiantes);
-        int totalDes  = filas.Sum(f => f.Desertores);
-        decimal global = totalEst > 0
-            ? Math.Round((decimal)totalDes / totalEst * 100, 1)
+        decimal global = totalGlobal > 0
+            ? Math.Round((decimal)desertoresGlobal / totalGlobal * 100, 1)
             : 0m;
 
         return new ReporteDesercionPorAnioDto
         {
             Filas            = filas,
-            TotalEstudiantes = totalEst,
-            TotalDesertores  = totalDes,
+            TotalEstudiantes = totalGlobal,
+            TotalDesertores  = desertoresGlobal,
             TasaGlobal       = global
         };
     }

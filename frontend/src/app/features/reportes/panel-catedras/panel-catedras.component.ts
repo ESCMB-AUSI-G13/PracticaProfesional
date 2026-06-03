@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ReportesService, ReportePromediosCatedra } from '../reportes.service';
 import { CursosService, Curso } from '../../cursos/cursos.service';
+import { CarrerasService, Carrera } from '../../carreras/carreras.service';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -18,9 +19,20 @@ Chart.register(...registerables);
 export class PanelCatedrasComponent implements OnInit, OnDestroy {
   @ViewChild('chartCanvas') canvasRef?: ElementRef<HTMLCanvasElement>;
   private chart: Chart | null = null;
-  cursos  = signal<Curso[]>([]);
-  anio    = signal<number | null>(null);
-  cursoId = signal<number | null>(null);
+  cursos    = signal<Curso[]>([]);
+  carreras  = signal<Carrera[]>([]);
+  anios     = [2021, 2022, 2023];
+  anio      = signal<number | null>(null);
+  cursoId   = signal<number | null>(null);
+  carreraId = signal<number | null>(null);
+
+  cursosConEstado = computed(() => {
+    const cid = this.carreraId();
+    return this.cursos().map(c => ({
+      ...c,
+      deshabilitado: cid !== null && c.carreraId !== cid,
+    }));
+  });
 
   reporte     = signal<ReportePromediosCatedra | null>(null);
   cargando    = signal(false);
@@ -45,12 +57,20 @@ export class PanelCatedrasComponent implements OnInit, OnDestroy {
   constructor(
     private reportesService: ReportesService,
     private cursosService: CursosService,
+    private carrerasService: CarrerasService,
     private router: Router,
     private injector: Injector
   ) {}
 
   ngOnInit(): void {
     this.cursosService.listar().subscribe({ next: c => this.cursos.set(c) });
+    this.carrerasService.listar().subscribe({ next: c => this.carreras.set(c) });
+  }
+
+  onCarreraChange(id: number | null): void {
+    this.carreraId.set(id);
+    const curso = this.cursos().find(c => c.id === this.cursoId());
+    if (id && curso && curso.carreraId !== id) this.cursoId.set(null);
   }
 
   buscar(): void {
@@ -59,7 +79,7 @@ export class PanelCatedrasComponent implements OnInit, OnDestroy {
     this.buscado.set(true);
 
     this.reportesService
-      .obtenerPromediosCatedra(this.anio() ?? undefined, this.cursoId() ?? undefined)
+      .obtenerPromediosCatedra(this.anio() ?? undefined, this.cursoId() ?? undefined, this.carreraId() ?? undefined)
       .subscribe({
         next: data => {
           this.reporte.set(data);
@@ -75,6 +95,7 @@ export class PanelCatedrasComponent implements OnInit, OnDestroy {
     this.chart = null;
     this.anio.set(null);
     this.cursoId.set(null);
+    this.carreraId.set(null);
     this.reporte.set(null);
     this.buscado.set(false);
     this.error.set(null);
@@ -142,8 +163,9 @@ export class PanelCatedrasComponent implements OnInit, OnDestroy {
   descargarPdf(): void {
     this.descargando.set(true);
     this.reportesService.descargarPromediosCatedraPdf(
-      this.anio()    ?? undefined,
-      this.cursoId() ?? undefined,
+      this.anio()       ?? undefined,
+      this.cursoId()    ?? undefined,
+      this.carreraId()  ?? undefined,
     ).subscribe({
       next: blob => {
         const url = URL.createObjectURL(blob);
