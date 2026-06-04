@@ -7,6 +7,10 @@ backend/src/bin/
 backend/src/obj/
 backend/src/**/bin/
 backend/src/**/obj/
+backend/tests/bin/
+backend/tests/obj/
+backend/tests/**/bin/
+backend/tests/**/obj/
 
 # .NET user secrets
 **/secrets.json
