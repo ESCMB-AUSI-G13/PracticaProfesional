@@ -8,7 +8,10 @@
       "Bash(taskkill /PID 16512 /F)",
       "PowerShell(Stop-Process -Id 16512 -Force -ErrorAction SilentlyContinue)",
       "PowerShell(Get-NetTCPConnection -LocalPort 5000 -State Listen)",
-      "PowerShell(Stop-Process -Id 21928 -Force)"
+      "PowerShell(Stop-Process -Id 21928 -Force)",
+      "Bash(git rm *)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
