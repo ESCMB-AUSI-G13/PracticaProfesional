@@ -641,56 +641,59 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
     // ─────────────────────────────────────────────────────────────────────────
     public async Task<List<PuntoMatriculaDto>> ObtenerEvolucionMatriculaAsync(CancellationToken ct = default)
     {
-        // Pares (EstudianteId, Anio) desde tres fuentes:
-        // 1. FechaDeIngreso → el ingresante SIEMPRE estuvo activo en su año de entrada
-        var desdeIngreso = await db.Estudiantes
-            .Select(e => new { EstudianteId = e.Id, Anio = e.FechaDeIngreso.Year })
-            .ToListAsync(ct);
+        var anioActual = DateTime.UtcNow.Year;
 
-        // 2. HistorialAcademico → años cursados (cargados por el seeder para años anteriores)
-        var desdeHistorial = await db.HistorialAcademico
-            .Select(h => new { h.EstudianteId, h.Anio })
-            .ToListAsync(ct);
-
-        // 3. InscripcionesMateria → Cursos (cubre el año en curso)
-        var desdeInscripciones = await db.InscripcionesMateria
-            .Join(db.Cursos, im => im.CursoId, c => c.Id,
-                  (im, c) => new { im.EstudianteId, c.Anio })
-            .ToListAsync(ct);
-
-        // Total activos por año = unión de las 3 fuentes (distinct por EstudianteId)
-        var activosPorAnio = desdeIngreso
-            .Concat(desdeHistorial)
-            .Concat(desdeInscripciones)
-            .GroupBy(x => x.Anio)
-            .Select(g => new { Anio = g.Key, Count = g.Select(x => x.EstudianteId).Distinct().Count() })
-            .ToList();
-
-        // Ingresantes por año (solo para la columna de breakdown)
-        var ingresantesPorAnio = desdeIngreso
-            .GroupBy(x => x.Anio)
-            .Select(g => new { Anio = g.Key, Count = g.Count() })
-            .ToList();
-
-        var anios = activosPorAnio.Select(a => a.Anio)
-            .Distinct()
-            .OrderBy(a => a)
-            .ToList();
-
-        return anios.Select(a =>
-        {
-            int ingresantes  = ingresantesPorAnio.FirstOrDefault(x => x.Anio == a)?.Count ?? 0;
-            int totalActivos = activosPorAnio.FirstOrDefault(x => x.Anio == a)?.Count ?? 0;
-            int continuantes = Math.Max(0, totalActivos - ingresantes);
-
-            return new PuntoMatriculaDto
+        // Una sola query: atributos necesarios para reconstruir el rango de años activos por alumno
+        var estudiantes = await db.Estudiantes
+            .Select(e => new
             {
-                Anio         = a,
+                AnioIngreso = e.FechaDeIngreso.Year,
+                AnioEgreso  = e.FechaDeEgreso != null ? (int?)e.FechaDeEgreso.Value.Year : null,
+                e.Condicion,
+                AnioCarrera = (int)e.Anio   // año de carrera al momento de desertar (1, 2, 3, 4)
+            })
+            .ToListAsync(ct);
+
+        int anioMinimo = estudiantes.Min(e => e.AnioIngreso);
+
+        var puntos = new List<PuntoMatriculaDto>();
+
+        for (int anio = anioMinimo; anio <= anioActual; anio++)
+        {
+            int totalActivos = 0;
+            int ingresantes  = 0;
+
+            foreach (var e in estudiantes)
+            {
+                if (e.AnioIngreso > anio) continue;
+
+                // ¿Estaba activo este alumno en el año `anio`?
+                bool activo = e.Condicion switch
+                {
+                    CondicionEstudiante.Regular
+                    or CondicionEstudiante.Libre
+                    or CondicionEstudiante.Promocional => true,
+                    CondicionEstudiante.Egresado       => e.AnioEgreso == null || anio <= e.AnioEgreso.Value,
+                    CondicionEstudiante.Desertor        => anio <= e.AnioIngreso + (e.AnioCarrera - 1),
+                    _                                  => false
+                };
+
+                if (!activo) continue;
+
+                totalActivos++;
+                if (e.AnioIngreso == anio) ingresantes++;
+            }
+
+            puntos.Add(new PuntoMatriculaDto
+            {
+                Anio         = anio,
                 TotalActivos = totalActivos,
                 Ingresantes  = ingresantes,
-                Continuantes = continuantes
-            };
-        }).ToList();
+                Continuantes = Math.Max(0, totalActivos - ingresantes)
+            });
+        }
+
+        return puntos;
     }
 
     // ─────────────────────────────────────────────────────────────────────────

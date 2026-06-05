@@ -377,7 +377,21 @@ var app = builder.Build();
         // await NuevosEstudiantes2024TrayectoSeeder.SeedAsync(db, logger);
         // await Anio2024ActividadesSeeder.SeedTrayecto2024Año1CompletarAsync(db, logger);
 
+        // -- Cohorte 2025 --
+        // await NuevosEstudiantes2025Seeder.SeedAsync(db, logger);
+        // await Anio2025ActividadesSeeder.SeedAsync(db, logger);
+        // await NuevosEstudiantes2025TrayectoSeeder.SeedAsync(db, logger);
+        // await Anio2025ActividadesSeeder.SeedTrayecto2025Año1CompletarAsync(db, logger);
+
+        // -- Cohorte 2026 --
+        // await NuevosEstudiantes2026Seeder.SeedAsync(db, logger);
+        // await Anio2026ActividadesSeeder.SeedAsync(db, logger);
+        // await NuevosEstudiantes2026TrayectoSeeder.SeedAsync(db, logger);
+        // await Anio2026ActividadesSeeder.SeedTrayecto2026Año1CompletarAsync(db, logger);
+
         // -- Correcciones / patches --
+        await PatchDesercionSeeder.PatchAsync(db, logger);          // ← deserción real en cohortes 2025/2026 + año 4
+        // await PatchEgresadosSeeder.PatchAsync(db, logger);       // ← HABILITAR para corregir tasas egresados
         // await CondicionRealistaSeeder.SeedAsync(db, logger);
         // await CohorteHistoricaSeeder.CapFechasEgresoFuturaAsync(db, logger);
         // await EstudiantesSeeder.SeedAsync(db, logger);

@@ -60,29 +60,31 @@ public static class CohorteHistoricaSeeder
     }
 
     // Profesorado (4 años) 30 alumnos/comisión:
-    //   Año1→45%(13), Año2→25%(4), Año3→25%(3) → 20% egresa (6), 13% activos (4)
+    //   2021: ~17% egresa (10/60) | Año1→33%(10), Año2→13%(4), Año3→10%(3) → 17D + 8R
+    //   2022: ~13% egresa (8/60)  | mismos desertores → 17D + 9R
     // Trayecto (2 años) 30 alumnos/comisión:
-    //   Año1→33%(10), Año2→12%(3)              → 43% egresa (13), 13% activos (4)
+    //   Tasas por cohorte: 2021=25%, 2022=28%, 2023=30%, 2024=25% → global ~27%
+    //   Duración promedio decreciente: 2021>2022>2023>2024 (los de 2021 tuvieron más tiempo)
     private static readonly GrupoConfig[] Grupos =
     [
-        // ── Profesorado 2021 — sin egresados (cohorte aún no completada), 13 activos intermitentes
-        new(2021, 1, "A", Egresados: 0, DesertoresPorAnio: [10, 4, 3]),
-        new(2021, 1, "B", Egresados: 0, DesertoresPorAnio: [10, 4, 3]),
-        // ── Trayecto 2021 — egreso ~43% (13/30 por comisión) ─────────────────
-        new(2021, 2, "A", Egresados: 13, DesertoresPorAnio: [10, 3]),
-        new(2021, 2, "B", Egresados: 13, DesertoresPorAnio: [10, 3]),
-        // ── Profesorado 2022 — sin egresados (cohorte aún no completada), 13 activos intermitentes
-        new(2022, 1, "A", Egresados: 0, DesertoresPorAnio: [10, 4, 3]),
-        new(2022, 1, "B", Egresados: 0, DesertoresPorAnio: [10, 4, 3]),
-        // ── Trayecto 2022 — egreso ~43% (13/30 por comisión) ─────────────────
-        new(2022, 2, "A", Egresados: 13, DesertoresPorAnio: [10, 3]),
-        new(2022, 2, "B", Egresados: 13, DesertoresPorAnio: [10, 3]),
-        // ── Trayecto 2023 — carrera completada en 2025, distribución final ────
-        new(2023, 2, "A", Egresados: 13, DesertoresPorAnio: [10, 3]),
-        new(2023, 2, "B", Egresados: 13, DesertoresPorAnio: [10, 3]),
-        // ── Trayecto 2024 — carrera completada en 2026, distribución final ────
-        new(2024, 2, "A", Egresados: 13, DesertoresPorAnio: [10, 3]),
-        new(2024, 2, "B", Egresados: 13, DesertoresPorAnio: [10, 3]),
+        // ── Profesorado 2021 — ~17% egresa (10/60) ─────────────────────────────
+        new(2021, 1, "A", Egresados: 5, DesertoresPorAnio: [10, 4, 3]),  // 5E+17D+8R=30
+        new(2021, 1, "B", Egresados: 5, DesertoresPorAnio: [10, 4, 3]),  // 5E+17D+8R=30
+        // ── Trayecto 2021 — 25% egresa (15/60) ─────────────────────────────────
+        new(2021, 2, "A", Egresados: 8, DesertoresPorAnio: [10, 3]),     // 8E+13D+9R=30
+        new(2021, 2, "B", Egresados: 7, DesertoresPorAnio: [10, 3]),     // 7E+13D+10R=30
+        // ── Profesorado 2022 — ~13% egresa (8/60) ──────────────────────────────
+        new(2022, 1, "A", Egresados: 4, DesertoresPorAnio: [10, 4, 3]),  // 4E+17D+9R=30
+        new(2022, 1, "B", Egresados: 4, DesertoresPorAnio: [10, 4, 3]),  // 4E+17D+9R=30
+        // ── Trayecto 2022 — 28% egresa (17/60) ─────────────────────────────────
+        new(2022, 2, "A", Egresados: 9, DesertoresPorAnio: [10, 3]),     // 9E+13D+8R=30
+        new(2022, 2, "B", Egresados: 8, DesertoresPorAnio: [10, 3]),     // 8E+13D+9R=30
+        // ── Trayecto 2023 — 30% egresa (18/60) ─────────────────────────────────
+        new(2023, 2, "A", Egresados: 9, DesertoresPorAnio: [10, 3]),     // 9E+13D+8R=30
+        new(2023, 2, "B", Egresados: 9, DesertoresPorAnio: [10, 3]),     // 9E+13D+8R=30
+        // ── Trayecto 2024 — 25% egresa (15/60) ─────────────────────────────────
+        new(2024, 2, "A", Egresados: 8, DesertoresPorAnio: [10, 3]),     // 8E+13D+9R=30
+        new(2024, 2, "B", Egresados: 7, DesertoresPorAnio: [10, 3]),     // 7E+13D+10R=30
     ];
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -281,9 +283,12 @@ public static class CohorteHistoricaSeeder
         bool prof2023HistoricoSobrante = await db.Usuarios
             .AnyAsync(u => u.Legajo.StartsWith("EST-H2023-C1"), ct);
 
-        // Todo correcto: distribuciones 2021/2022/2024, sin egresados en C1-2021 y sin sobrantes accidentales
-        if (egresadosC2_2021 >= 24 && egresadosC2_2024 >= 24
-            && desertoresC1_2021 <= 34 && egresadosC1_2021 == 0
+        // Todo correcto: distribuciones 2021/2022/2024 y Profesorado 2021 con egresados
+        // Trayecto 2021 objetivo: 15 (≥12 para tolerar variaciones del patch)
+        // Trayecto 2024 objetivo: 15 (≥12)
+        // Profesorado 2021 objetivo: 10 (≥5 por comisión A)
+        if (egresadosC2_2021 >= 12 && egresadosC2_2024 >= 12
+            && desertoresC1_2021 <= 34 && egresadosC1_2021 >= 5
             && desertoresHistoricos >= 100
             && !prof2023HistoricoSobrante)
         {

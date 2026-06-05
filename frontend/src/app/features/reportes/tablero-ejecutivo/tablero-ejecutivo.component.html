@@ -125,7 +125,7 @@
     @if (t.evolucionMatricula.length) {
       <section class="seccion">
         <h2 class="seccion-titulo">Evolución de Matrícula por Año</h2>
-        <p class="seccion-subtitulo">Activos totales, ingresantes nuevos y continuantes por año calendario</p>
+        <p class="seccion-subtitulo">Alumnos inscriptos durante cada año calendario (incluye quienes egresaron o desertaron ese mismo año). El KPI "Activos hoy" refleja únicamente los inscriptos al día de la fecha.</p>
         <div class="grafico-barras-wrap">
           <canvas #matriculaCanvas></canvas>
         </div>
@@ -134,7 +134,7 @@
             <thead>
               <tr>
                 <th>Año</th>
-                <th>Matriculados en el año</th>
+                <th>Activos en el año</th>
                 <th>Ingresantes</th>
                 <th>Continuantes</th>
               </tr>

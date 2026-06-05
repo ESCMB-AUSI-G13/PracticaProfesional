@@ -11,7 +11,22 @@
       "PowerShell(Stop-Process -Id 21928 -Force)",
       "Bash(git rm *)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(rm \"d:/facum/GITHUB TESIS/PracticaProfesional/database/fix_egresados_migration.sql\")",
+      "PowerShell(\\(Get-Item \"C:\\\\Users\\\\facum\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--facum-GITHUB-TESIS-PracticaProfesional\\\\7d3d3ab4-7c98-415b-b65c-793bd314973f\\\\tasks\\\\b2npko8v8.output\"\\).Length / 1MB)",
+      "PowerShell($size = \\(Get-Item \"C:\\\\Users\\\\facum\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--facum-GITHUB-TESIS-PracticaProfesional\\\\7d3d3ab4-7c98-415b-b65c-793bd314973f\\\\tasks\\\\b2npko8v8.output\"\\).Length / 1MB; Write-Host \"Tamaño: $size MB\"; Get-Content \"C:\\\\Users\\\\facum\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--facum-GITHUB-TESIS-PracticaProfesional\\\\7d3d3ab4-7c98-415b-b65c-793bd314973f\\\\tasks\\\\b2npko8v8.output\" | Select-String \"Seeder|completado|OK|Error|Exception|Now listening|Application started\" | Select-Object -Last 15)",
+      "PowerShell($size = \\(Get-Item \"C:\\\\Users\\\\facum\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--facum-GITHUB-TESIS-PracticaProfesional\\\\7d3d3ab4-7c98-415b-b65c-793bd314973f\\\\tasks\\\\b2npko8v8.output\"\\).Length / 1MB; Write-Host \"Tamaño: $size MB\"; Get-Content \"C:\\\\Users\\\\facum\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\d--facum-GITHUB-TESIS-PracticaProfesional\\\\7d3d3ab4-7c98-415b-b65c-793bd314973f\\\\tasks\\\\b2npko8v8.output\" | Select-String \"Seeder|completado|OK|Error|Exception|Now listening|Application started\" | Select-Object -Last 20)",
+      "PowerShell(Get-Process -Name \"dotnet\")",
+      "PowerShell(Stop-Process -Force)",
+      "Bash(curl -s -X POST http://localhost:5000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"direcc@gmail.com\",\"password\":\"Direcc123!\"}')",
+      "Bash(curl -s -X POST http://localhost:5000/api/auth/login -H \"Content-Type: application/json\" -d '{\"email\":\"admin@institucion.edu.ar\",\"password\":\"Admin1234!\"}')",
+      "Bash(python3 -c ' *)",
+      "Bash(sqlcmd -S tcp:escmb-data-server.database.windows.net,1433 -d escmb-db -U admin-db -P Tesis2026!! -Q ' *)",
+      "Bash(\"/c/Program Files/Microsoft SQL Server/Client SDK/ODBC/170/Tools/Binn/SQLCMD.EXE\" -S \"tcp:escmb-data-server.database.windows.net,1433\" -d \"escmb-db\" -U \"admin-db\" -P \"Tesis2026!!\" -Q \"SELECT YEAR\\(FechaDeIngreso\\) AS Cohorte, CarreraId, Condicion, Anio, COUNT\\(*\\) AS Total FROM Estudiantes WHERE CarreraId=2 AND YEAR\\(FechaDeIngreso\\) IN \\(2025,2026\\) GROUP BY YEAR\\(FechaDeIngreso\\),CarreraId,Condicion,Anio ORDER BY 1,3,4\")",
+      "Bash(Select-String \"error CS|error FS|: error|Build succeeded|FAILED\")"
+    ],
+    "additionalDirectories": [
+      "d:\\facum\\GITHUB TESIS\\PracticaProfesional\\database"
     ]
   }
 }
