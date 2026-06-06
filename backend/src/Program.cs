@@ -475,3 +475,6 @@ static async Task RepararMigracionesInconsistentesAsync(
         }
     }
 }
+
+// Necesario para WebApplicationFactory en tests de integración
+public partial class Program { }
