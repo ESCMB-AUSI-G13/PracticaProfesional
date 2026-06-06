@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PracticaProfesional.Application.Usuarios;
 using PracticaProfesional.Application.Usuarios.DTOs;
+using PracticaProfesional.Domain.Enums;
 
 namespace PracticaProfesional.Controllers;
 
@@ -12,8 +13,7 @@ public class UsuariosController(
     CrearUsuarioUseCase crearUsuario,
     ListarUsuariosUseCase listarUsuarios,
     ModificarUsuarioUseCase modificarUsuario,
-    DesactivarUsuarioUseCase desactivarUsuario,
-    ReactivarUsuarioUseCase reactivarUsuario,
+    CambiarActivacionUseCase cambiarActivacion,
     CambiarClaveUseCase cambiarClave) : ControllerBase
 {
     [HttpGet]
@@ -49,7 +49,7 @@ public class UsuariosController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Desactivar(int id, CancellationToken cancellationToken)
     {
-        await desactivarUsuario.EjecutarAsync(id, cancellationToken);
+        await cambiarActivacion.EjecutarAsync(id, activar: false, rolEsperado: null, "Usuario", cancellationToken);
         return NoContent();
     }
 
@@ -58,7 +58,7 @@ public class UsuariosController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Reactivar(int id, CancellationToken cancellationToken)
     {
-        await reactivarUsuario.EjecutarAsync(id, cancellationToken);
+        await cambiarActivacion.EjecutarAsync(id, activar: true, rolEsperado: null, "Usuario", cancellationToken);
         return NoContent();
     }
 

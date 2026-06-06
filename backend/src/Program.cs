@@ -95,23 +95,18 @@ builder.Services.AddScoped<ListarAuditoriaLogsUseCase>();
 builder.Services.AddScoped<CrearUsuarioUseCase>();
 builder.Services.AddScoped<ListarUsuariosUseCase>();
 builder.Services.AddScoped<ModificarUsuarioUseCase>();
-builder.Services.AddScoped<DesactivarUsuarioUseCase>();
-builder.Services.AddScoped<ReactivarUsuarioUseCase>();
+builder.Services.AddScoped<CambiarActivacionUseCase>();
 builder.Services.AddScoped<CambiarClaveUseCase>();
 
 // Docentes
 builder.Services.AddScoped<CrearDocenteUseCase>();
 builder.Services.AddScoped<ListarDocentesUseCase>();
 builder.Services.AddScoped<ModificarDocenteUseCase>();
-builder.Services.AddScoped<DesactivarDocenteUseCase>();
-builder.Services.AddScoped<ReactivarDocenteUseCase>();
 
 // Preceptores
 builder.Services.AddScoped<CrearPreceptorUseCase>();
 builder.Services.AddScoped<ListarPreceptoresUseCase>();
 builder.Services.AddScoped<ModificarPreceptorUseCase>();
-builder.Services.AddScoped<DesactivarPreceptorUseCase>();
-builder.Services.AddScoped<ReactivarPreceptorUseCase>();
 
 // Inscripciones
 builder.Services.AddScoped<ListarInscripcionesUseCase>();
@@ -231,8 +226,6 @@ builder.Services.AddHostedService<AlertasBackgroundService>();
 builder.Services.AddScoped<CrearEstudianteUseCase>();
 builder.Services.AddScoped<ListarEstudiantesUseCase>();
 builder.Services.AddScoped<ModificarEstudianteUseCase>();
-builder.Services.AddScoped<DesactivarEstudianteUseCase>();
-builder.Services.AddScoped<ReactivarEstudianteUseCase>();
 builder.Services.AddScoped<EliminarEstudianteUseCase>();
 
 // ── Autenticación JWT ──────────────────────────────────────────────────────────

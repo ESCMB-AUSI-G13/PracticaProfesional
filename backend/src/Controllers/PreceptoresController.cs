@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PracticaProfesional.Application.Preceptores;
 using PracticaProfesional.Application.Preceptores.DTOs;
+using PracticaProfesional.Application.Usuarios;
+using PracticaProfesional.Domain.Enums;
 
 namespace PracticaProfesional.Controllers;
 
@@ -12,8 +14,7 @@ public class PreceptoresController(
     CrearPreceptorUseCase crearPreceptor,
     ListarPreceptoresUseCase listarPreceptores,
     ModificarPreceptorUseCase modificarPreceptor,
-    DesactivarPreceptorUseCase desactivarPreceptor,
-    ReactivarPreceptorUseCase reactivarPreceptor) : ControllerBase
+    CambiarActivacionUseCase cambiarActivacion) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<PreceptorDto>), StatusCodes.Status200OK)]
@@ -48,7 +49,7 @@ public class PreceptoresController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Desactivar(int usuarioId, CancellationToken cancellationToken)
     {
-        await desactivarPreceptor.EjecutarAsync(usuarioId, cancellationToken);
+        await cambiarActivacion.EjecutarAsync(usuarioId, activar: false, Rol.Preceptor, "Preceptor", cancellationToken);
         return NoContent();
     }
 
@@ -57,7 +58,7 @@ public class PreceptoresController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Reactivar(int usuarioId, CancellationToken cancellationToken)
     {
-        await reactivarPreceptor.EjecutarAsync(usuarioId, cancellationToken);
+        await cambiarActivacion.EjecutarAsync(usuarioId, activar: true, Rol.Preceptor, "Preceptor", cancellationToken);
         return NoContent();
     }
 }

@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PracticaProfesional.Application.Docentes;
 using PracticaProfesional.Application.Docentes.DTOs;
+using PracticaProfesional.Application.Usuarios;
+using PracticaProfesional.Domain.Enums;
 
 namespace PracticaProfesional.Controllers;
 
@@ -12,8 +14,7 @@ public class DocentesController(
     CrearDocenteUseCase crearDocente,
     ListarDocentesUseCase listarDocentes,
     ModificarDocenteUseCase modificarDocente,
-    DesactivarDocenteUseCase desactivarDocente,
-    ReactivarDocenteUseCase reactivarDocente) : ControllerBase
+    CambiarActivacionUseCase cambiarActivacion) : ControllerBase
 {
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<DocenteDto>), StatusCodes.Status200OK)]
@@ -48,7 +49,7 @@ public class DocentesController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Desactivar(int usuarioId, CancellationToken cancellationToken)
     {
-        await desactivarDocente.EjecutarAsync(usuarioId, cancellationToken);
+        await cambiarActivacion.EjecutarAsync(usuarioId, activar: false, Rol.Docente, "Docente", cancellationToken);
         return NoContent();
     }
 
@@ -57,7 +58,7 @@ public class DocentesController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Reactivar(int usuarioId, CancellationToken cancellationToken)
     {
-        await reactivarDocente.EjecutarAsync(usuarioId, cancellationToken);
+        await cambiarActivacion.EjecutarAsync(usuarioId, activar: true, Rol.Docente, "Docente", cancellationToken);
         return NoContent();
     }
 }
