@@ -392,65 +392,11 @@ var app = builder.Build();
         // -- Correcciones / patches --
         await PatchDesercionSeeder.PatchAsync(db, logger);          // ← deserción real en cohortes 2025/2026 + año 4
         // await PatchEgresadosSeeder.PatchAsync(db, logger);       // ← HABILITAR para corregir tasas egresados
-        // await CondicionRealistaSeeder.SeedAsync(db, logger);
-        // await CohorteHistoricaSeeder.CapFechasEgresoFuturaAsync(db, logger);
-        // await EstudiantesSeeder.SeedAsync(db, logger);
-        // await EstudiantesSeeder.FixNombresAsync(db, logger);
-        // await EstudiantesSeeder.PatchJustificacionesAsync(db, logger);
-        // await CohorteHistoricaSeeder.RepararAsync(db, logger);
-        // await CohorteHistoricaSeeder.SeedHistorialAsync(db, logger);
-        // await CohorteHistoricaSeeder.SeedDesertoresActivosAsync(db, logger);
-        // await HistorialAnteriorSeeder.SeedAsync(db, logger);
-        // await ExamenesSeeder.SeedAsync(db, logger);
-        // await NotasExamenesSeeder.SeedAsync(db, logger);
-        // await NotasHistoricasSeeder.SeedAsync(db, logger);
-        // await EncuestaRespuestasSeeder.SeedAsync(db, app.Configuration["Encuestas:Salt"] ?? "pp-salt-2026");
     }
     catch (Exception ex)
     {
         logger.LogError(ex, "Error al aplicar migraciones o seed. La aplicación continuará sin migración automática.");
     }
-
-    // Corrección de condiciones académicas según datos reales de asistencia y notas.
-    // try
-    // {
-    //     var db2 = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    //     await EstudiantesSeeder.CorregirCondicionesAsync(db2, logger);
-    // }
-    // catch (Exception ex)
-    // {
-    //     logger.LogWarning(ex, "CorregirCondiciones: error no crítico, se continúa.");
-    // }
-
-    // try
-    // {
-    //     var dbD = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    //     await CohorteHistoricaSeeder.AsegurarDesertoresActivosAsync(dbD, logger);
-    // }
-    // catch (Exception ex)
-    // {
-    //     logger.LogWarning(ex, "AsegurarDesertoresActivos: error no crítico, se continúa.");
-    // }
-
-    // try
-    // {
-    //     var db3 = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    //     await EstudiantesSeeder.PatchCondicionesRetencionAsync(db3, logger);
-    // }
-    // catch (Exception ex)
-    // {
-    //     logger.LogWarning(ex, "PatchCondicionesRetencion: error no crítico, se continúa.");
-    // }
-
-    // try
-    // {
-    //     var db4 = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    //     await CohorteHistoricaSeeder.CorregirDistribucionProf2023Async(db4, logger);
-    // }
-    // catch (Exception ex)
-    // {
-    //     logger.LogWarning(ex, "CorregirDistribucionProf2023: error no crítico, se continúa.");
-    // }
 }
 
 app.UseCors("AllowFrontend");

@@ -7,6 +7,9 @@ namespace PracticaProfesional.Domain.Entities;
 public class Estudiante : AggregateRoot
 {
     // ── Transiciones válidas por estado ─────────────────────────────────────
+    // Cualquier condición activa puede derivar en Desertor (abandono en cualquier etapa).
+    // Desertor → Regular representa re-ingreso al sistema.
+    // Egresado es terminal: no se puede revertir un egreso.
     private static readonly Dictionary<CondicionEstudiante, IReadOnlySet<CondicionEstudiante>> _transicionesValidas =
         new()
         {

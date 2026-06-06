@@ -469,14 +469,12 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
             .GroupBy(x => x.EstudianteId)
             .ToDictionary(g => g.Key, g => g.Select(x => x.Anio).Distinct().ToList());
 
-        var historialLookup = aniosPorEstudiante;
-
         // Paso 3: combinar — un registro por (estudiante × año historial)
         var resultado = new List<DatosRetencionAnualRawDto>();
 
         foreach (var e in estudiantes)
         {
-            if (historialLookup.TryGetValue(e.Id, out var anios))
+            if (aniosPorEstudiante.TryGetValue(e.Id, out var anios))
             {
                 foreach (var anio in anios)
                     resultado.Add(new DatosRetencionAnualRawDto
@@ -674,6 +672,8 @@ public class RendimientoConsolidadoRepository(AppDbContext db) : IRendimientoCon
                     or CondicionEstudiante.Libre
                     or CondicionEstudiante.Promocional => true,
                     CondicionEstudiante.Egresado       => e.AnioEgreso == null || anio <= e.AnioEgreso.Value,
+                    // Un desertor estuvo activo hasta el año calendario en que cursaba su AnioCarrera.
+                    // Ej: ingresó en 2021, desertó en año 2 → último año activo = 2021 + (2-1) = 2022.
                     CondicionEstudiante.Desertor        => anio <= e.AnioIngreso + (e.AnioCarrera - 1),
                     _                                  => false
                 };
