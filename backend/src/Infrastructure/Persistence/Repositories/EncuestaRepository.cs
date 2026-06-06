@@ -67,4 +67,39 @@ public class EncuestaRepository(AppDbContext db) : IEncuestaRepository
              .Where(r => r.EncuestaId == encuestaId)
              .Include(r => r.Items)
              .ToListAsync(ct);
+
+    public Task<Encuesta?> ObtenerConRespuestasYPreguntasAsync(int encuestaId, CancellationToken ct = default)
+        => db.Encuestas
+             .Include(e => e.Preguntas.OrderBy(p => p.Orden))
+             .Include(e => e.Respuestas)
+                 .ThenInclude(r => r.Items)
+             .FirstOrDefaultAsync(e => e.Id == encuestaId, ct);
+
+    public Task<List<Encuesta>> ListarConRespuestasPorMateriasAsync(List<int> materiaIds, CancellationToken ct = default)
+        => db.Encuestas
+             .Include(e => e.Respuestas)
+                 .ThenInclude(r => r.Items)
+             .Where(e => e.MateriaId.HasValue && materiaIds.Contains(e.MateriaId.Value))
+             .OrderByDescending(e => e.CicloLectivo)
+             .ThenBy(e => e.Titulo)
+             .ToListAsync(ct);
+
+    public Task<List<Encuesta>> ListarTodasConRespuestasAsync(CancellationToken ct = default)
+        => db.Encuestas
+             .Include(e => e.Respuestas)
+                 .ThenInclude(r => r.Items)
+             .OrderByDescending(e => e.CicloLectivo)
+             .ThenBy(e => e.Titulo)
+             .ToListAsync(ct);
+
+    public Task<List<Encuesta>> ListarEvaluacionDocentePorMateriasAsync(List<int> materiaIds, CancellationToken ct = default)
+        => db.Encuestas
+             .Include(e => e.Preguntas.OrderBy(p => p.Orden))
+             .Include(e => e.Materia)
+             .Where(e => e.Tipo == Domain.Enums.TipoEncuesta.EvaluacionDocente
+                      && e.MateriaId != null
+                      && materiaIds.Contains(e.MateriaId.Value))
+             .OrderByDescending(e => e.CicloLectivo)
+             .ThenBy(e => e.Titulo)
+             .ToListAsync(ct);
 }

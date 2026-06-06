@@ -1,22 +1,16 @@
-using Microsoft.EntityFrameworkCore;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Reportes.DTOs;
 using PracticaProfesional.Domain.Enums;
-using PracticaProfesional.Infrastructure.Persistence;
 
 namespace PracticaProfesional.Application.Reportes;
 
-public class ResultadosEncuestasUseCase(AppDbContext db)
+public class ResultadosEncuestasUseCase(IEncuestaRepository repo)
 {
     // ── RR-03 / RR-04: una encuesta → resultados por pregunta + evolución ────
     public async Task<ReporteSatisfaccionDto> ObtenerSatisfaccionAsync(
         int encuestaId, CancellationToken ct = default)
     {
-        var encuesta = await db.Encuestas
-            .Include(e => e.Preguntas.OrderBy(p => p.Orden))
-            .Include(e => e.Respuestas)
-                .ThenInclude(r => r.Items)
-            .FirstOrDefaultAsync(e => e.Id == encuestaId, ct)
+        var encuesta = await repo.ObtenerConRespuestasYPreguntasAsync(encuestaId, ct)
             ?? throw new KeyNotFoundException($"Encuesta {encuestaId} no encontrada.");
 
         var respuestas = encuesta.Respuestas.ToList();
@@ -93,14 +87,7 @@ public class ResultadosEncuestasUseCase(AppDbContext db)
     public async Task<ReporteComparativoEncuestasDto> ObtenerComparativoDocenteAsync(
         List<int> materiaIds, CancellationToken ct = default)
     {
-        var encuestas = await db.Encuestas
-            .Include(e => e.Respuestas)
-                .ThenInclude(r => r.Items)
-            .Where(e => e.MateriaId.HasValue && materiaIds.Contains(e.MateriaId.Value))
-            .OrderByDescending(e => e.CicloLectivo)
-            .ThenBy(e => e.Titulo)
-            .ToListAsync(ct);
-
+        var encuestas = await repo.ListarConRespuestasPorMateriasAsync(materiaIds, ct);
         return BuildComparativo(encuestas);
     }
 
@@ -108,13 +95,7 @@ public class ResultadosEncuestasUseCase(AppDbContext db)
     public async Task<ReporteComparativoEncuestasDto> ObtenerComparativoAsync(
         CancellationToken ct = default)
     {
-        var encuestas = await db.Encuestas
-            .Include(e => e.Respuestas)
-                .ThenInclude(r => r.Items)
-            .OrderByDescending(e => e.CicloLectivo)
-            .ThenBy(e => e.Titulo)
-            .ToListAsync(ct);
-
+        var encuestas = await repo.ListarTodasConRespuestasAsync(ct);
         return BuildComparativo(encuestas);
     }
 

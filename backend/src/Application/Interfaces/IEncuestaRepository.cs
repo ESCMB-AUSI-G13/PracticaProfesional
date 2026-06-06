@@ -24,4 +24,9 @@ public interface IEncuestaRepository
     // ── Reportes ──────────────────────────────────────────────────────────────
     Task<List<RespuestaEncuesta>> ObtenerRespuestasConItemsAsync(
         int encuestaId, CancellationToken ct = default);
+
+    Task<Encuesta?> ObtenerConRespuestasYPreguntasAsync(int encuestaId, CancellationToken ct = default);
+    Task<List<Encuesta>> ListarConRespuestasPorMateriasAsync(List<int> materiaIds, CancellationToken ct = default);
+    Task<List<Encuesta>> ListarTodasConRespuestasAsync(CancellationToken ct = default);
+    Task<List<Encuesta>> ListarEvaluacionDocentePorMateriasAsync(List<int> materiaIds, CancellationToken ct = default);
 }

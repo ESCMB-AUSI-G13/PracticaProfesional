@@ -1,30 +1,19 @@
-using Microsoft.EntityFrameworkCore;
 using PracticaProfesional.Application.Encuestas.DTOs;
 using PracticaProfesional.Application.Interfaces;
-using PracticaProfesional.Domain.Enums;
-using PracticaProfesional.Infrastructure.Persistence;
 
 namespace PracticaProfesional.Application.Encuestas;
 
 public class ListarEncuestasDocenteUseCase(
     IDocenteRepository           docenteRepo,
     IEspacioCurricularRepository espacioRepo,
-    AppDbContext                 db)
+    IEncuestaRepository          encuestaRepo)
 {
     public async Task<List<EncuestaDto>> EjecutarAsync(int usuarioId, CancellationToken ct = default)
     {
         var materiaIds = await ObtenerMateriaIdsAsync(usuarioId, ct);
         if (materiaIds.Count == 0) return [];
 
-        var encuestas = await db.Encuestas
-            .Include(e => e.Preguntas.OrderBy(p => p.Orden))
-            .Include(e => e.Materia)
-            .Where(e => e.Tipo == TipoEncuesta.EvaluacionDocente
-                     && e.MateriaId != null
-                     && materiaIds.Contains(e.MateriaId.Value))
-            .OrderByDescending(e => e.CicloLectivo)
-            .ThenBy(e => e.Titulo)
-            .ToListAsync(ct);
+        var encuestas = await encuestaRepo.ListarEvaluacionDocentePorMateriasAsync(materiaIds.ToList(), ct);
 
         return encuestas.Select(ListarEncuestasUseCase.ToDto).ToList();
     }
