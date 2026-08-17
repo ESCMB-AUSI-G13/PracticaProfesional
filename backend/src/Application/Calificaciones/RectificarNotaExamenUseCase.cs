@@ -1,4 +1,5 @@
 using PracticaProfesional.Application.Calificaciones.DTOs;
+using PracticaProfesional.Application.EstadoAcademico;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Domain.Enums;
 using PracticaProfesional.Domain.Exceptions;
@@ -13,6 +14,8 @@ namespace PracticaProfesional.Application.Calificaciones;
 /// </summary>
 public class RectificarNotaExamenUseCase(
     IInscripcionExamenRepository inscripcionExamenRepository,
+    IHistorialAcademicoRepository historialRepository,
+    ActualizarEstadoAcademicoUseCase evaluarEstadoAcademico,
     IAuditoriaService auditoria)
 {
     public async Task<NotaExamenResultDto> EjecutarAsync(
@@ -68,6 +71,9 @@ public class RectificarNotaExamenUseCase(
         var estudiante = inscripcion.Estudiante;
         var examen     = inscripcion.Examen;
 
+        if (examen.TipoExamen == TipoExamen.Final && inscripcion.Estado == EstadoInscripcion.Aprobada)
+            await RegistrarNotaFinalEnHistorialAsync(inscripcion.EstudianteId, examen.MateriaId, nuevaNota.Valor, cancellationToken);
+
         return new NotaExamenResultDto(
             InscripcionExamenId:      inscripcion.Id,
             EstudianteId:             inscripcion.EstudianteId,
@@ -79,5 +85,19 @@ public class RectificarNotaExamenUseCase(
             NotaValor:                nuevaNota.Valor,
             EsAprobado:               nuevaNota.EsAprobado,
             Estado:                   inscripcion.Estado.ToString());
+    }
+
+    /// <summary>Ver comentario en CargarNotaExamenUseCase.RegistrarNotaFinalEnHistorialAsync.</summary>
+    private async Task RegistrarNotaFinalEnHistorialAsync(
+        int estudianteId, int materiaId, decimal notaValor, CancellationToken cancellationToken)
+    {
+        var historiales = await historialRepository.ObtenerPorEstudianteYMateriaAsync(estudianteId, materiaId, cancellationToken);
+        var historial = historiales.OrderByDescending(h => h.Id).FirstOrDefault();
+        if (historial is null) return;
+
+        historial.RegistrarNotaFinal(notaValor, "Aprobada");
+        await historialRepository.GuardarCambiosAsync(cancellationToken);
+
+        await evaluarEstadoAcademico.EvaluarSoloEgresoAsync(estudianteId, materiaId, cancellationToken);
     }
 }

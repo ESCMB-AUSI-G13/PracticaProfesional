@@ -15,7 +15,6 @@ public class InscribirseEnExamenUseCase(
     IEstudianteRepository           estudianteRepository,
     IExamenRepository               examenRepository,
     IInscripcionExamenRepository    inscripcionExamenRepository,
-    IInscripcionMateriaRepository   inscripcionMateriaRepository,
     ICorrelativiadadRepository      correlativiadadRepository,
     IHistorialAcademicoRepository   historialRepository,
     ICalendarioAcademicoRepository  calendarioRepository,
@@ -45,14 +44,15 @@ public class InscribirseEnExamenUseCase(
         var examen = await examenRepository.ObtenerPorIdAsync(dto.ExamenId, cancellationToken)
             ?? throw new BusinessException($"No se encontró el examen con Id {dto.ExamenId}.");
 
-        // Para finales: el alumno debe haber cursado la materia (inscripción activa o regularizada)
+        // Para finales: el alumno debe estar Regularizado en la materia (cursada cerrada
+        // sin perder la regularidad), no simplemente tener una inscripción activa.
         if (examen.TipoExamen is TipoExamen.Final)
         {
-            var inscriptoEnMateria = await inscripcionMateriaRepository
-                .ExisteInscripcionActivaAsync(estudiante.Id, examen.MateriaId, cancellationToken);
-            if (!inscriptoEnMateria)
+            var regularizado = await historialRepository
+                .EstaRegularizadoAsync(estudiante.Id, examen.MateriaId, cancellationToken);
+            if (!regularizado)
                 throw new BusinessException(
-                    "Para inscribirse al examen final debe tener la materia cursada (inscripción activa).");
+                    "Para inscribirse al examen final debe tener la materia regularizada.");
 
             await ValidarCorrelativiadadesParaRendirAsync(estudiante.Id, examen.MateriaId, cancellationToken);
         }

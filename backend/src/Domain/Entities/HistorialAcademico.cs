@@ -44,4 +44,15 @@ public class HistorialAcademico
             Condicion = condicion
         };
     }
+
+    /// <summary>
+    /// Registra la nota obtenida al rendir y aprobar el examen final de la materia.
+    /// La condición de la cursada (Regular/Libre) ya quedó fijada al cerrar el curso;
+    /// esto solo completa la nota definitiva de la materia.
+    /// </summary>
+    public void RegistrarNotaFinal(decimal notaFinal, string estadoFinal)
+    {
+        NotaFinal = notaFinal;
+        EstadoFinal = estadoFinal;
+    }
 }

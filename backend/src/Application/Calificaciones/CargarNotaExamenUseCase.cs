@@ -1,4 +1,5 @@
 using PracticaProfesional.Application.Calificaciones.DTOs;
+using PracticaProfesional.Application.EstadoAcademico;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Domain.Enums;
 using PracticaProfesional.Domain.Exceptions;
@@ -20,6 +21,8 @@ namespace PracticaProfesional.Application.Calificaciones;
 /// </summary>
 public class CargarNotaExamenUseCase(
     IInscripcionExamenRepository inscripcionExamenRepository,
+    IHistorialAcademicoRepository historialRepository,
+    ActualizarEstadoAcademicoUseCase evaluarEstadoAcademico,
     IAuditoriaService auditoria)
 {
     public async Task<NotaExamenResultDto> EjecutarAsync(
@@ -70,6 +73,11 @@ public class CargarNotaExamenUseCase(
         var estudiante = inscripcion.Estudiante;
         var examen = inscripcion.Examen;
 
+        // 8. Si es un examen Final aprobado, la nota queda como nota definitiva de la
+        // materia en HistorialAcademico, y se evalúa el egreso automático (CU-43).
+        if (examen.TipoExamen == TipoExamen.Final && inscripcion.Estado == EstadoInscripcion.Aprobada)
+            await RegistrarNotaFinalEnHistorialAsync(inscripcion.EstudianteId, examen.MateriaId, nota.Valor, cancellationToken);
+
         return new NotaExamenResultDto(
             InscripcionExamenId: inscripcion.Id,
             EstudianteId: inscripcion.EstudianteId,
@@ -81,5 +89,25 @@ public class CargarNotaExamenUseCase(
             NotaValor: nota.Valor,
             EsAprobado: nota.EsAprobado,
             Estado: inscripcion.Estado.ToString());
+    }
+
+    /// <summary>
+    /// Actualiza la nota definitiva de la materia en HistorialAcademico y dispara la
+    /// evaluación automática de egreso (CU-43). El registro de HistorialAcademico ya
+    /// existe porque InscribirseEnExamenUseCase exige estar Regularizado (cierre de
+    /// cursada previo) para poder inscribirse a un examen Final; si por datos legacy no
+    /// existiera, se omite en vez de intentar crear un registro sin CursoId válido.
+    /// </summary>
+    private async Task RegistrarNotaFinalEnHistorialAsync(
+        int estudianteId, int materiaId, decimal notaValor, CancellationToken cancellationToken)
+    {
+        var historiales = await historialRepository.ObtenerPorEstudianteYMateriaAsync(estudianteId, materiaId, cancellationToken);
+        var historial = historiales.OrderByDescending(h => h.Id).FirstOrDefault();
+        if (historial is null) return;
+
+        historial.RegistrarNotaFinal(notaValor, "Aprobada");
+        await historialRepository.GuardarCambiosAsync(cancellationToken);
+
+        await evaluarEstadoAcademico.EvaluarSoloEgresoAsync(estudianteId, materiaId, cancellationToken);
     }
 }

@@ -24,4 +24,8 @@ public interface IHistorialAcademicoRepository
         int carreraId,
         CancellationToken cancellationToken = default);
     Task<bool> ExistePorMateriaIdAsync(int materiaId, CancellationToken cancellationToken = default);
+
+    Task AgregarAsync(HistorialAcademico historial, CancellationToken cancellationToken = default);
+    Task AgregarRangoAsync(IEnumerable<HistorialAcademico> historiales, CancellationToken cancellationToken = default);
+    Task GuardarCambiosAsync(CancellationToken cancellationToken = default);
 }

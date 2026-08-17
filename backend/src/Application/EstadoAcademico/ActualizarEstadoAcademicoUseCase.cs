@@ -96,6 +96,38 @@ public class ActualizarEstadoAcademicoUseCase(
             false, "Sin cambios: ningún criterio de transición fue superado.");
     }
 
+    /// <summary>
+    /// Evalúa únicamente el criterio de Egreso (evento "MateriaAprobada" de CU-43: si el
+    /// plan queda 100% completo, transición automática a Egreso). Se invoca automáticamente
+    /// al aprobar un examen final. A diferencia de <see cref="EjecutarAsync"/>, no evalúa
+    /// Promoción/Pérdida de regularidad/Deserción — esos criterios dependen de una nota de
+    /// cursada que este flujo no calcula (la nota de la materia es la del examen final) y
+    /// dispararlos acá sería semánticamente incorrecto (p. ej. marcar "Promocional" a un
+    /// alumno que ya rindió el final, cuando Promocional significa estar eximido de rendir).
+    /// </summary>
+    public async Task<ResultadoActualizacionEstadoDto> EvaluarSoloEgresoAsync(
+        int estudianteId, int materiaId, CancellationToken cancellationToken = default)
+    {
+        var estudiante = await estudianteRepository.ObtenerPorIdAsync(estudianteId, cancellationToken)
+            ?? throw new BusinessException($"No se encontró el estudiante con Id {estudianteId}.");
+
+        if (estudiante.Condicion == CondicionEstudiante.Egresado)
+            return BuildResultado(estudiante.Id, estudiante.Condicion, estudiante.Condicion,
+                false, "El estudiante ya se encuentra en estado Egresado.");
+
+        var condicionAnterior = estudiante.Condicion;
+
+        var motivo = await EvaluarEgresoAsync(estudianteId, materiaId, cancellationToken);
+        if (motivo is not null)
+        {
+            estudiante.Egresar();
+            return await GuardarYAuditarAsync(estudiante, condicionAnterior, motivo, cancellationToken);
+        }
+
+        return BuildResultado(estudiante.Id, condicionAnterior, estudiante.Condicion,
+            false, "Sin cambios: aún no completó el 100% del plan.");
+    }
+
     // ── Evaluadores privados ─────────────────────────────────────────────────────
 
     /// <summary>

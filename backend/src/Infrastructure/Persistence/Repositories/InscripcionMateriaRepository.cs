@@ -97,4 +97,11 @@ public class InscripcionMateriaRepository(AppDbContext context) : IInscripcionMa
             .Where(i => i.CursoId == cursoId && i.MateriaId == materiaId && i.Estado == EstadoInscripcion.Activa)
             .OrderBy(i => i.Estudiante.Usuario.Apellido).ThenBy(i => i.Estudiante.Usuario.Nombre)
             .ToListAsync(cancellationToken);
+
+    public async Task<IEnumerable<InscripcionMateria>> ListarActivasPorCursoAsync(
+        int cursoId,
+        CancellationToken cancellationToken = default)
+        => await context.InscripcionesMateria
+            .Where(i => i.CursoId == cursoId && i.Estado == EstadoInscripcion.Activa)
+            .ToListAsync(cancellationToken);
 }

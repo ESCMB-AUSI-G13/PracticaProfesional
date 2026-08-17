@@ -74,4 +74,19 @@ public class HistorialAcademicoRepository(AppDbContext context) : IHistorialAcad
 
     public Task<bool> ExistePorMateriaIdAsync(int materiaId, CancellationToken cancellationToken = default)
         => context.HistorialAcademico.AnyAsync(h => h.MateriaId == materiaId, cancellationToken);
+
+    public async Task AgregarAsync(HistorialAcademico historial, CancellationToken cancellationToken = default)
+    {
+        await context.HistorialAcademico.AddAsync(historial, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task AgregarRangoAsync(IEnumerable<HistorialAcademico> historiales, CancellationToken cancellationToken = default)
+    {
+        await context.HistorialAcademico.AddRangeAsync(historiales, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task GuardarCambiosAsync(CancellationToken cancellationToken = default)
+        => await context.SaveChangesAsync(cancellationToken);
 }

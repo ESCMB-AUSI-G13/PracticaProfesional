@@ -1,10 +1,27 @@
 using PracticaProfesional.Application.Interfaces;
+using PracticaProfesional.Domain.Entities;
+using PracticaProfesional.Domain.Enums;
 using PracticaProfesional.Domain.Exceptions;
 
 namespace PracticaProfesional.Application.Cursos;
 
-public class CerrarCursoUseCase(ICursoRepository cursoRepository, IAuditoriaService auditoria)
+/// <summary>
+/// Cierra un curso y liquida la cursada de cada alumno inscripto: decide si regularizó
+/// (queda habilitado a rendir el examen final — CU-22/CU-33) o perdió la regularidad en
+/// base a la asistencia, y lo deja registrado en HistorialAcademico. Sin este registro,
+/// el motor de correlatividades y el conteo de egreso (CU-43) no tienen datos reales.
+/// </summary>
+public class CerrarCursoUseCase(
+    ICursoRepository cursoRepository,
+    IInscripcionMateriaRepository inscripcionMateriaRepository,
+    IAsistenciaRepository asistenciaRepository,
+    IHistorialAcademicoRepository historialRepository,
+    IAuditoriaService auditoria)
 {
+    // Mismo umbral que ActualizarEstadoAcademicoUseCase.AusenciaMaxRegularidad.
+    // Si se cambia acá, cambiar también allá.
+    private const decimal AusenciaMaxRegularidad = 0.25m;
+
     public async Task EjecutarAsync(int id, CancellationToken cancellationToken = default)
     {
         var curso = await cursoRepository.ObtenerPorIdAsync(id, cancellationToken)
@@ -13,9 +30,37 @@ public class CerrarCursoUseCase(ICursoRepository cursoRepository, IAuditoriaServ
         curso.Cerrar();
         await cursoRepository.GuardarCambiosAsync(cancellationToken);
 
+        var inscripciones = await inscripcionMateriaRepository.ListarActivasPorCursoAsync(id, cancellationToken);
+
+        var historiales = new List<HistorialAcademico>();
+        foreach (var inscripcion in inscripciones)
+        {
+            var (total, ausentesInjust, _) = await asistenciaRepository.ObtenerEstadisticasAsync(
+                inscripcion.EstudianteId, inscripcion.MateriaId, inscripcion.CursoId, cancellationToken);
+
+            var condicion = total > 0 && (decimal)ausentesInjust / total > AusenciaMaxRegularidad
+                ? CondicionEstudiante.Libre
+                : CondicionEstudiante.Regular;
+
+            if (condicion == CondicionEstudiante.Libre)
+                inscripcion.MarcarDesaprobada();
+            else
+                inscripcion.MarcarAprobada();
+
+            historiales.Add(HistorialAcademico.Crear(
+                inscripcion.EstudianteId, inscripcion.MateriaId, inscripcion.CursoId,
+                curso.Anio, curso.Comision,
+                estadoFinal: condicion.ToString(), notaFinal: null, condicion));
+        }
+
+        await inscripcionMateriaRepository.GuardarCambiosAsync(cancellationToken);
+
+        if (historiales.Count > 0)
+            await historialRepository.AgregarRangoAsync(historiales, cancellationToken);
+
         await auditoria.RegistrarAsync("Curso", curso.Id.ToString(), "CERRAR",
             valorAnterior: new { Estado = "Activo" },
-            valorNuevo: new { Estado = "Cerrado" },
+            valorNuevo: new { Estado = "Cerrado", AlumnosLiquidados = historiales.Count },
             cancellationToken: cancellationToken);
     }
 }
