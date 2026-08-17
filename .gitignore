@@ -11,6 +11,8 @@ backend/tests/bin/
 backend/tests/obj/
 backend/tests/**/bin/
 backend/tests/**/obj/
+backend/publish/
+**/buildcheck/
 
 # .NET user secrets
 **/secrets.json
