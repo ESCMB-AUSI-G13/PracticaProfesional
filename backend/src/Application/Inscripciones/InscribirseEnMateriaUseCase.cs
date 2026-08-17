@@ -16,6 +16,7 @@ public class InscribirseEnMateriaUseCase(
     ICorrelativiadadRepository correlativiadadRepository,
     IHistorialAcademicoRepository historialRepository,
     ICalendarioAcademicoRepository calendarioRepository,
+    IEspacioCurricularRepository espacioCurricularRepository,
     IAuditoriaService auditoria)
 {
     public async Task<InscripcionMateriaResultDto> EjecutarAsync(
@@ -43,6 +44,22 @@ public class InscribirseEnMateriaUseCase(
 
         // 5. Validar correlatividades para CURSAR
         await ValidarCorrelativiadadesParaCursarAsync(dto.EstudianteId, dto.MateriaId, cancellationToken);
+
+        // 5b. Validar que la materia efectivamente se dicte en el curso elegido
+        var espacios = await espacioCurricularRepository.ListarPorCursoYMateriaAsync(dto.CursoId, dto.MateriaId, cancellationToken);
+        if (!espacios.Any())
+            throw new BusinessException("La materia seleccionada no se dicta en el curso elegido.");
+
+        // 5c. El curso debe estar Activo (no Cerrado ni Suspendido)
+        var curso = espacios.First().Curso;
+        if (curso.Estado != EstadoCurso.Activo)
+            throw new BusinessException($"No se puede inscribir: el curso se encuentra en estado '{curso.Estado}'.");
+
+        // 5d. Validar cupo disponible
+        var activasEnCurso = await inscripcionMateriaRepository
+            .ListarActivasPorCursoYMateriaAsync(dto.CursoId, dto.MateriaId, cancellationToken);
+        if (activasEnCurso.Count() >= curso.Cupo)
+            throw new BusinessException("No hay cupo disponible en este curso.", 409);
 
         // 6. Crear la inscripción
         var inscripcion = InscripcionMateria.Crear(dto.EstudianteId, dto.MateriaId, dto.CursoId);

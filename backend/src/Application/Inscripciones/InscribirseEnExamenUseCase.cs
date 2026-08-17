@@ -44,6 +44,16 @@ public class InscribirseEnExamenUseCase(
         var examen = await examenRepository.ObtenerPorIdAsync(dto.ExamenId, cancellationToken)
             ?? throw new BusinessException($"No se encontró el examen con Id {dto.ExamenId}.");
 
+        // Evitar doble inscripción (reintentos de red, doble click)
+        if (await inscripcionExamenRepository.ExisteAsync(estudiante.Id, dto.ExamenId, cancellationToken))
+            throw new BusinessException("El estudiante ya está inscripto en este examen.", 409);
+
+        // Validar cupo disponible
+        var inscriptosActivos = (await inscripcionExamenRepository.ObtenerPorExamenAsync(dto.ExamenId, cancellationToken))
+            .Count(i => i.Estado == EstadoInscripcion.Activa);
+        if (inscriptosActivos >= examen.Cupo)
+            throw new BusinessException("No hay cupo disponible para este examen.", 409);
+
         // Para finales: el alumno debe estar Regularizado en la materia (cursada cerrada
         // sin perder la regularidad), no simplemente tener una inscripción activa.
         if (examen.TipoExamen is TipoExamen.Final)

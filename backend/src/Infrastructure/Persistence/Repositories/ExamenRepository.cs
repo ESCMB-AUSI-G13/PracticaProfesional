@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using PracticaProfesional.Application.Examenes.DTOs;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Domain.Entities;
+using PracticaProfesional.Domain.Enums;
 using PracticaProfesional.Domain.Exceptions;
 
 namespace PracticaProfesional.Infrastructure.Persistence.Repositories;
@@ -44,6 +45,16 @@ public class ExamenRepository(AppDbContext db) : IExamenRepository
         var examen = await db.Examenes.FindAsync([id], cancellationToken)
             ?? throw new BusinessException($"No se encontró el examen con Id {id}.");
 
+        var tieneNotasCargadas = await db.InscripcionesExamen
+            .AnyAsync(ie => ie.ExamenId == id &&
+                (ie.Estado == EstadoInscripcion.Aprobada || ie.Estado == EstadoInscripcion.Desaprobada),
+                cancellationToken);
+        if (tieneNotasCargadas)
+            throw new BusinessException(
+                "No se puede eliminar un examen con notas ya cargadas. Rectificá o dá de baja las inscripciones primero.", 409);
+
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+
         // 1. Desligar AuditoriaCambios que apuntan a las InscripcionesExamen de este examen
         var inscripcionIds = await db.InscripcionesExamen
             .Where(ie => ie.ExamenId == id)
@@ -70,6 +81,8 @@ public class ExamenRepository(AppDbContext db) : IExamenRepository
         // 4. Eliminar el examen
         db.Examenes.Remove(examen);
         await db.SaveChangesAsync(cancellationToken);
+
+        await transaction.CommitAsync(cancellationToken);
     }
 
     public Task<bool> ExistePorMateriaIdAsync(int materiaId, CancellationToken cancellationToken = default)
