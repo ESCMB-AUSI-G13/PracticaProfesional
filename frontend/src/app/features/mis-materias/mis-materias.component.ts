@@ -21,10 +21,11 @@ export class MisMateriasComponent implements OnInit {
   materias      = signal<Materia[]>([]);
   cursos        = signal<Curso[]>([]);
 
-  cargando    = signal(true);
-  mostrarForm = signal(false);
-  guardando   = signal(false);
-  error       = signal<string | null>(null);
+  cargando       = signal(true);
+  cargandoCursos = signal(false);
+  mostrarForm    = signal(false);
+  guardando      = signal(false);
+  error          = signal<string | null>(null);
 
   comprobante         = signal<ComprobanteInscripcionMateria | null>(null);
   cargandoComprobante = signal(false);
@@ -41,32 +42,52 @@ export class MisMateriasComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    let errorInscripciones: string | null = null;
+    let errorMaterias: string | null = null;
+
     forkJoin({
       inscripciones: this.service.listarMisInscripciones().pipe(
         catchError((e: { error?: { detail?: string }; message?: string }) => {
-          this.error.set(`Error al cargar inscripciones: ${e.error?.detail ?? e.message ?? 'desconocido'}`);
+          errorInscripciones = `inscripciones (${e.error?.detail ?? e.message ?? 'desconocido'})`;
           return of([] as InscripcionMateria[]);
         })
       ),
       materias: this.materiasService.listarMiCarrera().pipe(
         catchError((e: { error?: { detail?: string }; message?: string }) => {
-          this.error.set(`Error al cargar materias: ${e.error?.detail ?? e.message ?? 'desconocido'}`);
+          errorMaterias = `materias (${e.error?.detail ?? e.message ?? 'desconocido'})`;
           return of([] as Materia[]);
-        })
-      ),
-      cursos: this.cursosService.listar().pipe(
-        catchError((e: { error?: { detail?: string }; message?: string }) => {
-          this.error.set(`Error al cargar cursos: ${e.error?.detail ?? e.message ?? 'desconocido'}`);
-          return of([] as Curso[]);
         })
       )
     }).subscribe({
-      next: ({ inscripciones, materias, cursos }) => {
+      next: ({ inscripciones, materias }) => {
         this.inscripciones.set(inscripciones);
         this.materias.set(materias);
-        this.cursos.set(cursos.filter(c => c.estado === 'Activo'));
         this.cargando.set(false);
+
+        // Si ambas cargas fallan, un solo signal de error no debe perder la primera.
+        const errores = [errorInscripciones, errorMaterias].filter((e): e is string => e !== null);
+        if (errores.length > 0)
+          this.error.set(`Error al cargar ${errores.join(' y ')}.`);
       }
+    });
+  }
+
+  onMateriaChange(materiaId: number | null): void {
+    this.selectedMateriaId.set(materiaId);
+    this.selectedCursoId.set(null);
+    this.cursos.set([]);
+
+    if (!materiaId) return;
+
+    this.cargandoCursos.set(true);
+    this.cursosService.listarPorMateria(materiaId).pipe(
+      catchError((e: { error?: { detail?: string }; message?: string }) => {
+        this.error.set(`Error al cargar cursos: ${e.error?.detail ?? e.message ?? 'desconocido'}`);
+        return of([] as Curso[]);
+      })
+    ).subscribe(cursos => {
+      this.cursos.set(cursos);
+      this.cargandoCursos.set(false);
     });
   }
 
@@ -85,7 +106,10 @@ export class MisMateriasComponent implements OnInit {
           this.ejecutarInscripcion();
         }
       },
-      error: () => this.ejecutarInscripcion()
+      // No dejar pasar la inscripción si no se pudo verificar la encuesta obligatoria:
+      // el backend igual bloquearía con 428, pero acá el usuario vería un error genérico
+      // en vez de que se le muestre la encuesta que tenía que completar.
+      error: () => this.error.set('No se pudo verificar si tenés una encuesta pendiente. Reintentá en unos segundos.')
     });
   }
 
@@ -105,7 +129,10 @@ export class MisMateriasComponent implements OnInit {
           next: (c) => { this.comprobante.set(c); this.cargandoComprobante.set(false); },
           error: () => { this.cargandoComprobante.set(false); }
         });
-        this.service.listarMisInscripciones().subscribe(list => this.inscripciones.set(list));
+        this.service.listarMisInscripciones().subscribe({
+          next: list => this.inscripciones.set(list),
+          error: () => this.error.set('La inscripción se registró, pero no se pudo actualizar la lista. Recargá la página para verla.')
+        });
       },
       error: (e) => {
         this.error.set(e.error?.detail ?? e.error?.mensaje ?? 'Error al inscribirse.');
@@ -125,6 +152,7 @@ export class MisMateriasComponent implements OnInit {
   limpiarForm(): void {
     this.selectedMateriaId.set(null);
     this.selectedCursoId.set(null);
+    this.cursos.set([]);
     this.mostrarForm.set(false);
   }
 
@@ -134,6 +162,7 @@ export class MisMateriasComponent implements OnInit {
 
   estadoLabel(estado: string): string {
     const map: Record<string, string> = {
+      'pendiente':   '○ Pendiente',
       'activa':      '● Activa',
       'aprobada':    '✓ Aprobada',
       'desaprobada': '✗ Desaprobada',
