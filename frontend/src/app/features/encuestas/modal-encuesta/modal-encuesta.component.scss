@@ -84,9 +84,27 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.aviso-anonima { font-size: 0.75rem; color: #999; margin: 0; flex: 1; }
+.aviso-anonima { font-size: 0.75rem; color: #999; margin: 0; flex: 1; min-width: 200px; }
+
+.modal-footer-acciones {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-shrink: 0;
+}
+
+.btn-mas-tarde {
+  padding: 0.55rem 1.1rem;
+  background: none; color: #666;
+  border: 1px solid #ccc; border-radius: 6px;
+  font-size: 0.9rem; font-weight: 500;
+  cursor: pointer; white-space: nowrap;
+}
+.btn-mas-tarde:hover:not(:disabled) { background: #f4f6f9; }
+.btn-mas-tarde:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .btn-enviar {
   padding: 0.55rem 1.4rem;

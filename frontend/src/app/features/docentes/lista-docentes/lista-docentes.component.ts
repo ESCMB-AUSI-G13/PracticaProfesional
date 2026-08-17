@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { DocentesService, Docente } from '../docentes.service';
@@ -11,9 +11,25 @@ import { DocentesService, Docente } from '../docentes.service';
   styleUrl: './lista-docentes.component.scss'
 })
 export class ListaDocentesComponent implements OnInit {
-  docentes = signal<Docente[]>([]);
+  private todosLosDocentes = signal<Docente[]>([]);
   cargando = signal(true);
   error = signal<string | null>(null);
+  busqueda = signal('');
+
+  docentes = computed(() => {
+    const todos = this.todosLosDocentes();
+    const texto = this.busqueda().toLowerCase().trim();
+    if (!texto) return todos;
+
+    return todos.filter(d =>
+      d.nombre.toLowerCase().includes(texto)   ||
+      d.apellido.toLowerCase().includes(texto) ||
+      d.legajo.toLowerCase().includes(texto)   ||
+      d.email.toLowerCase().includes(texto)    ||
+      d.dni.toLowerCase().includes(texto)      ||
+      d.categoria.toLowerCase().includes(texto)
+    );
+  });
 
   constructor(
     private docentesService: DocentesService,
@@ -30,7 +46,7 @@ export class ListaDocentesComponent implements OnInit {
 
     this.docentesService.listar().subscribe({
       next: (data) => {
-        this.docentes.set(data);
+        this.todosLosDocentes.set(data);
         this.cargando.set(false);
       },
       error: () => {
@@ -39,6 +55,10 @@ export class ListaDocentesComponent implements OnInit {
       }
     });
   }
+
+  onBusqueda(texto: string): void { this.busqueda.set(texto); }
+
+  hayDocentesEnBD(): boolean { return this.todosLosDocentes().length > 0; }
 
   desactivar(usuarioId: number): void {
     if (!confirm('¿Desactivar este docente?')) return;

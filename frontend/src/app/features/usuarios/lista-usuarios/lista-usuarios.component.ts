@@ -19,27 +19,22 @@ export class ListaUsuariosComponent implements OnInit, OnDestroy {
   cargando        = signal(true);
   error           = signal<string | null>(null);
   sesionesActivas = signal<Set<number>>(new Set());
-  filtroRol       = signal('');
   busqueda        = signal('');
 
   usuarios = computed(() => {
     const todos  = this.todosLosUsuarios();
-    const rol    = this.filtroRol().toLowerCase();
     const texto  = this.busqueda().toLowerCase().trim();
 
     return todos.filter(u => {
-      const cumpleRol = !rol || u.rol.toLowerCase() === rol;
       const cumpleBusqueda = !texto ||
         u.nombre.toLowerCase().includes(texto)   ||
         u.apellido.toLowerCase().includes(texto) ||
         u.legajo.toLowerCase().includes(texto)   ||
         u.email.toLowerCase().includes(texto)    ||
         (u.dni ?? '').toLowerCase().includes(texto);
-      return cumpleRol && cumpleBusqueda;
+      return cumpleBusqueda;
     });
   });
-
-  readonly roles = ['Estudiante', 'Docente', 'Preceptor', 'Direccion'];
 
   private pollIntervalo: ReturnType<typeof setInterval> | null = null;
 
@@ -78,10 +73,6 @@ export class ListaUsuariosComponent implements OnInit, OnDestroy {
 
   estaActivo(id: number): boolean {
     return this.sesionesActivas().has(id);
-  }
-
-  onFiltroRol(event: Event): void {
-    this.filtroRol.set((event.target as HTMLSelectElement).value);
   }
 
   onBusqueda(texto: string): void {

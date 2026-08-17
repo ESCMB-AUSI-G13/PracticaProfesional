@@ -8,12 +8,26 @@
     </div>
   </header>
 
+  @if (!cargando() && !error() && hayDocentesEnBD()) {
+    <div class="filtros">
+      <div class="filtro-busqueda">
+        <input
+          #inputBusqueda
+          type="text"
+          placeholder="Buscar por nombre, legajo, email, DNI, categoría…"
+          (input)="onBusqueda(inputBusqueda.value)">
+      </div>
+    </div>
+  }
+
   @if (cargando()) {
     <p class="estado">Cargando...</p>
   } @else if (error()) {
     <p class="estado error">{{ error() }}</p>
-  } @else if (docentes().length === 0) {
+  } @else if (!hayDocentesEnBD()) {
     <p class="estado">No hay docentes registrados.</p>
+  } @else if (docentes().length === 0) {
+    <p class="estado">No se encontraron docentes con ese criterio.</p>
   } @else {
     <table class="tabla">
       <thead>

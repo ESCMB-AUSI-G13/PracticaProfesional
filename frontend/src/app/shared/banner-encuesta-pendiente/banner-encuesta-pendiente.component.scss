@@ -1,0 +1,49 @@
+.banner {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: #eaf4fb;
+  color: #1c3d5a;
+  border-bottom: 1px solid #bcdff5;
+  padding: 0.6rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 0.9rem;
+}
+
+.banner-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.banner-texto {
+  flex: 1;
+}
+
+.btn-responder {
+  flex-shrink: 0;
+  background: #3498db;
+  color: #fff;
+  border: none;
+  padding: 0.35rem 0.9rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+
+  &:hover { background: #2980b9; }
+}
+
+.btn-cerrar {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: #1c3d5a;
+  cursor: pointer;
+  font-size: 0.9rem;
+  padding: 0.2rem 0.4rem;
+  opacity: 0.6;
+
+  &:hover { opacity: 1; }
+}

@@ -57,7 +57,8 @@
       "Bash(Get-ChildItem -Path \"d:\\\\Documents\\\\3A\\\\PRACTICA PROFESIONAL\\\\PracticaProfesional\" -Directory)",
       "Bash(dotnet test *)",
       "Bash(rm \"d:/Documents/3A/PRACTICA PROFESIONAL/PracticaProfesional/frontend/src/app/services/todo.service.ts\")",
-      "Bash(dotnet clean *)"
+      "Bash(dotnet clean *)",
+      "Bash(git rm *)"
     ],
     "additionalDirectories": [
       "d:\\Documents\\3A\\PRACTICA PROFESIONAL\\PracticaProfesional\\frontend\\src\\app\\services"

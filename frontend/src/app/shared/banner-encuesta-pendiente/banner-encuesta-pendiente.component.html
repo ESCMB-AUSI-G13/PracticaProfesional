@@ -1,0 +1,10 @@
+@if (mostrar()) {
+  <div class="banner" role="alert">
+    <span class="banner-icon">📋</span>
+    <span class="banner-texto">
+      Tenés una <strong>encuesta pendiente</strong>. Vas a necesitar completarla antes de inscribirte a una materia o examen.
+    </span>
+    <button class="btn-responder" (click)="ir()">Responder ahora</button>
+    <button class="btn-cerrar" (click)="descartar()" aria-label="Cerrar aviso" title="Cerrar">✕</button>
+  </div>
+}

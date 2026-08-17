@@ -40,11 +40,13 @@ public class Curso
     public void Suspender() => Estado = EstadoCurso.Suspendido;
     public void Reactivar() => Estado = EstadoCurso.Activo;
 
-    public void Modificar(string comision, int cupo)
+    public void Modificar(string comision, int cupo, int preceptorId)
     {
         if (string.IsNullOrWhiteSpace(comision)) throw new ArgumentException("La comisión es obligatoria.");
         if (cupo <= 0) throw new ArgumentException("El cupo debe ser mayor a cero.");
+        if (preceptorId <= 0) throw new ArgumentException("El preceptor es obligatorio.");
         Comision = comision.ToUpperInvariant();
         Cupo = cupo;
+        PreceptorId = preceptorId;
     }
 }

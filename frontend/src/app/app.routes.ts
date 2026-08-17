@@ -318,6 +318,15 @@ export const routes: Routes = [
             .then(m => m.PanelCatedrasComponent)
       },
 
+      // Encuestas — Estudiante (responder pendientes)
+      {
+        path: 'mis-encuestas-pendientes',
+        canActivate: [roleGuard('Estudiante')],
+        loadComponent: () =>
+          import('./features/encuestas/mis-encuestas-estudiante/mis-encuestas-estudiante.component')
+            .then(m => m.MisEncuestasEstudianteComponent)
+      },
+
       // Encuestas — Docente (sus propias evaluaciones)
       {
         path: 'mis-encuestas',

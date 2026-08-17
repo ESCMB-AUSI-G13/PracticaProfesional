@@ -1,24 +1,19 @@
 <div class="page">
   <header class="page-header">
     <div class="header-left">
-      <h1>Gestión de Usuarios</h1>
+      <h1>Gestión de Usuarios de Dirección</h1>
     </div>
     <div class="header-actions">
       <button class="btn btn-primary" (click)="irACrear()">+ Nuevo usuario</button>
     </div>
   </header>
 
-  <div class="filtros">
-    <div class="filtro-item">
-      <label for="filtroRol">Filtrar por rol:</label>
-      <select id="filtroRol" (change)="onFiltroRol($event)">
-        <option value="">Todos</option>
-        @for (rol of roles; track rol) {
-          <option [value]="rol">{{ rol }}</option>
-        }
-      </select>
-    </div>
+  <p class="hint">
+    Esta pantalla gestiona solo cuentas de Dirección. Para Estudiantes, Docentes o Preceptores
+    usá sus pantallas dedicadas.
+  </p>
 
+  <div class="filtros">
     <div class="filtro-busqueda">
       <input
         #inputBusqueda

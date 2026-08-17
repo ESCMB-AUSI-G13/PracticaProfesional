@@ -30,7 +30,8 @@ public class CalificacionesController(
         int examenId,
         CancellationToken cancellationToken)
     {
-        var resultado = await listarInscripcionesUseCase.EjecutarAsync(examenId, cancellationToken);
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var resultado = await listarInscripcionesUseCase.EjecutarAsync(examenId, usuarioId, cancellationToken);
         return Ok(resultado);
     }
 
@@ -92,7 +93,8 @@ public class CalificacionesController(
         int inscripcionExamenId,
         CancellationToken cancellationToken)
     {
-        var resultado = await historialNotasUseCase.EjecutarAsync(inscripcionExamenId, cancellationToken);
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var resultado = await historialNotasUseCase.EjecutarAsync(inscripcionExamenId, usuarioId, cancellationToken);
         return Ok(resultado);
     }
 }

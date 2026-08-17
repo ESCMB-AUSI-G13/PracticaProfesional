@@ -11,6 +11,7 @@ namespace PracticaProfesional.Controllers;
 public class CursosController(
     CrearCursoUseCase crearCurso,
     ListarCursosUseCase listarCursos,
+    ListarCursosPorMateriaUseCase listarCursosPorMateria,
     ModificarCursoUseCase modificarCurso,
     CerrarCursoUseCase cerrarCurso,
     ReactivarCursoUseCase reactivarCurso) : ControllerBase
@@ -21,6 +22,15 @@ public class CursosController(
     public async Task<IActionResult> Listar(CancellationToken cancellationToken)
     {
         var resultado = await listarCursos.EjecutarAsync(cancellationToken);
+        return Ok(resultado);
+    }
+
+    [HttpGet("por-materia/{materiaId:int}")]
+    [Authorize(Roles = "Direccion,Estudiante")]
+    [ProducesResponseType(typeof(IEnumerable<CursoDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> ListarPorMateria(int materiaId, CancellationToken cancellationToken)
+    {
+        var resultado = await listarCursosPorMateria.EjecutarAsync(materiaId, cancellationToken);
         return Ok(resultado);
     }
 

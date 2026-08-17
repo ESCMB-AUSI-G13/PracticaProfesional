@@ -1,6 +1,7 @@
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Usuarios.DTOs;
 using PracticaProfesional.Domain.Enums;
+using PracticaProfesional.Domain.Exceptions;
 
 namespace PracticaProfesional.Application.Usuarios;
 
@@ -15,6 +16,11 @@ public class ModificarUsuarioUseCase(
 
         if (!Enum.TryParse<Rol>(dto.Rol, ignoreCase: true, out var rol))
             throw new ArgumentException($"Rol inválido: {dto.Rol}");
+
+        if (usuario.Rol != Rol.Direccion || rol != Rol.Direccion)
+            throw new BusinessException(
+                $"Los usuarios con rol {(usuario.Rol != Rol.Direccion ? usuario.Rol : rol)} tienen un perfil adicional " +
+                "(Carrera, Categoría, Turno, etc.) y deben editarse desde la pantalla de Estudiantes, Docentes o Preceptores correspondiente.");
 
         if (await usuarioRepository.ExistePorEmailExcluyendoIdAsync(dto.Email, id, cancellationToken))
             throw new InvalidOperationException("Ya existe otro usuario con ese email.");

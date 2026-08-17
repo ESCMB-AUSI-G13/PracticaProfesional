@@ -21,8 +21,6 @@ export class EditarUsuarioComponent implements OnInit {
   error         = signal<string | null>(null);
   usuarioId!: number;
 
-  readonly roles = ['Estudiante', 'Docente', 'Preceptor', 'Direccion'];
-
   constructor(
     private fb: FormBuilder,
     private usuariosService: UsuariosService,

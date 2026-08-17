@@ -45,10 +45,40 @@
     </div>
   }
 
+  @if (!cargando() && hayEncuestasEnBD()) {
+    <div class="filtros">
+      <div class="filtro-busqueda">
+        <input
+          #inputBusqueda
+          type="text"
+          placeholder="Buscar por título, descripción, materia o ciclo…"
+          (input)="onBusqueda(inputBusqueda.value)">
+      </div>
+      <div class="filtro-item">
+        <label>Tipo</label>
+        <select [ngModel]="filtroTipo()" (ngModelChange)="filtroTipo.set($event)">
+          <option value="todos">Todos</option>
+          <option value="SatisfaccionGeneral">Satisfacción General</option>
+          <option value="EvaluacionDocente">Evaluación Docente</option>
+        </select>
+      </div>
+      <div class="filtro-item">
+        <label>Estado</label>
+        <select [ngModel]="filtroEstado()" (ngModelChange)="filtroEstado.set($event)">
+          <option value="todas">Todas</option>
+          <option value="activa">Activas</option>
+          <option value="inactiva">Inactivas</option>
+        </select>
+      </div>
+    </div>
+  }
+
   @if (cargando()) {
     <p class="estado">Cargando...</p>
-  } @else if (encuestas().length === 0) {
+  } @else if (!hayEncuestasEnBD()) {
     <p class="estado">No hay encuestas creadas.</p>
+  } @else if (encuestas().length === 0) {
+    <p class="estado">No se encontraron encuestas con ese criterio.</p>
   } @else {
     @for (enc of encuestas(); track enc.id) {
       <div class="encuesta-card" [class.inactiva]="!enc.activa">

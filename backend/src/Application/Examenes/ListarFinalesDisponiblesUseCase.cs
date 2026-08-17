@@ -28,10 +28,9 @@ public class ListarFinalesDisponiblesUseCase(
         var materiaIds = inscripciones.Select(i => i.MateriaId).Distinct().ToHashSet();
 
         // Todos los finales futuros para esas materias
-        var todosExamenes = await examenRepository.ListarAsync(cancellationToken);
-        var finales = todosExamenes
+        var examenesDeMaterias = await examenRepository.ListarAsync(materiaIds, cancellationToken);
+        var finales = examenesDeMaterias
             .Where(e =>
-                materiaIds.Contains(e.MateriaId) &&
                 e.TipoExamen == nameof(TipoExamen.Final) &&
                 e.FechaExamen >= DateTime.UtcNow.Date)
             .ToList();

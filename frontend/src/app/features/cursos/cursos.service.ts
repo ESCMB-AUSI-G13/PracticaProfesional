@@ -24,8 +24,9 @@ export interface CrearCursoRequest {
 }
 
 export interface ModificarCursoRequest {
-  comision: string;
-  cupo:     number;
+  comision:    string;
+  cupo:        number;
+  preceptorId: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -36,6 +37,10 @@ export class CursosService {
 
   listar(): Observable<Curso[]> {
     return this.http.get<Curso[]>(this.apiUrl);
+  }
+
+  listarPorMateria(materiaId: number): Observable<Curso[]> {
+    return this.http.get<Curso[]>(`${this.apiUrl}/por-materia/${materiaId}`);
   }
 
   crear(dto: CrearCursoRequest): Observable<Curso> {

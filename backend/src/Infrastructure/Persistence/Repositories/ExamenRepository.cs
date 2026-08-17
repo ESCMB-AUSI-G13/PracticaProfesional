@@ -9,10 +9,14 @@ namespace PracticaProfesional.Infrastructure.Persistence.Repositories;
 
 public class ExamenRepository(AppDbContext db) : IExamenRepository
 {
-    public async Task<IEnumerable<ExamenDto>> ListarAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<ExamenDto>> ListarAsync(IEnumerable<int>? materiaIds = null, CancellationToken cancellationToken = default)
     {
-        var raw = await db.Examenes
-            .AsNoTracking()
+        var query = db.Examenes.AsNoTracking();
+        var filtered = materiaIds is null
+            ? query
+            : query.Where(e => materiaIds.Contains(e.MateriaId));
+
+        var raw = await filtered
             .OrderByDescending(e => e.FechaExamen)
             .Select(e => new {
                 e.Id, e.MateriaId, e.FechaExamen, e.Horario, e.Cupo, e.TipoExamen,

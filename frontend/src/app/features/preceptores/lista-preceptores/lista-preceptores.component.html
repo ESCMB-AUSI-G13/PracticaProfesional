@@ -8,12 +8,26 @@
     </div>
   </header>
 
+  @if (!cargando() && !error() && hayPreceptoresEnBD()) {
+    <div class="filtros">
+      <div class="filtro-busqueda">
+        <input
+          #inputBusqueda
+          type="text"
+          placeholder="Buscar por nombre, legajo, email, DNI, turno…"
+          (input)="onBusqueda(inputBusqueda.value)">
+      </div>
+    </div>
+  }
+
   @if (cargando()) {
     <p class="estado">Cargando...</p>
   } @else if (error()) {
     <p class="estado error">{{ error() }}</p>
-  } @else if (preceptores().length === 0) {
+  } @else if (!hayPreceptoresEnBD()) {
     <p class="estado">No hay preceptores registrados.</p>
+  } @else if (preceptores().length === 0) {
+    <p class="estado">No se encontraron preceptores con ese criterio.</p>
   } @else {
     <table class="tabla">
       <thead>

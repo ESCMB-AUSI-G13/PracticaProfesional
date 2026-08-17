@@ -52,12 +52,17 @@
 
     <div class="modal-footer">
       <p class="aviso-anonima">Tus respuestas son completamente anónimas y no pueden vincularse a tu identidad.</p>
-      <button
-        class="btn-enviar"
-        (click)="enviar()"
-        [disabled]="!puedeEnviar() || enviando()">
-        {{ enviando() ? 'Enviando...' : 'Enviar y continuar' }}
-      </button>
+      <div class="modal-footer-acciones">
+        <button class="btn-mas-tarde" (click)="cerrar.emit()" [disabled]="enviando()" type="button">
+          Responder más tarde
+        </button>
+        <button
+          class="btn-enviar"
+          (click)="enviar()"
+          [disabled]="!puedeEnviar() || enviando()">
+          {{ enviando() ? 'Enviando...' : 'Enviar y continuar' }}
+        </button>
+      </div>
     </div>
   </div>
 </div>

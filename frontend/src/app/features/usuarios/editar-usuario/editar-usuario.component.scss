@@ -42,6 +42,16 @@
   gap: 1rem;
 }
 
+.hint {
+  font-size: 0.85rem;
+  color: #555;
+  background: #eef6fc;
+  border: 1px solid #d3e8f7;
+  border-radius: 4px;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1.25rem;
+}
+
 .form-group {
   display: flex;
   flex-direction: column;

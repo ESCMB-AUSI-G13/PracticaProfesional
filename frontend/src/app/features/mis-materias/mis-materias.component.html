@@ -23,7 +23,7 @@
 
       <div class="form-row">
         <label>Materia</label>
-        <select [ngModel]="selectedMateriaId()" (ngModelChange)="selectedMateriaId.set($event ? +$event : null)">
+        <select [ngModel]="selectedMateriaId()" (ngModelChange)="onMateriaChange($event ? +$event : null)">
           <option [value]="null">— Seleccioná una materia —</option>
           @for (m of materias(); track m.id) {
             <option [value]="m.id">{{ m.codigo }} — {{ m.nombre }} ({{ m.carreraNombre }})</option>
@@ -33,8 +33,21 @@
 
       <div class="form-row">
         <label>Curso</label>
-        <select [ngModel]="selectedCursoId()" (ngModelChange)="selectedCursoId.set($event ? +$event : null)">
-          <option [value]="null">— Seleccioná un curso —</option>
+        <select
+          [ngModel]="selectedCursoId()"
+          (ngModelChange)="selectedCursoId.set($event ? +$event : null)"
+          [disabled]="!selectedMateriaId() || cargandoCursos()">
+          <option [value]="null">
+            @if (!selectedMateriaId()) {
+              — Elegí primero una materia —
+            } @else if (cargandoCursos()) {
+              Cargando cursos...
+            } @else if (cursos().length === 0) {
+              No hay cursos disponibles para esta materia
+            } @else {
+              — Seleccioná un curso —
+            }
+          </option>
           @for (c of cursos(); track c.id) {
             <option [value]="c.id">{{ c.anioLectivo }}° año — Comisión {{ c.comision }} ({{ c.anio }})</option>
           }

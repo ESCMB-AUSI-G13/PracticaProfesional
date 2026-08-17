@@ -11,10 +11,13 @@ namespace PracticaProfesional.Application.Calificaciones;
 /// </summary>
 public class ObtenerHistorialNotasUseCase(
     IInscripcionExamenRepository inscripcionExamenRepository,
-    IAuditoriaLogRepository auditoriaLogRepository)
+    IAuditoriaLogRepository auditoriaLogRepository,
+    IDocenteRepository docenteRepository,
+    IEspacioCurricularRepository espacioCurricularRepository)
 {
     public async Task<IEnumerable<CambioNotaDto>> EjecutarAsync(
         int inscripcionExamenId,
+        int usuarioId,
         CancellationToken cancellationToken = default)
     {
         // Verificar que la inscripción existe
@@ -22,6 +25,10 @@ public class ObtenerHistorialNotasUseCase(
             .ObtenerPorIdAsync(inscripcionExamenId, cancellationToken)
             ?? throw new BusinessException(
                 $"No se encontró la inscripción a examen con Id {inscripcionExamenId}.");
+
+        // Solo el docente a cargo de la materia puede ver el historial de su examen
+        if (!await EsDocenteDeLaMateriaAsync(usuarioId, inscripcion.Examen.MateriaId, cancellationToken))
+            throw new BusinessException("No tenés permiso para ver el historial de esta materia.", 403);
 
         var logs = await auditoriaLogRepository.ObtenerPorEntidadAsync(
             "InscripcionExamen",
@@ -38,5 +45,15 @@ public class ObtenerHistorialNotasUseCase(
                 ValorNuevo:    l.ValorNuevo,
                 EjecutorEmail: l.EjecutorEmail,
                 Timestamp:     l.Timestamp));
+    }
+
+    /// <summary>Mismo criterio que ListarEncuestasDocenteUseCase.EsMateriaDelDocenteAsync.</summary>
+    private async Task<bool> EsDocenteDeLaMateriaAsync(int usuarioId, int materiaId, CancellationToken cancellationToken)
+    {
+        var docente = await docenteRepository.ObtenerPorUsuarioIdAsync(usuarioId, cancellationToken);
+        if (docente is null) return false;
+
+        var espacios = await espacioCurricularRepository.ListarPorDocenteIdAsync(docente.Id, cancellationToken);
+        return espacios.Any(e => e.MateriaId == materiaId);
     }
 }

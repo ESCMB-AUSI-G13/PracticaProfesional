@@ -1,0 +1,37 @@
+@if (respondiendo() && encuestaPendiente(); as encuesta) {
+  <app-modal-encuesta
+    [encuesta]="encuesta"
+    (completada)="onEncuestaCompletada()"
+    (cerrar)="onCerrarModal()">
+  </app-modal-encuesta>
+}
+
+<div class="page">
+  <header class="page-header">
+    <h1>Mis Encuestas</h1>
+  </header>
+
+  @if (cargando()) {
+    <p class="estado">Cargando...</p>
+  } @else if (error()) {
+    <p class="estado error">{{ error() }}</p>
+  } @else {
+    @if (encuestaPendiente(); as encuesta) {
+      <div class="card-pendiente">
+        <div class="card-info">
+          <span class="badge-pendiente">Pendiente</span>
+          <h2>{{ encuesta.titulo }}</h2>
+          @if (encuesta.descripcion) {
+            <p class="descripcion">{{ encuesta.descripcion }}</p>
+          }
+          <p class="aviso">
+            Tenés que completarla antes de poder inscribirte a una materia o examen.
+          </p>
+        </div>
+        <button class="btn btn-primary" (click)="responderAhora()">Responder ahora</button>
+      </div>
+    } @else {
+      <p class="estado">No tenés encuestas pendientes por el momento.</p>
+    }
+  }
+</div>

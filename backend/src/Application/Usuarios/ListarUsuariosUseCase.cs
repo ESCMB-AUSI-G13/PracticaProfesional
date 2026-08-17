@@ -6,17 +6,9 @@ namespace PracticaProfesional.Application.Usuarios;
 
 public class ListarUsuariosUseCase(IUsuarioRepository usuarioRepository)
 {
-    public async Task<IEnumerable<UsuarioDto>> EjecutarAsync(string? rol = null, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<UsuarioDto>> EjecutarAsync(CancellationToken cancellationToken = default)
     {
-        Rol? rolFiltro = null;
-        if (!string.IsNullOrWhiteSpace(rol))
-        {
-            if (!Enum.TryParse<Rol>(rol, ignoreCase: true, out var rolParsed))
-                throw new ArgumentException($"Rol inválido: {rol}");
-            rolFiltro = rolParsed;
-        }
-
-        var usuarios = await usuarioRepository.ListarAsync(rolFiltro, cancellationToken);
+        var usuarios = await usuarioRepository.ListarAsync(Rol.Direccion, cancellationToken);
         return usuarios.Select(CrearUsuarioUseCase.ToDto);
     }
 }

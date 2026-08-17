@@ -23,8 +23,13 @@
         <input type="number" [ngModel]="cupo()" (ngModelChange)="cupo.set($event)" name="cupo" min="1" />
       </div>
       <div class="campo">
-        <label>Preceptor</label>
-        <input type="text" [value]="preceptorNombre()" disabled />
+        <label>Preceptor *</label>
+        <select [ngModel]="preceptorUsuarioId()" (ngModelChange)="preceptorUsuarioId.set($event ? +$event : null)" name="preceptorId">
+          <option [value]="null">-- Seleccionar preceptor --</option>
+          @for (p of preceptores(); track p.id) {
+            <option [value]="p.usuarioId">{{ p.apellido }}, {{ p.nombre }} ({{ p.turno }})</option>
+          }
+        </select>
       </div>
 
       <div class="acciones">

@@ -37,10 +37,7 @@ export class UsuariosService {
 
   constructor(private http: HttpClient) {}
 
-  listar(rol?: string): Observable<Usuario[]> {
-    if (rol) {
-      return this.http.get<Usuario[]>(this.apiUrl, { params: { rol } });
-    }
+  listar(): Observable<Usuario[]> {
     return this.http.get<Usuario[]>(this.apiUrl);
   }
 

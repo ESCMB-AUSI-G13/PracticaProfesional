@@ -18,9 +18,9 @@ public class UsuariosController(
 {
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<UsuarioDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> Listar([FromQuery] string? rol, CancellationToken cancellationToken)
+    public async Task<IActionResult> Listar(CancellationToken cancellationToken)
     {
-        var resultado = await listarUsuarios.EjecutarAsync(rol, cancellationToken);
+        var resultado = await listarUsuarios.EjecutarAsync(cancellationToken);
         return Ok(resultado);
     }
 
@@ -49,7 +49,7 @@ public class UsuariosController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Desactivar(int id, CancellationToken cancellationToken)
     {
-        await cambiarActivacion.EjecutarAsync(id, activar: false, rolEsperado: null, "Usuario", cancellationToken);
+        await cambiarActivacion.EjecutarAsync(id, activar: false, rolEsperado: Rol.Direccion, "Usuario", cancellationToken);
         return NoContent();
     }
 
@@ -58,7 +58,7 @@ public class UsuariosController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Reactivar(int id, CancellationToken cancellationToken)
     {
-        await cambiarActivacion.EjecutarAsync(id, activar: true, rolEsperado: null, "Usuario", cancellationToken);
+        await cambiarActivacion.EjecutarAsync(id, activar: true, rolEsperado: Rol.Direccion, "Usuario", cancellationToken);
         return NoContent();
     }
 

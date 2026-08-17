@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { PreceptoresService, Preceptor } from '../preceptores.service';
@@ -11,9 +11,25 @@ import { PreceptoresService, Preceptor } from '../preceptores.service';
   styleUrl: './lista-preceptores.component.scss'
 })
 export class ListaPreceptoresComponent implements OnInit {
-  preceptores = signal<Preceptor[]>([]);
+  private todosLosPreceptores = signal<Preceptor[]>([]);
   cargando = signal(true);
   error = signal<string | null>(null);
+  busqueda = signal('');
+
+  preceptores = computed(() => {
+    const todos = this.todosLosPreceptores();
+    const texto = this.busqueda().toLowerCase().trim();
+    if (!texto) return todos;
+
+    return todos.filter(p =>
+      p.nombre.toLowerCase().includes(texto)   ||
+      p.apellido.toLowerCase().includes(texto) ||
+      p.legajo.toLowerCase().includes(texto)   ||
+      p.email.toLowerCase().includes(texto)    ||
+      p.dni.toLowerCase().includes(texto)      ||
+      p.turno.toLowerCase().includes(texto)
+    );
+  });
 
   constructor(
     private preceptoresService: PreceptoresService,
@@ -30,7 +46,7 @@ export class ListaPreceptoresComponent implements OnInit {
 
     this.preceptoresService.listar().subscribe({
       next: (data) => {
-        this.preceptores.set(data);
+        this.todosLosPreceptores.set(data);
         this.cargando.set(false);
       },
       error: () => {
@@ -39,6 +55,10 @@ export class ListaPreceptoresComponent implements OnInit {
       }
     });
   }
+
+  onBusqueda(texto: string): void { this.busqueda.set(texto); }
+
+  hayPreceptoresEnBD(): boolean { return this.todosLosPreceptores().length > 0; }
 
   desactivar(usuarioId: number): void {
     if (!confirm('¿Desactivar este preceptor?')) return;

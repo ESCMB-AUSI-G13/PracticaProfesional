@@ -16,8 +16,6 @@ export class CrearUsuarioComponent {
   cargando = signal(false);
   error = signal<string | null>(null);
 
-  readonly roles = ['Estudiante', 'Docente', 'Preceptor', 'Direccion'];
-
   constructor(
     private fb: FormBuilder,
     private usuariosService: UsuariosService,
@@ -29,7 +27,7 @@ export class CrearUsuarioComponent {
       nombre: ['', [Validators.required, Validators.maxLength(100)]],
       apellido: ['', [Validators.required, Validators.maxLength(100)]],
       password: ['', [Validators.required, Validators.minLength(8)]],
-      rol: ['Estudiante', Validators.required]
+      rol: ['Direccion']
     });
   }
 

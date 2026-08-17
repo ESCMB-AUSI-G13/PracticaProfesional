@@ -19,11 +19,17 @@ public class ExamenesController(
     InscribirseEnExamenUseCase inscribirseEnExamen,
     ObtenerComprobanteInscripcionExamenUseCase comprobanteExamenUseCase) : ControllerBase
 {
+    /// <summary>GET api/examenes — Dirección ve todos los exámenes; Docente solo los de sus materias.</summary>
     [HttpGet]
     [Authorize(Roles = "Direccion,Docente")]
     [ProducesResponseType(typeof(IEnumerable<ExamenDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Listar(CancellationToken cancellationToken)
-        => Ok(await listarExamenes.EjecutarAsync(cancellationToken));
+    {
+        int? docenteUsuarioId = User.IsInRole("Direccion")
+            ? null
+            : int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        return Ok(await listarExamenes.EjecutarAsync(docenteUsuarioId, cancellationToken));
+    }
 
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "Direccion")]

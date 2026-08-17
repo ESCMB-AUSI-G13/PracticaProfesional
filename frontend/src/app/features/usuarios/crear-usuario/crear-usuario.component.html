@@ -2,8 +2,13 @@
   <div class="card">
     <div class="card-header">
       <button class="btn-back" (click)="volver()">← Volver</button>
-      <h1>Nuevo usuario</h1>
+      <h1>Nuevo usuario de Dirección</h1>
     </div>
+
+    <p class="hint">
+      Esta pantalla es solo para cuentas de Dirección. Para crear Estudiantes, Docentes o Preceptores
+      usá su pantalla dedicada, así se genera también su perfil correspondiente (Carrera, Categoría, Turno, etc.).
+    </p>
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="form-row">
@@ -48,14 +53,6 @@
           @if (form.get('password')?.invalid && form.get('password')?.touched) {
             <span class="error-msg">La contraseña debe tener al menos 8 caracteres.</span>
           }
-        </div>
-        <div class="form-group">
-          <label for="rol">Rol *</label>
-          <select id="rol" formControlName="rol">
-            @for (rol of roles; track rol) {
-              <option [value]="rol">{{ rol }}</option>
-            }
-          </select>
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { AuthService } from '../../features/auth/services/auth.service';
 import { BannerVistaRolComponent } from '../banner-vista-rol/banner-vista-rol.component';
+import { BannerEncuestaPendienteComponent } from '../banner-encuesta-pendiente/banner-encuesta-pendiente.component';
 import { NotificacionBellComponent } from '../notificacion-bell/notificacion-bell.component';
 import { NotificacionesService } from '../../features/notificaciones/notificaciones.service';
 
@@ -38,7 +39,7 @@ const NAV: NavItem[] = [
     icon: 'entidades',
     roles: ['Direccion'],
     children: [
-      { label: 'Usuarios',      ruta: '/usuarios',              icon: '', roles: ['Direccion'] },
+      { label: 'Dirección',     ruta: '/usuarios',              icon: '', roles: ['Direccion'] },
       { label: 'Docentes',      ruta: '/docentes',              icon: '', roles: ['Direccion'] },
       { label: 'Preceptores',   ruta: '/preceptores',           icon: '', roles: ['Direccion'] },
       { label: 'Estudiantes',   ruta: '/estudiantes',           icon: '', roles: ['Direccion'] },
@@ -90,6 +91,12 @@ const NAV: NavItem[] = [
     roles: ['Estudiante']
   },
   {
+    label: 'Mis Encuestas',
+    ruta: '/mis-encuestas-pendientes',
+    icon: 'reportes',
+    roles: ['Estudiante']
+  },
+  {
     label: 'Reportes',
     icon: 'reportes',
     roles: ['Direccion', 'Docente', 'Preceptor'],
@@ -137,7 +144,7 @@ const NAV: NavItem[] = [
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, BannerVistaRolComponent, NotificacionBellComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, BannerVistaRolComponent, BannerEncuestaPendienteComponent, NotificacionBellComponent],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss'
 })

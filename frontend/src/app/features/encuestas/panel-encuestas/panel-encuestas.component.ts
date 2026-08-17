@@ -1,9 +1,12 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
   EncuestasService, EncuestaDto, CrearEncuestaRequest, AgregarPreguntaRequest
 } from '../encuestas.service';
+
+type FiltroEstado = 'todas' | 'activa' | 'inactiva';
+type FiltroTipo = 'todos' | 'SatisfaccionGeneral' | 'EvaluacionDocente';
 
 @Component({
   selector: 'app-panel-encuestas',
@@ -13,10 +16,33 @@ import {
   styleUrl: './panel-encuestas.component.scss'
 })
 export class PanelEncuestasComponent implements OnInit {
-  encuestas    = signal<EncuestaDto[]>([]);
+  private todasLasEncuestas = signal<EncuestaDto[]>([]);
   cargando     = signal(true);
   error        = signal<string | null>(null);
   exito        = signal<string | null>(null);
+
+  // Filtros
+  busqueda      = signal('');
+  filtroTipo    = signal<FiltroTipo>('todos');
+  filtroEstado  = signal<FiltroEstado>('todas');
+
+  encuestas = computed(() => {
+    const todas  = this.todasLasEncuestas();
+    const texto  = this.busqueda().toLowerCase().trim();
+    const tipo   = this.filtroTipo();
+    const estado = this.filtroEstado();
+
+    return todas.filter(e => {
+      const cumpleBusqueda = !texto ||
+        e.titulo.toLowerCase().includes(texto) ||
+        (e.descripcion ?? '').toLowerCase().includes(texto) ||
+        (e.materiaNombre ?? '').toLowerCase().includes(texto) ||
+        String(e.cicloLectivo).includes(texto);
+      const cumpleTipo   = tipo === 'todos' || e.tipo === tipo;
+      const cumpleEstado = estado === 'todas' || (estado === 'activa' ? e.activa : !e.activa);
+      return cumpleBusqueda && cumpleTipo && cumpleEstado;
+    });
+  });
 
   // Panel crear encuesta
   mostrarFormEncuesta = signal(false);
@@ -40,7 +66,7 @@ export class PanelEncuestasComponent implements OnInit {
   cargar(): void {
     this.cargando.set(true);
     this.service.listar().subscribe({
-      next: data => { this.encuestas.set(data); this.cargando.set(false); },
+      next: data => { this.todasLasEncuestas.set(data); this.cargando.set(false); },
       error: () => { this.error.set('Error al cargar encuestas.'); this.cargando.set(false); }
     });
   }
@@ -54,7 +80,7 @@ export class PanelEncuestasComponent implements OnInit {
     this.guardandoEncuesta.set(true);
     this.service.crear(this.nuevaEncuesta).subscribe({
       next: (e) => {
-        this.encuestas.update(list => [...list, e]);
+        this.todasLasEncuestas.update(list => [...list, e]);
         this.mostrarFormEncuesta.set(false);
         this.resetFormEncuesta();
         this.guardandoEncuesta.set(false);
@@ -84,7 +110,7 @@ export class PanelEncuestasComponent implements OnInit {
     this.guardandoPregunta.set(true);
     this.service.agregarPregunta(this.nuevaPregunta).subscribe({
       next: (p) => {
-        this.encuestas.update(list =>
+        this.todasLasEncuestas.update(list =>
           list.map(e => e.id === this.nuevaPregunta.encuestaId
             ? { ...e, preguntas: [...e.preguntas, p] }
             : e)
@@ -108,7 +134,7 @@ export class PanelEncuestasComponent implements OnInit {
 
     accion.subscribe({
       next: () => {
-        this.encuestas.update(list =>
+        this.todasLasEncuestas.update(list =>
           list.map(e => e.id === encuesta.id ? { ...e, activa: !e.activa } : e)
         );
         this.exito.set(encuesta.activa ? 'Encuesta desactivada.' : 'Encuesta activada.');
@@ -119,9 +145,13 @@ export class PanelEncuestasComponent implements OnInit {
   }
 
   private proximoOrden(encuestaId: number): number {
-    const enc = this.encuestas().find(e => e.id === encuestaId);
+    const enc = this.todasLasEncuestas().find(e => e.id === encuestaId);
     return enc ? enc.preguntas.length + 1 : 1;
   }
+
+  onBusqueda(texto: string): void { this.busqueda.set(texto); }
+
+  hayEncuestasEnBD(): boolean { return this.todasLasEncuestas().length > 0; }
 
   private resetFormEncuesta(): void {
     this.nuevaEncuesta = {
