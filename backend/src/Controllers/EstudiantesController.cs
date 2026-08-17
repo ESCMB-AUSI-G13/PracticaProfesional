@@ -14,8 +14,7 @@ public class EstudiantesController(
     CrearEstudianteUseCase crearEstudiante,
     ListarEstudiantesUseCase listarEstudiantes,
     ModificarEstudianteUseCase modificarEstudiante,
-    CambiarActivacionUseCase cambiarActivacion,
-    EliminarEstudianteUseCase eliminarEstudiante) : ControllerBase
+    CambiarActivacionUseCase cambiarActivacion) : ControllerBase
 {
     [HttpGet]
     [Authorize(Roles = "Direccion")]
@@ -75,16 +74,6 @@ public class EstudiantesController(
     public async Task<IActionResult> Reactivar(int usuarioId, CancellationToken cancellationToken)
     {
         await cambiarActivacion.EjecutarAsync(usuarioId, activar: true, Rol.Estudiante, "Estudiante", cancellationToken);
-        return NoContent();
-    }
-
-    [HttpDelete("{usuarioId:int}/eliminar")]
-    [Authorize(Roles = "Direccion")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Eliminar(int usuarioId, CancellationToken cancellationToken)
-    {
-        await eliminarEstudiante.EjecutarAsync(usuarioId, cancellationToken);
         return NoContent();
     }
 }

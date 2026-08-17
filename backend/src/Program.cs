@@ -227,7 +227,6 @@ builder.Services.AddHostedService<AlertasBackgroundService>();
 builder.Services.AddScoped<CrearEstudianteUseCase>();
 builder.Services.AddScoped<ListarEstudiantesUseCase>();
 builder.Services.AddScoped<ModificarEstudianteUseCase>();
-builder.Services.AddScoped<EliminarEstudianteUseCase>();
 
 // ── Encuestas: salt de anonimización (CU-36/CU-40) ──────────────────────────────
 // Sin este valor el token de disociación de identidad usaría un default público del

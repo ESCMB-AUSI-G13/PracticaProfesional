@@ -12,6 +12,5 @@ public interface IEstudianteRepository
     Task<Estudiante?> ObtenerPorLegajoAsync(string legajo, CancellationToken cancellationToken = default);
     Task<IEnumerable<EstudianteDto>> ListarAsync(CancellationToken cancellationToken = default);
     Task AgregarAsync(Estudiante estudiante, CancellationToken cancellationToken = default);
-    Task EliminarAsync(int estudianteId, int usuarioId, CancellationToken cancellationToken = default);
     Task GuardarCambiosAsync(CancellationToken cancellationToken = default);
 }

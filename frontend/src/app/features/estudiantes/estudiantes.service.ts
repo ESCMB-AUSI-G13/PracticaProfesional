@@ -76,8 +76,4 @@ export class EstudiantesService {
   reactivar(usuarioId: number): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/${usuarioId}/reactivar`, {});
   }
-
-  eliminar(usuarioId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${usuarioId}/eliminar`);
-  }
 }
