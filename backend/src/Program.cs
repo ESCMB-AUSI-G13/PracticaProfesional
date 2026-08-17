@@ -163,6 +163,7 @@ builder.Services.AddScoped<EliminarEventoCalendarioUseCase>();
 builder.Services.AddScoped<ICursoRepository, CursoRepository>();
 builder.Services.AddScoped<CrearCursoUseCase>();
 builder.Services.AddScoped<ListarCursosUseCase>();
+builder.Services.AddScoped<ListarCursosPorMateriaUseCase>();
 builder.Services.AddScoped<ModificarCursoUseCase>();
 builder.Services.AddScoped<CerrarCursoUseCase>();
 builder.Services.AddScoped<ReactivarCursoUseCase>();
@@ -227,6 +228,15 @@ builder.Services.AddScoped<CrearEstudianteUseCase>();
 builder.Services.AddScoped<ListarEstudiantesUseCase>();
 builder.Services.AddScoped<ModificarEstudianteUseCase>();
 builder.Services.AddScoped<EliminarEstudianteUseCase>();
+
+// ── Encuestas: salt de anonimización (CU-36/CU-40) ──────────────────────────────
+// Sin este valor el token de disociación de identidad usaría un default público del
+// código fuente, haciendo trivial recalcularlo y reidentificar quién respondió qué.
+_ = builder.Configuration["Encuestas:Salt"]
+    ?? throw new InvalidOperationException(
+        "Falta configurar Encuestas:Salt (appsettings.Development.json en local, " +
+        "Encuestas__Salt en Azure App Service). Generar un valor aleatorio largo, " +
+        "no reutilizar ningún otro secreto.");
 
 // ── Autenticación JWT ──────────────────────────────────────────────────────────
 var jwtSettings = builder.Configuration.GetSection("Jwt");

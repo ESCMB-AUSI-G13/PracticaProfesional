@@ -21,7 +21,8 @@ public class ObtenerEncuestaPendienteUseCase(
     public async Task<EncuestaDto?> EjecutarAsync(int estudianteId, CancellationToken ct = default)
     {
         var activas = await repo.ListarActivasAsync(ct);
-        var salt    = config["Encuestas:Salt"] ?? "pp-salt-2026";
+        // Validado como obligatorio al arrancar la app (Program.cs) — no hay fallback inseguro.
+        var salt    = config["Encuestas:Salt"]!;
 
         foreach (var encuesta in activas)
         {
@@ -41,10 +42,16 @@ public class ObtenerEncuestaPendienteUseCase(
         return null;
     }
 
+    /// <summary>
+    /// HMAC-SHA256 con el salt como clave secreta: sin conocer el salt (no está en el
+    /// código ni tiene default), recalcular el token para reidentificar estudianteId es
+    /// computacionalmente inviable, aunque estudianteId/encuestaId sean enteros chicos.
+    /// </summary>
     internal static string ComputarToken(int estudianteId, int encuestaId, string salt)
     {
-        var raw   = $"{estudianteId}|{encuestaId}|{salt}";
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(raw));
+        var datos = Encoding.UTF8.GetBytes($"{estudianteId}|{encuestaId}");
+        var clave = Encoding.UTF8.GetBytes(salt);
+        var bytes = HMACSHA256.HashData(clave, datos);
         return Convert.ToHexString(bytes).ToLowerInvariant();
     }
 }

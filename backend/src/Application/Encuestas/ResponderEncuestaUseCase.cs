@@ -28,7 +28,8 @@ public class ResponderEncuestaUseCase(
         if (!encuesta.Activa)
             throw new BusinessException("La encuesta no está activa.");
 
-        var salt  = config["Encuestas:Salt"] ?? "pp-salt-2026";
+        // Validado como obligatorio al arrancar la app (Program.cs) — no hay fallback inseguro.
+        var salt  = config["Encuestas:Salt"]!;
         var token = ObtenerEncuestaPendienteUseCase.ComputarToken(estudiante.Id, encuesta.Id, salt);
 
         if (await repo.TokenYaExisteAsync(token, encuesta.Id, ct))
