@@ -15,6 +15,8 @@ namespace PracticaProfesional.Application.Calificaciones;
 public class RectificarNotaExamenUseCase(
     IInscripcionExamenRepository inscripcionExamenRepository,
     IHistorialAcademicoRepository historialRepository,
+    IDocenteRepository docenteRepository,
+    IEspacioCurricularRepository espacioCurricularRepository,
     ActualizarEstadoAcademicoUseCase evaluarEstadoAcademico,
     IAuditoriaService auditoria)
 {
@@ -30,6 +32,10 @@ public class RectificarNotaExamenUseCase(
             .ObtenerPorIdAsync(dto.InscripcionExamenId, cancellationToken)
             ?? throw new BusinessException(
                 $"No se encontró la inscripción a examen con Id {dto.InscripcionExamenId}.");
+
+        // 1b. Solo el docente a cargo de la materia puede rectificar la nota de su examen
+        if (!await EsDocenteDeLaMateriaAsync(dto.UsuarioId, inscripcion.Examen.MateriaId, cancellationToken))
+            throw new BusinessException("No tenés permiso para rectificar notas de esta materia.", 403);
 
         // 2. Solo se puede rectificar si ya tiene nota (Aprobada / Desaprobada)
         if (inscripcion.Estado != EstadoInscripcion.Aprobada &&
@@ -99,5 +105,15 @@ public class RectificarNotaExamenUseCase(
         await historialRepository.GuardarCambiosAsync(cancellationToken);
 
         await evaluarEstadoAcademico.EvaluarSoloEgresoAsync(estudianteId, materiaId, cancellationToken);
+    }
+
+    /// <summary>Mismo criterio que ListarEncuestasDocenteUseCase.EsMateriaDelDocenteAsync.</summary>
+    private async Task<bool> EsDocenteDeLaMateriaAsync(int usuarioId, int materiaId, CancellationToken cancellationToken)
+    {
+        var docente = await docenteRepository.ObtenerPorUsuarioIdAsync(usuarioId, cancellationToken);
+        if (docente is null) return false;
+
+        var espacios = await espacioCurricularRepository.ListarPorDocenteIdAsync(docente.Id, cancellationToken);
+        return espacios.Any(e => e.MateriaId == materiaId);
     }
 }

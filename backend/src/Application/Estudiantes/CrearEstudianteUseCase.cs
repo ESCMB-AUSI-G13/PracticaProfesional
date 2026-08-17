@@ -23,6 +23,9 @@ public class CrearEstudianteUseCase(
         var carrera = await carreraRepository.ObtenerPorIdAsync(dto.CarreraId, cancellationToken)
             ?? throw new BusinessException($"No se encontró la carrera con Id {dto.CarreraId}.");
 
+        if (string.IsNullOrWhiteSpace(dto.Password) || dto.Password.Length < 6)
+            throw new ArgumentException("La clave debe tener al menos 6 caracteres.");
+
         var legajo = await usuarioRepository.GenerarProximoLegajoAsync(cancellationToken);
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         var usuario = Usuario.Crear(dto.DNI, legajo, dto.Email, dto.Nombre, dto.Apellido, passwordHash, Rol.Estudiante);

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PracticaProfesional.Application.Calificaciones;
@@ -53,7 +54,8 @@ public class CalificacionesController(
         [FromBody] CargarNotaRequestDto body,
         CancellationToken cancellationToken)
     {
-        var dto = new CargarNotaExamenDto(inscripcionExamenId, body.Nota);
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var dto = new CargarNotaExamenDto(inscripcionExamenId, body.Nota, usuarioId);
         var resultado = await cargarNotaUseCase.EjecutarAsync(dto, cancellationToken);
         return Ok(resultado);
     }
@@ -72,7 +74,8 @@ public class CalificacionesController(
         [FromBody] RectificarNotaRequestDto body,
         CancellationToken cancellationToken)
     {
-        var dto = new RectificarNotaExamenDto(inscripcionExamenId, body.NuevaNota, body.Motivo);
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var dto = new RectificarNotaExamenDto(inscripcionExamenId, body.NuevaNota, body.Motivo, usuarioId);
         var resultado = await rectificarNotaUseCase.EjecutarAsync(dto, cancellationToken);
         return Ok(resultado);
     }

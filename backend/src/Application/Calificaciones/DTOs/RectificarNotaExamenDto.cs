@@ -7,4 +7,5 @@ namespace PracticaProfesional.Application.Calificaciones.DTOs;
 public record RectificarNotaExamenDto(
     int InscripcionExamenId,
     decimal NuevaNota,
-    string Motivo);
+    string Motivo,
+    int UsuarioId);

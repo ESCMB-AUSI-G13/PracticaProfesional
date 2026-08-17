@@ -4,12 +4,22 @@ using PracticaProfesional.Domain.Exceptions;
 
 namespace PracticaProfesional.Application.Inscripciones;
 
-public class ObtenerComprobanteInscripcionUseCase(IInscripcionMateriaRepository repository)
+public class ObtenerComprobanteInscripcionUseCase(
+    IInscripcionMateriaRepository repository,
+    IEstudianteRepository estudianteRepository)
 {
-    public async Task<ComprobanteInscripcionMateriaDto> EjecutarAsync(int id, CancellationToken cancellationToken = default)
+    public async Task<ComprobanteInscripcionMateriaDto> EjecutarAsync(
+        int id, int usuarioId, bool esDireccion, CancellationToken cancellationToken = default)
     {
         var inscripcion = await repository.ObtenerPorIdAsync(id, cancellationToken)
             ?? throw new BusinessException($"No se encontró la inscripción con Id {id}.");
+
+        if (!esDireccion)
+        {
+            var estudiante = await estudianteRepository.ObtenerPorUsuarioIdAsync(usuarioId, cancellationToken);
+            if (estudiante is null || estudiante.Id != inscripcion.EstudianteId)
+                throw new BusinessException("No tenés permiso para ver este comprobante.", 403);
+        }
 
         return new ComprobanteInscripcionMateriaDto(
             inscripcion.Id,

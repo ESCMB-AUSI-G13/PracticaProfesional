@@ -47,7 +47,8 @@ public class InscripcionesController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> ObtenerComprobante(int id, CancellationToken cancellationToken)
     {
-        var comprobante = await comprobanteUseCase.EjecutarAsync(id, cancellationToken);
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var comprobante = await comprobanteUseCase.EjecutarAsync(id, usuarioId, User.IsInRole("Direccion"), cancellationToken);
         return Ok(comprobante);
     }
 

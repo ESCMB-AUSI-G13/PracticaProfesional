@@ -421,6 +421,7 @@ app.Use(async (context, next) =>
     {
         var (statusCode, title) = ex switch
         {
+            BusinessException bex when bex.StatusCode == 428 => (428, "Encuesta pendiente"),
             BusinessException bex         => (bex.StatusCode, "Error de negocio"),
             UnauthorizedAccessException   => (StatusCodes.Status401Unauthorized, "No autorizado"),
             ArgumentException             => (StatusCodes.Status400BadRequest, "Solicitud inválida"),
@@ -429,12 +430,19 @@ app.Use(async (context, next) =>
             _                             => (StatusCodes.Status500InternalServerError, "Error interno del servidor")
         };
 
+        // Para errores no controlados (500) no se expone ex.Message: puede contener
+        // detalles internos (cadenas de conexión, nombres de tabla, etc.). Para el resto,
+        // el mensaje ya está pensado para mostrarse al usuario.
+        var detail = statusCode == StatusCodes.Status500InternalServerError
+            ? "Ocurrió un error interno. Intentá nuevamente más tarde."
+            : ex.Message;
+
         context.Response.StatusCode = statusCode;
         await context.Response.WriteAsJsonAsync(new ProblemDetails
         {
             Status = statusCode,
             Title  = title,
-            Detail = ex.Message
+            Detail = detail
         });
     }
 });

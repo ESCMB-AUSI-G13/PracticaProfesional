@@ -2,6 +2,7 @@ using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Usuarios.DTOs;
 using PracticaProfesional.Domain.Entities;
 using PracticaProfesional.Domain.Enums;
+using PracticaProfesional.Domain.Exceptions;
 
 namespace PracticaProfesional.Application.Usuarios;
 
@@ -14,11 +15,19 @@ public class CrearUsuarioUseCase(
         if (!Enum.TryParse<Rol>(dto.Rol, ignoreCase: true, out var rol))
             throw new ArgumentException($"Rol inválido: {dto.Rol}");
 
+        if (rol != Rol.Direccion)
+            throw new BusinessException(
+                $"El rol {rol} requiere un perfil adicional (Carrera, Categoría, Turno, etc.). " +
+                "Creá este usuario desde la pantalla de Estudiantes, Docentes o Preceptores correspondiente.");
+
         if (await usuarioRepository.ExistePorDniAsync(dto.DNI, cancellationToken))
             throw new InvalidOperationException("Ya existe un usuario con ese DNI.");
 
         if (await usuarioRepository.ExistePorEmailAsync(dto.Email, cancellationToken))
             throw new InvalidOperationException("Ya existe un usuario con ese email.");
+
+        if (string.IsNullOrWhiteSpace(dto.Password) || dto.Password.Length < 6)
+            throw new ArgumentException("La clave debe tener al menos 6 caracteres.");
 
         var legajo = await usuarioRepository.GenerarProximoLegajoAsync(cancellationToken);
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
