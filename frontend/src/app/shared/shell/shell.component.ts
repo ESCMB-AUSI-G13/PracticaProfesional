@@ -5,6 +5,7 @@ import { AuthService } from '../../features/auth/services/auth.service';
 import { BannerVistaRolComponent } from '../banner-vista-rol/banner-vista-rol.component';
 import { BannerEncuestaPendienteComponent } from '../banner-encuesta-pendiente/banner-encuesta-pendiente.component';
 import { NotificacionBellComponent } from '../notificacion-bell/notificacion-bell.component';
+import { AsistenteIaFabComponent } from '../asistente-ia-fab/asistente-ia-fab.component';
 import { NotificacionesService } from '../../features/notificaciones/notificaciones.service';
 
 interface NavItem {
@@ -144,7 +145,7 @@ const NAV: NavItem[] = [
 @Component({
   selector: 'app-shell',
   standalone: true,
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, BannerVistaRolComponent, BannerEncuestaPendienteComponent, NotificacionBellComponent],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, BannerVistaRolComponent, BannerEncuestaPendienteComponent, NotificacionBellComponent, AsistenteIaFabComponent],
   templateUrl: './shell.component.html',
   styleUrl: './shell.component.scss'
 })

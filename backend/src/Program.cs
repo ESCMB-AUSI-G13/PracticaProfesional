@@ -24,6 +24,8 @@ using PracticaProfesional.Application.Alertas;
 using PracticaProfesional.Application.Notificaciones;
 using PracticaProfesional.Application.Encuestas;
 using PracticaProfesional.Application.Padron;
+using PracticaProfesional.Application.AsistenteIA;
+using PracticaProfesional.Infrastructure.AsistenteIA;
 using PracticaProfesional.Infrastructure.BackgroundServices;
 using PracticaProfesional.Infrastructure.Persistence.Repositories;
 using PracticaProfesional.Application.Interfaces;
@@ -40,6 +42,8 @@ using PracticaProfesional.Infrastructure.Persistence;
 using PracticaProfesional.Domain.Exceptions;
 using PracticaProfesional.Infrastructure.Pdf;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 using QuestPDF.Infrastructure;
 
 QuestPDF.Settings.License = LicenseType.Community;
@@ -223,6 +227,10 @@ builder.Services.AddScoped<NotificarVencimientosUseCase>();
 builder.Services.AddScoped<ListarAlertasUseCase>();
 builder.Services.AddHostedService<AlertasBackgroundService>();
 
+// Asistente IA (Dirección) — tool-calling sobre Reportes existentes (Gemini, tier gratuito)
+builder.Services.AddScoped<IAsistenteIAService, AsistenteIAService>();
+builder.Services.AddScoped<PreguntarAsistenteUseCase>();
+
 // Estudiantes
 builder.Services.AddScoped<CrearEstudianteUseCase>();
 builder.Services.AddScoped<ListarEstudiantesUseCase>();
@@ -258,6 +266,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     });
 
 builder.Services.AddAuthorization();
+
+// ── Rate limiting (Asistente IA — control de costo del proveedor externo) ──────
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("asistente-ia", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonimo",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0
+            }));
+});
 
 // ── CORS ───────────────────────────────────────────────────────────────────────
 builder.Services.AddCors(options =>
@@ -448,6 +471,7 @@ app.Use(async (context, next) =>
 
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseRateLimiter();
 app.MapControllers();
 
 app.Run();

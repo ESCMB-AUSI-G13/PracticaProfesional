@@ -1,0 +1,57 @@
+@if (mostrarFab) {
+  <div class="asistente-ia-container">
+
+    @if (abierto()) {
+      <div class="asistente-panel">
+        <div class="asistente-header">
+          <span class="asistente-titulo">🤖 Asistente de Dirección</span>
+          <button class="btn-cerrar" (click)="togglePanel()" aria-label="Cerrar asistente">✕</button>
+        </div>
+
+        <div class="asistente-mensajes" #listaMensajes>
+          @if (mensajes().length === 0) {
+            <p class="asistente-intro">
+              Preguntame sobre deserción, retención, egresados, riesgo académico, rendimiento,
+              inasistencias o encuestas de satisfacción — o elegí una consulta rápida:
+            </p>
+          }
+          @for (m of mensajes(); track $index) {
+            <div class="mensaje" [class.mensaje-usuario]="m.rol === 'usuario'"
+                                  [class.mensaje-asistente]="m.rol === 'asistente'"
+                                  [class.mensaje-error]="m.rol === 'error'">
+              {{ m.texto }}
+            </div>
+          }
+          @if (enviando()) {
+            <div class="mensaje mensaje-asistente mensaje-escribiendo">Consultando…</div>
+          }
+        </div>
+
+        <div class="asistente-chips">
+          @for (p of preguntasSugeridas; track p.label) {
+            <button class="chip" [disabled]="enviando()" (click)="enviarPregunta(p.pregunta)">
+              {{ p.label }}
+            </button>
+          }
+        </div>
+
+        <div class="asistente-input">
+          <input
+            type="text"
+            placeholder="Escribí tu pregunta..."
+            [(ngModel)]="textoInput"
+            [disabled]="enviando()"
+            (keyup.enter)="enviarDesdeInput()" />
+          <button class="btn-enviar" [disabled]="enviando() || !textoInput.trim()" (click)="enviarDesdeInput()">
+            Enviar
+          </button>
+        </div>
+      </div>
+    }
+
+    <button class="fab-btn" (click)="togglePanel()" [attr.aria-label]="'Abrir asistente de IA'">
+      @if (abierto()) { ✕ } @else { 🤖 }
+    </button>
+
+  </div>
+}
