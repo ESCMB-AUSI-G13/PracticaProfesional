@@ -73,6 +73,10 @@ backend/
 ### 6. Reportes e Indicadores (CU-38, CU-45)
 - Dashboards para Dirección: Tasas de aprobación, deserción y rendimiento por cohorte.
 - Exportación de certificados con **Hash SHA-256 / QR** de integridad.
+
+### 7. Asistente de IA para Dirección
+- Botón flotante (solo visible para rol **Direccion**) con chat en lenguaje natural sobre datos institucionales (deserción, retención, egresados, riesgo académico, rendimiento, inasistencias, encuestas).
+- **Proveedor:** Gemini (tier gratuito de Google AI Studio), vía tool-calling — nunca genera SQL ni accede a datos directamente. Ver detalle técnico en "Convenciones Técnicas → Asistente de IA".
 ---
 
 ## Reglas Estrictas (GLOBAL)
@@ -117,6 +121,13 @@ crear(dto: CrearCarreraRequest): Observable<Carrera> {
 }
 ```
 
+#### Asistente de IA (`Application/AsistenteIA/`, `Infrastructure/AsistenteIA/`)
+El asistente **no tiene acceso a SQL ni a repositorios**. Cada "herramienta" que el modelo puede invocar es un UseCase de `Application/Reportes/` ya existente, expuesto vía `AIFunctionFactory.Create(...)` (Microsoft.Extensions.AI) en `PreguntarAsistenteUseCase.ConstruirHerramientas()`. El JSON Schema de cada herramienta se deriva automáticamente de la firma del método en C# — no se escribe a mano.
+
+**Regla anti-PII (obligatoria):** ninguna herramienta puede reenviarle al modelo un listado nominal de estudiantes (nombre, legajo, DNI). Los UseCases que devuelven filas por alumno (`RiesgoAcademicoUseCase`, `ReporteInasistenciasUseCase`) se proyectan a solo los totales agregados antes de serializar (ver `ProyectarRiesgo`/`ProyectarInasistencias` en `PreguntarAsistenteUseCase`). Al agregar una herramienta nueva, si el UseCase subyacente expone datos por alumno, hay que proyectar del mismo modo — no pasar el DTO completo.
+
+**Proveedor:** Gemini, no Anthropic — decisión deliberada por costo (tier gratuito, ver conversación de implementación). Config en `GeminiIA:ApiKey`/`GeminiIA:Model`. Si se evalúa cambiar de proveedor en el futuro, confirmar con el usuario antes de introducir un costo recurrente.
+
 ---
 
 ## Modelo de Dominio (Resumen)
@@ -159,6 +170,8 @@ Las secrets del backend NO van en archivos JSON — se configuran en el portal d
 | `Jwt__Key` | `Jwt:Key` |
 | `AzureCommunication__ConnectionString` | `AzureCommunication:ConnectionString` |
 | `AzureCommunication__Remitente` | `AzureCommunication:Remitente` |
+| `GeminiIA__ApiKey` | `GeminiIA:ApiKey` (key gratuita de Google AI Studio, sin tarjeta) |
+| `GeminiIA__Model` | `GeminiIA:Model` (opcional, default `gemini-3.6-flash`) |
 
 El archivo `appsettings.Development.json` solo se usa en local — en producción el entorno es `Production` y las variables de Azure sobreescriben `appsettings.json`.
 

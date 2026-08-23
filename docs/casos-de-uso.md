@@ -104,3 +104,18 @@
 
 ---
 
+## Módulo 8 — Asistente de IA para Dirección
+
+| Caso de uso | Estado | Roles habilitados |
+|---|---|---|
+| Consultar datos institucionales en lenguaje natural (chat flotante) | Implementado | Administrador (Dirección) |
+| Preguntas rápidas preseteadas (chips de acceso directo) | Implementado | Administrador (Dirección) |
+
+**Reglas de negocio:**
+- El modelo de IA **nunca ejecuta SQL ni accede a datos directamente**: solo puede invocar (tool-calling) los mismos UseCases de Reportes que ya usan los paneles del Módulo 4, con las mismas reglas de negocio y de acceso.
+- **Anti-PII:** las herramientas que en su UseCase original devuelven filas por alumno (riesgo académico, inasistencias) se proyectan a solo totales agregados antes de mandarse al proveedor externo — nunca se envían nombres, legajos ni DNI fuera del sistema.
+- No hay búsqueda de un alumno puntual por legajo vía el chat (superficie de consulta de datos individuales fuera de alcance); para eso sigue usándose el Control de Legajo (RR-09).
+- Proveedor: Gemini (tier gratuito de Google AI Studio) — decisión de costo, ver `docs/arquitectura.md`.
+
+---
+

@@ -46,4 +46,6 @@ El **backend (App Service)** se puede apagar cuando no se usa:
 
 ## Variables de entorno del backend
 
-Las credenciales de producción están configuradas en las **Application Settings** del App Service en el portal de Azure, no en el código fuente.
+Las credenciales de producción están configuradas en las **Application Settings** del App Service en el portal de Azure, no en el código fuente. El separador de jerarquía es `__` (doble guión bajo), ej. `GeminiIA__ApiKey` mapea a `GeminiIA:ApiKey`.
+
+**Asistente de IA:** requiere `GeminiIA__ApiKey` — una API key **gratuita** de [Google AI Studio](https://aistudio.google.com) (no pide tarjeta). Sin esta variable configurada, el botón flotante del asistente sigue visible para Dirección pero devuelve un error de "no disponible" en vez de romper el resto de la app.

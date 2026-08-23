@@ -95,6 +95,35 @@ Siguen el mismo patrón que Usuarios. Ver Swagger para detalle completo.
 
 ---
 
+### Asistente de IA
+| Método | Endpoint | Roles | Descripción |
+|---|---|---|---|
+| POST | `/api/asistente-ia/preguntar` | Dirección | Responde una pregunta en lenguaje natural sobre datos institucionales, usando tool-calling sobre los UseCases de Reportes existentes |
+
+**Request:**
+```json
+{ "pregunta": "¿Cuál es la tasa de deserción general?" }
+```
+
+**Respuesta (200):**
+```json
+{
+  "respuesta": "La tasa de deserción general de la institución es del 31,6%...",
+  "herramientaUsada": "tablero_ejecutivo",
+  "generadoEn": "2026-08-23T01:01:25.5687978Z"
+}
+```
+
+**Errores:**
+| Status | Causa |
+|---|---|
+| 400 | Pregunta vacía o mayor a 500 caracteres |
+| 401/403 | Sin token o rol distinto de Dirección |
+| 429 | Rate limit (10 preguntas/minuto por usuario) |
+| 503 | `GeminiIA:ApiKey` no configurada, o el proveedor de IA no responde |
+
+---
+
 ### Notificaciones
 | Método | Endpoint | Descripción |
 |---|---|---|

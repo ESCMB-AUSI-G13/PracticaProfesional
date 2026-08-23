@@ -15,6 +15,7 @@
    - [2.4 Alertas académicas](#24-alertas-académicas)
    - [2.5 Encuestas académicas](#25-encuestas-académicas)
    - [2.6 Auditoría](#26-auditoría)
+   - [2.7 Asistente de IA](#27-asistente-de-ia)
 3. [Docente](#3-docente)
    - [3.1 Mis materias](#31-mis-materias)
    - [3.2 Registro de asistencias](#32-registro-de-asistencias)
@@ -311,6 +312,20 @@ Ir a **Auditoría** → **Log de cambios**.
 Registra todos los intentos de login (exitosos y fallidos).
 
 Ir a **Auditoría** → **Log de seguridad**.
+
+---
+
+### 2.7 Asistente de IA
+
+Botón flotante (🤖) visible en la esquina inferior derecha de cualquier pantalla, exclusivo del rol Dirección.
+
+1. Hacé clic en el botón para abrir el panel de chat.
+2. Elegí una de las **preguntas rápidas** (chips) para enviarla con un solo clic, o escribí tu propia pregunta en el campo de texto.
+3. El asistente responde en 2-4 oraciones en base a los datos reales del sistema (los mismos que usan los reportes) — nunca inventa cifras.
+
+**Preguntas que podés hacerle:** deserción general, estudiantes en riesgo académico alto, carrera con más egresados, retención por cohorte, nivel de inasistencias, evolución de notas, comisiones con menor aprobación, resultados de la última encuesta de satisfacción, entre otras variantes en lenguaje libre sobre estos mismos temas.
+
+> El asistente no puede buscar el historial de un alumno puntual por legajo — para eso usá **Control de legajo individual** (2.3).
 
 ---
 

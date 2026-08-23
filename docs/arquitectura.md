@@ -54,6 +54,16 @@ El dominio del instituto tiene reglas de negocio ricas que no son simples CRUDs:
 
 DDD permite que el código hable el mismo lenguaje que el instituto (legajo, correlatividad, regularidad, espacio curricular) en lugar de traducir constantemente entre términos técnicos y del negocio.
 
+### Asistente de IA — tool-calling sobre UseCases existentes, no acceso directo a datos
+
+El asistente de IA para Dirección (`Application/AsistenteIA/`, `Infrastructure/AsistenteIA/`) no tiene ningún acceso propio a SQL ni a repositorios. Cada "herramienta" que el modelo puede invocar es, literalmente, uno de los UseCases de `Application/Reportes/` que ya usan los paneles del tablero — expuestos vía `AIFunctionFactory.Create(...)` de `Microsoft.Extensions.AI`, que deriva el JSON Schema directamente de la firma del método en C#.
+
+Se descartó deliberadamente la alternativa de dejar que el modelo genere SQL libre contra tablas o vistas: eso agregaría una superficie nueva de acceso a datos sin las validaciones de negocio ni el RBAC que ya tienen los UseCases, y sería mucho más difícil de auditar.
+
+**Regla anti-PII:** los UseCases que devuelven filas por alumno (riesgo académico, inasistencias) se proyectan a solo totales agregados antes de serializarse hacia el proveedor externo — nunca se le envía a Gemini un listado con nombres, legajos o DNI.
+
+**Proveedor — Gemini, no el resto del ecosistema Claude/OpenAI:** decisión de costo. Anthropic y OpenAI no ofrecen tier gratuito por API (solo pago por uso con tarjeta cargada); Google AI Studio sí, sin tarjeta, y los límites gratuitos superan ampliamente el volumen esperado (consultas puntuales de Dirección). El cliente HTTP vive detrás de `IAsistenteIAService`, así que cambiar de proveedor en el futuro es acotado a `Infrastructure/AsistenteIA/`, pero no debería hacerse sin volver a evaluar el costo.
+
 ### Auditoría inmutable
 Todo cambio en Notas o Inscripciones genera un registro en `AuditoriaCambio` que no puede ser modificado ni eliminado. Esto garantiza trazabilidad completa para la dirección del instituto.
 
