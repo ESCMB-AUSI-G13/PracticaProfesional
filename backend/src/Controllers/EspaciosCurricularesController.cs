@@ -46,7 +46,7 @@ public class EspaciosCurricularesController(
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "Direccion")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)] // "no encontrada" es BusinessException (400), no 404 — ver CHECKLIST.md Tier 7 #35
     public async Task<IActionResult> Eliminar(int id, CancellationToken cancellationToken)
     {
         await eliminarUseCase.EjecutarAsync(id, cancellationToken);

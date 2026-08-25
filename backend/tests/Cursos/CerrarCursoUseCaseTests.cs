@@ -82,7 +82,8 @@ public class CerrarCursoUseCaseTests
             new InscripcionMateriaRepository(db),
             new AsistenciaRepository(db),
             new HistorialAcademicoRepository(db),
-            new NoOpAuditoriaService());
+            new NoOpAuditoriaService(),
+            new NoOpUnitOfWork());
 
         return (curso, materia, estudianteRegular, estudianteLibre, useCase, db);
     }

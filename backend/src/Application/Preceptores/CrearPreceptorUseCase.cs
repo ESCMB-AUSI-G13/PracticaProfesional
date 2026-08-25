@@ -18,8 +18,7 @@ public class CrearPreceptorUseCase(
         if (await usuarioRepository.ExistePorEmailAsync(dto.Email, cancellationToken))
             throw new InvalidOperationException("Ya existe un usuario con ese email.");
 
-        if (string.IsNullOrWhiteSpace(dto.Password) || dto.Password.Length < 6)
-            throw new ArgumentException("La clave debe tener al menos 6 caracteres.");
+        Usuario.ValidarFortalezaPassword(dto.Password);
 
         var legajo = await usuarioRepository.GenerarProximoLegajoAsync(cancellationToken);
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);

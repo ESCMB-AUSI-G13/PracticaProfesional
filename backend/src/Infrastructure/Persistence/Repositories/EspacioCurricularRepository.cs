@@ -53,6 +53,9 @@ public class EspacioCurricularRepository(AppDbContext db) : IEspacioCurricularRe
         => await db.EspaciosCurriculares
             .AnyAsync(ec => ec.MateriaId == materiaId && ec.DocenteId == docenteId && ec.CursoId == cursoId, cancellationToken);
 
+    public async Task<bool> ExistePorMateriaIdAsync(int materiaId, CancellationToken cancellationToken = default)
+        => await db.EspaciosCurriculares.AnyAsync(ec => ec.MateriaId == materiaId, cancellationToken);
+
     public async Task AgregarAsync(EspacioCurricular ec, CancellationToken cancellationToken = default)
     {
         await db.EspaciosCurriculares.AddAsync(ec, cancellationToken);

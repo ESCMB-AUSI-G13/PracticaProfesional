@@ -10,7 +10,8 @@ public class RegistroUseCase(
     IUsuarioRepository usuarioRepository,
     IEstudianteRepository estudianteRepository,
     ICarreraRepository carreraRepository,
-    IPadronRepository padronRepository)
+    IPadronRepository padronRepository,
+    IUnitOfWork unitOfWork)
 {
     public async Task EjecutarAsync(RegistroRequestDto dto, CancellationToken cancellationToken = default)
     {
@@ -26,18 +27,23 @@ public class RegistroUseCase(
         _ = await carreraRepository.ObtenerPorIdAsync(dto.CarreraId, cancellationToken)
             ?? throw new BusinessException($"No se encontró la carrera con Id {dto.CarreraId}.");
 
-        if (string.IsNullOrWhiteSpace(dto.Password) || dto.Password.Length < 6)
-            throw new ArgumentException("La clave debe tener al menos 6 caracteres.");
+        Usuario.ValidarFortalezaPassword(dto.Password);
 
         var legajo = await usuarioRepository.GenerarProximoLegajoAsync(cancellationToken);
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         var usuario = Usuario.Crear(dto.DNI, legajo, dto.Email, dto.Nombre, dto.Apellido, passwordHash, Rol.Estudiante);
 
-        await usuarioRepository.AgregarAsync(usuario, cancellationToken);
+        // Usuario + Estudiante + consumo del Padrón deben confirmarse juntos: sin transacción,
+        // un fallo a mitad de camino dejaba un Usuario huérfano o el DNI liberado para un
+        // segundo registro antes de que el primero tuviera perfil (ver CHECKLIST.md, Tier 2 #4).
+        await unitOfWork.EjecutarEnTransaccionAsync(async () =>
+        {
+            await usuarioRepository.AgregarAsync(usuario, cancellationToken);
 
-        var estudiante = Estudiante.Crear(usuario.Id, dto.Anio, dto.CarreraId, dto.FechaDeIngreso);
-        await estudianteRepository.AgregarAsync(estudiante, cancellationToken);
+            var estudiante = Estudiante.Crear(usuario.Id, dto.Anio, dto.CarreraId, dto.FechaDeIngreso);
+            await estudianteRepository.AgregarAsync(estudiante, cancellationToken);
 
-        await padronRepository.EliminarAsync(dto.DNI.Trim(), cancellationToken);
+            await padronRepository.EliminarAsync(dto.DNI.Trim(), cancellationToken);
+        }, cancellationToken: cancellationToken);
     }
 }

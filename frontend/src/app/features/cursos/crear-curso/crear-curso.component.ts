@@ -48,7 +48,7 @@ export class CrearCursoComponent implements OnInit {
       anioLectivo: this.anioLectivo(),
       comision: this.comision(),
       cupo: this.cupo(),
-      preceptorId: this.preceptorId()!
+      preceptorUsuarioId: this.preceptorId()!
     }).subscribe({
       next: () => this.router.navigate(['/cursos']),
       error: (e) => { this.error.set(e.error?.mensaje ?? 'Error al crear el curso.'); this.guardando.set(false); }

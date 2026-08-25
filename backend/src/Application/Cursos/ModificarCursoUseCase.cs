@@ -17,8 +17,8 @@ public class ModificarCursoUseCase(
         if (await cursoRepository.ExistePorAnioYComisionExcluyendoAsync(curso.Anio, curso.AnioLectivo, dto.Comision, curso.CarreraId, id, cancellationToken))
             throw new BusinessException($"Ya existe otro curso con la comisión '{dto.Comision.ToUpperInvariant()}' en el año {curso.Anio}, {curso.AnioLectivo}° año para la misma carrera.");
 
-        var preceptor = await preceptorRepository.ObtenerPorUsuarioIdAsync(dto.PreceptorId, cancellationToken)
-            ?? throw new BusinessException($"No se encontró el preceptor con Id {dto.PreceptorId}.");
+        var preceptor = await preceptorRepository.ObtenerPorUsuarioIdAsync(dto.PreceptorUsuarioId, cancellationToken)
+            ?? throw new BusinessException($"No se encontró el preceptor con Usuario Id {dto.PreceptorUsuarioId}.");
 
         var anterior = new { curso.Comision, curso.Cupo, curso.PreceptorId };
         curso.Modificar(dto.Comision, dto.Cupo, preceptor.Id);

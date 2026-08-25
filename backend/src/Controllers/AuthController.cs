@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using PracticaProfesional.Application.Auth;
 using PracticaProfesional.Application.Auth.DTOs;
 using PracticaProfesional.Application.Interfaces;
@@ -16,6 +17,7 @@ public class AuthController(
     ILogSeguridadService logSeguridad) : ControllerBase
 {
     [HttpPost("login")]
+    [EnableRateLimiting("login")]
     [ProducesResponseType(typeof(AuthResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login(

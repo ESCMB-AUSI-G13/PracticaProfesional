@@ -14,6 +14,8 @@ public class ListarEventosCalendarioUseCase(ICalendarioAcademicoRepository calen
             e.Comision,
             e.FechaInicio,
             e.FechaFin,
-            e.TipoEvento.ToString()));
+            e.TipoEvento.ToString(),
+            e.MateriaId,
+            e.CursoId));
     }
 }

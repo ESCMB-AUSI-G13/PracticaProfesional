@@ -46,4 +46,19 @@ public class SesionesController(ISesionService sesionService) : ControllerBase
     [ProducesResponseType(typeof(IEnumerable<int>), StatusCodes.Status200OK)]
     public IActionResult ObtenerActivas()
         => Ok(sesionService.ObtenerIdsActivos());
+
+    /// <summary>
+    /// Cierra remotamente la sesión de un usuario: cualquier JWT que ya tenga emitido deja de
+    /// aceptarse de inmediato (no hace falta desactivar la cuenta para esto). Antes Dirección
+    /// no tenía ninguna forma de cortarle el acceso a una sesión puntual sin una desactivación
+    /// completa (ver CHECKLIST.md, Tier 7 #38).
+    /// </summary>
+    [HttpDelete("activas/{usuarioId:int}")]
+    [Authorize(Roles = "Direccion")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    public IActionResult CerrarSesionRemota(int usuarioId)
+    {
+        sesionService.ForzarCierre(usuarioId);
+        return NoContent();
+    }
 }

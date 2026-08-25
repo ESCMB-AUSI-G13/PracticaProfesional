@@ -6,7 +6,7 @@
 |---|---|---|
 | Crear / modificar / desactivar Docente | Implementado | Administrador |
 | Crear / modificar / desactivar Preceptor | Implementado | Administrador |
-| Crear / modificar / desactivar Estudiante | Implementado | Administrador, Preceptor |
+| Crear / modificar / desactivar Estudiante | Implementado | Administrador |
 | Gestión de usuarios del sistema | Implementado | Administrador |
 | Recuperación de contraseña por email | Implementado | Todos |
 

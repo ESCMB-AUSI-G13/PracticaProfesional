@@ -1,3 +1,4 @@
+using System.Data;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Materias.DTOs;
 using PracticaProfesional.Domain.Entities;
@@ -8,23 +9,32 @@ namespace PracticaProfesional.Application.Materias;
 public class CrearMateriaUseCase(
     IMateriaRepository materiaRepository,
     ICarreraRepository carreraRepository,
-    IAuditoriaService auditoria)
+    IAuditoriaService auditoria,
+    IUnitOfWork unitOfWork)
 {
     public async Task<MateriaDto> EjecutarAsync(CrearMateriaDto dto, CancellationToken cancellationToken = default)
     {
         var carrera = await carreraRepository.ObtenerPorIdAsync(dto.CarreraId, cancellationToken)
             ?? throw new BusinessException($"No se encontró la carrera con Id {dto.CarreraId}.");
 
-        var numero = await materiaRepository.ObtenerSiguienteNumeroAsync(cancellationToken);
-        var codigo = $"MAT-{numero:D3}";
+        // Generación de código + insert dentro de una transacción Serializable: el número
+        // siguiente se calcula leyendo el máximo actual (MAX+1), y sin esto dos altas
+        // concurrentes podían leer el mismo máximo antes de que ninguna hiciera commit y
+        // terminar chocando contra el índice único de Codigo (ver CHECKLIST.md, Tier 4 #15).
+        Materia materia = null!;
+        await unitOfWork.EjecutarEnTransaccionAsync(async () =>
+        {
+            var numero = await materiaRepository.ObtenerSiguienteNumeroAsync(cancellationToken);
+            var codigo = $"MAT-{numero:D3}";
 
-        var materia = Materia.Crear(codigo, dto.Nombre, dto.CarreraId, dto.Anio);
-        await materiaRepository.AgregarAsync(materia, cancellationToken);
+            materia = Materia.Crear(codigo, dto.Nombre, dto.CarreraId, dto.Anio);
+            await materiaRepository.AgregarAsync(materia, cancellationToken);
 
-        await auditoria.RegistrarAsync("Materia", materia.Id.ToString(), "CREAR",
-            valorAnterior: null,
-            valorNuevo: new { materia.Codigo, materia.Nombre, CarreraId = dto.CarreraId, CarreraNombre = carrera.Nombre },
-            cancellationToken: cancellationToken);
+            await auditoria.RegistrarAsync("Materia", materia.Id.ToString(), "CREAR",
+                valorAnterior: null,
+                valorNuevo: new { materia.Codigo, materia.Nombre, CarreraId = dto.CarreraId, CarreraNombre = carrera.Nombre },
+                cancellationToken: cancellationToken);
+        }, IsolationLevel.Serializable, cancellationToken);
 
         return ToDto(materia, carrera.Nombre);
     }

@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Configuration;
-using PracticaProfesional.Application.Encuestas;
 using PracticaProfesional.Application.Inscripciones;
 using PracticaProfesional.Application.Inscripciones.DTOs;
 using PracticaProfesional.Domain.Entities;
@@ -75,10 +73,7 @@ public class InscribirseEnExamenUseCaseTests
             new HistorialAcademicoRepository(db),
             new CalendarioAcademicoRepository(db),
             new NoOpAuditoriaService(),
-            new ObtenerEncuestaPendienteUseCase(
-                new EncuestaRepository(db),
-                new InscripcionMateriaRepository(db),
-                new ConfigurationBuilder().Build()));
+            new NoOpUnitOfWork());
 
         return new Escenario(db, useCase, usuarioEstudiante.Id, estudiante, examen, materia, curso);
     }
@@ -97,7 +92,7 @@ public class InscribirseEnExamenUseCaseTests
         var e = await PrepararEscenarioAsync();
 
         var ex = await Assert.ThrowsAsync<BusinessException>(() =>
-            e.UseCase.EjecutarAsync(new InscribirseEnExamenDto(e.UsuarioIdEstudiante, e.Examen.Id)));
+            e.UseCase.EjecutarAsync(new InscribirseEnExamenDto(e.Estudiante.Id, e.Examen.Id)));
 
         Assert.Contains("regularizada", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
@@ -108,7 +103,7 @@ public class InscribirseEnExamenUseCaseTests
         var e = await PrepararEscenarioAsync();
         await RegularizarAsync(e);
 
-        var resultado = await e.UseCase.EjecutarAsync(new InscribirseEnExamenDto(e.UsuarioIdEstudiante, e.Examen.Id));
+        var resultado = await e.UseCase.EjecutarAsync(new InscribirseEnExamenDto(e.Estudiante.Id, e.Examen.Id));
 
         Assert.Equal("Activa", resultado.Estado);
     }
@@ -118,10 +113,10 @@ public class InscribirseEnExamenUseCaseTests
     {
         var e = await PrepararEscenarioAsync();
         await RegularizarAsync(e);
-        await e.UseCase.EjecutarAsync(new InscribirseEnExamenDto(e.UsuarioIdEstudiante, e.Examen.Id));
+        await e.UseCase.EjecutarAsync(new InscribirseEnExamenDto(e.Estudiante.Id, e.Examen.Id));
 
         var ex = await Assert.ThrowsAsync<BusinessException>(() =>
-            e.UseCase.EjecutarAsync(new InscribirseEnExamenDto(e.UsuarioIdEstudiante, e.Examen.Id)));
+            e.UseCase.EjecutarAsync(new InscribirseEnExamenDto(e.Estudiante.Id, e.Examen.Id)));
 
         Assert.Equal(409, ex.StatusCode);
     }
@@ -143,10 +138,10 @@ public class InscribirseEnExamenUseCaseTests
             otroEstudiante.Id, e.Materia.Id, e.Curso.Id, e.Curso.Anio, e.Curso.Comision,
             estadoFinal: "Regular", notaFinal: null, CondicionEstudiante.Regular));
         await e.Db.SaveChangesAsync();
-        await e.UseCase.EjecutarAsync(new InscribirseEnExamenDto(otroUsuario.Id, e.Examen.Id));
+        await e.UseCase.EjecutarAsync(new InscribirseEnExamenDto(otroEstudiante.Id, e.Examen.Id));
 
         var ex = await Assert.ThrowsAsync<BusinessException>(() =>
-            e.UseCase.EjecutarAsync(new InscribirseEnExamenDto(e.UsuarioIdEstudiante, e.Examen.Id)));
+            e.UseCase.EjecutarAsync(new InscribirseEnExamenDto(e.Estudiante.Id, e.Examen.Id)));
 
         Assert.Equal(409, ex.StatusCode);
         Assert.Contains("cupo", ex.Message, StringComparison.OrdinalIgnoreCase);

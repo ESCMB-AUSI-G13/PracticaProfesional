@@ -15,7 +15,8 @@ public class InscripcionesController(
     ObtenerComprobanteInscripcionUseCase comprobanteUseCase,
     ListarMisInscripcionesEstudianteUseCase misInscripcionesUseCase,
     InscribirseEnMateriaAutogestUseCase autogestUseCase,
-    DarDeBajaInscripcionMateriaUseCase darDeBajaUseCase) : ControllerBase
+    DarDeBajaInscripcionMateriaUseCase darDeBajaUseCase,
+    InscribirseEnExamenUseCase inscribirseEnExamenUseCase) : ControllerBase
 {
     // ── Dirección ─────────────────────────────────────────────────────────────
 
@@ -27,10 +28,12 @@ public class InscripcionesController(
 
     /// <summary>
     /// POST api/inscripciones/materias
-    /// Dirección inscribe a un estudiante en una materia (CU-22).
+    /// Dirección o Preceptor inscribe a un estudiante en una materia (CU-22). Ampliado a
+    /// Preceptor para alinear con docs/casos-de-uso.md ("Inscripción a materia (manual) |
+    /// Preceptor, Administrador") — ver CHECKLIST.md, Tier 5 #21.
     /// </summary>
     [HttpPost("materias")]
-    [Authorize(Roles = "Direccion")]
+    [Authorize(Roles = "Direccion,Preceptor")]
     [ProducesResponseType(typeof(InscripcionMateriaResultDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> InscribirseEnMateria(
@@ -52,15 +55,41 @@ public class InscripcionesController(
         return Ok(comprobante);
     }
 
+    /// <summary>
+    /// Ampliado a Preceptor y Estudiante para alinear con docs/casos-de-uso.md ("Dar de baja
+    /// inscripción | Estudiante, Preceptor") — ver CHECKLIST.md, Tier 5 #21. Un Estudiante solo
+    /// puede dar de baja su propia inscripción (chequeo de propiedad en el UseCase).
+    /// </summary>
     [HttpDelete("materias/{id:int}")]
-    [Authorize(Roles = "Direccion")]
+    [Authorize(Roles = "Direccion,Preceptor,Estudiante")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> DarDeBajaInscripcion(int id, CancellationToken cancellationToken)
     {
-        await darDeBajaUseCase.EjecutarAsync(id, cancellationToken);
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var esStaff = User.IsInRole("Direccion") || User.IsInRole("Preceptor");
+        await darDeBajaUseCase.EjecutarAsync(id, usuarioId, esStaff, cancellationToken);
         return NoContent();
+    }
+
+    /// <summary>
+    /// POST api/inscripciones/examenes — Dirección inscribe a un estudiante puntual a un examen
+    /// (CU-33), con EstudianteId explícito. Antes el único endpoint de inscripción a examen
+    /// resolvía siempre el estudiante desde el token de quien llama, así que Dirección no tenía
+    /// ningún camino real para usarlo (ver CHECKLIST.md, Tier 4 #12).
+    /// </summary>
+    [HttpPost("examenes")]
+    [Authorize(Roles = "Direccion")]
+    [ProducesResponseType(typeof(InscripcionExamenResultDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> InscribirseEnExamen(
+        [FromBody] InscribirseEnExamenDto dto,
+        CancellationToken cancellationToken)
+    {
+        var resultado = await inscribirseEnExamenUseCase.EjecutarAsync(dto, cancellationToken);
+        return CreatedAtAction(nameof(Listar), new { id = resultado.Id }, resultado);
     }
 
     // ── Estudiante (autogestionada) ───────────────────────────────────────────

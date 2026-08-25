@@ -51,7 +51,11 @@ export class MisExamenesComponent implements OnInit {
           this.ejecutarInscripcion(examen.id);
         }
       },
-      error: () => this.ejecutarInscripcion(examen.id)
+      // No dejar pasar la inscripción si no se pudo verificar la encuesta obligatoria — mismo
+      // fix que ffe69ff aplicó en mis-materias.component.ts, que este componente hermano nunca
+      // recibió (ver CHECKLIST.md, Tier 7 #30). El backend igual bloquearía con 428, pero acá el
+      // usuario vería un error genérico en vez de la encuesta que tenía que completar.
+      error: () => this.error.set('No se pudo verificar si tenés una encuesta pendiente. Reintentá en unos segundos.')
     });
   }
 

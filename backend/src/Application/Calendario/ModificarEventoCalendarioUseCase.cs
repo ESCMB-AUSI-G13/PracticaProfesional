@@ -20,6 +20,8 @@ public class ModificarEventoCalendarioUseCase(ICalendarioAcademicoRepository cal
             evento.Comision,
             evento.FechaInicio,
             evento.FechaFin,
-            evento.TipoEvento.ToString());
+            evento.TipoEvento.ToString(),
+            evento.MateriaId,
+            evento.CursoId);
     }
 }

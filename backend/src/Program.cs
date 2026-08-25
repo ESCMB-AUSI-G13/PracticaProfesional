@@ -61,6 +61,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // ── Repositorios e interfaces ──────────────────────────────────────────────────
 builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IAuditoriaRepository, AuditoriaRepository>();
 builder.Services.AddScoped<IAuditoriaLogRepository, AuditoriaLogRepository>();
@@ -186,6 +187,7 @@ builder.Services.AddScoped<ListarExamenesUseCase>();
 builder.Services.AddScoped<EliminarExamenUseCase>();
 builder.Services.AddScoped<ListarFinalesDisponiblesUseCase>();
 builder.Services.AddScoped<InscribirseEnExamenUseCase>();
+builder.Services.AddScoped<InscribirseEnExamenAutogestUseCase>();
 
 // Reportes Rendimiento Consolidado (RR-05, RR-06, RR-07)
 builder.Services.AddScoped<IRendimientoConsolidadoRepository, RendimientoConsolidadoRepository>();
@@ -263,6 +265,45 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(key),
             ClockSkew = TimeSpan.Zero
         };
+
+        // Sin esto, un JWT emitido antes de desactivar una cuenta seguía siendo válido hasta
+        // su expiración (hasta 8h) — el JWT es stateless y por defecto no vuelve a chequear
+        // Usuario.Activo. Se agrega una consulta liviana por Id (indexado) en cada request
+        // autenticado para poder revocar el acceso de inmediato.
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = async context =>
+            {
+                var usuarioIdClaim = context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                if (usuarioIdClaim is null || !int.TryParse(usuarioIdClaim, out var usuarioId))
+                {
+                    context.Fail("Token inválido.");
+                    return;
+                }
+
+                var usuarioRepository = context.HttpContext.RequestServices.GetRequiredService<IUsuarioRepository>();
+                var usuario = await usuarioRepository.ObtenerPorIdAsync(usuarioId, context.HttpContext.RequestAborted);
+                if (usuario is null || !usuario.Activo)
+                {
+                    context.Fail("La cuenta fue desactivada.");
+                    return;
+                }
+
+                // Cierre remoto de sesión (ver CHECKLIST.md, Tier 7 #38): antes Dirección solo
+                // podía "ver" quién estaba conectado (GET /activas), sin ninguna forma de cortar
+                // el acceso de una sesión puntual sin desactivar la cuenta entera. Si hubo un
+                // cierre forzado posterior a la emisión de este token, se rechaza — un login
+                // nuevo emite un token válido de nuevo.
+                var iatClaim = context.Principal?.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Iat)?.Value;
+                if (iatClaim is not null && long.TryParse(iatClaim, out var iatUnix))
+                {
+                    var emitidoEn = DateTimeOffset.FromUnixTimeSeconds(iatUnix).UtcDateTime;
+                    var sesionService = context.HttpContext.RequestServices.GetRequiredService<ISesionService>();
+                    if (sesionService.FueForzadoDespuesDe(usuarioId, emitidoEn))
+                        context.Fail("La sesión fue cerrada remotamente. Volvé a iniciar sesión.");
+                }
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
@@ -280,6 +321,31 @@ builder.Services.AddRateLimiter(options =>
                 Window = TimeSpan.FromMinutes(1),
                 QueueLimit = 0
             }));
+
+    // Sin esto, /api/auth/login no tenía ningún freno ante intentos de fuerza bruta —
+    // verificado con 8 intentos fallidos consecutivos sin demora ni bloqueo. Se limita por IP
+    // (antes de autenticar no hay otra identidad disponible); sin cola, así que el intento que
+    // excede el límite se rechaza de inmediato en vez de esperar turno.
+    options.AddPolicy("login", httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "anonimo",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 8,
+                Window = TimeSpan.FromMinutes(5),
+                QueueLimit = 0
+            }));
+
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        await context.HttpContext.Response.WriteAsJsonAsync(new ProblemDetails
+        {
+            Status = StatusCodes.Status429TooManyRequests,
+            Title = "Demasiados intentos",
+            Detail = "Se superó el límite de intentos. Esperá unos minutos y volvé a intentar."
+        }, cancellationToken);
+    };
 });
 
 // ── CORS ───────────────────────────────────────────────────────────────────────
@@ -448,16 +514,24 @@ app.Use(async (context, next) =>
             UnauthorizedAccessException   => (StatusCodes.Status401Unauthorized, "No autorizado"),
             ArgumentException             => (StatusCodes.Status400BadRequest, "Solicitud inválida"),
             KeyNotFoundException          => (StatusCodes.Status404NotFound, "Recurso no encontrado"),
+            Microsoft.EntityFrameworkCore.DbUpdateException => (StatusCodes.Status409Conflict, "Conflicto de datos"),
             InvalidOperationException     => (StatusCodes.Status409Conflict, "Conflicto de negocio"),
             _                             => (StatusCodes.Status500InternalServerError, "Error interno del servidor")
         };
 
         // Para errores no controlados (500) no se expone ex.Message: puede contener
-        // detalles internos (cadenas de conexión, nombres de tabla, etc.). Para el resto,
-        // el mensaje ya está pensado para mostrarse al usuario.
-        var detail = statusCode == StatusCodes.Status500InternalServerError
-            ? "Ocurrió un error interno. Intentá nuevamente más tarde."
-            : ex.Message;
+        // detalles internos (cadenas de conexión, nombres de tabla, etc.). DbUpdateException
+        // tampoco expone ex.Message (es boilerplate de EF, no describe el conflicto real y
+        // su InnerException sí puede traer texto de SQL Server) — se usa un mensaje genérico
+        // fijo. Para el resto, el mensaje ya está pensado para mostrarse al usuario.
+        var detail = ex switch
+        {
+            Microsoft.EntityFrameworkCore.DbUpdateException =>
+                "El cambio no se pudo guardar por un conflicto con los datos existentes (por ejemplo, un valor duplicado o una referencia inválida).",
+            _ when statusCode == StatusCodes.Status500InternalServerError =>
+                "Ocurrió un error interno. Intentá nuevamente más tarde.",
+            _ => ex.Message
+        };
 
         context.Response.StatusCode = statusCode;
         await context.Response.WriteAsJsonAsync(new ProblemDetails
@@ -476,44 +550,60 @@ app.MapControllers();
 
 app.Run();
 
-// ── Reparación de migraciones con DDL no aplicado ──────────────────────────────
-// Si una migración está en __EFMigrationsHistory pero su DDL no se ejecutó
-// (causado por EnableRetryOnFailure + transacciones DDL), la eliminamos para que
-// db.Database.Migrate() la vuelva a aplicar correctamente.
+// ── Reparación de columnas con DDL no aplicado ──────────────────────────────────
+// Antes esta función borraba el registro de la migración en __EFMigrationsHistory
+// para que db.Database.Migrate() la volviera a aplicar. Verificado que NO es
+// confiable: Migrate() puede reportar "already up to date" y no reaplicar el DDL
+// igual (causa exacta no determinada — posiblemente interacción entre el DELETE
+// manual sobre la conexión ya abierta y el chequeo de pendientes de Migrate()).
+// En su lugar, esta versión aplica el DDL faltante de forma directa e idempotente,
+// sin tocar __EFMigrationsHistory. Se salta si la tabla base todavía no existe
+// (Migrate() la va a crear completa, columna incluida) — esto también evita el
+// crash original en una base de datos totalmente vacía.
 static async Task RepararMigracionesInconsistentesAsync(
     PracticaProfesional.Infrastructure.Persistence.AppDbContext db,
     ILogger logger)
 {
-    // Mapa: (id de migración) → (SQL que verifica si el DDL se aplicó)
-    var verificaciones = new Dictionary<string, string>
+    var fixes = new (string Tabla, string Columna, string Ddl)[]
     {
-        ["20260529000001_AddFechaDeEgresoEstudiante"]  =
-            "SELECT COUNT(1) FROM sys.columns WHERE Name = N'FechaDeEgreso' AND Object_ID = Object_ID(N'Estudiantes')",
-        ["20260529000002_EnsureFechaDeEgresoEstudiante"] =
-            "SELECT COUNT(1) FROM sys.columns WHERE Name = N'FechaDeEgreso' AND Object_ID = Object_ID(N'Estudiantes')",
+        ("Estudiantes", "FechaDeEgreso", "ALTER TABLE [Estudiantes] ADD [FechaDeEgreso] datetime2 NULL;"),
     };
 
     var conn = db.Database.GetDbConnection();
     if (conn.State != System.Data.ConnectionState.Open)
         await conn.OpenAsync();
 
-    foreach (var (migrationId, sql) in verificaciones)
+    foreach (var (tabla, columna, ddl) in fixes)
     {
-        using var checkCmd = conn.CreateCommand();
-        checkCmd.CommandText = sql;
-        int existe = Convert.ToInt32(await checkCmd.ExecuteScalarAsync());
+        using var tablaCmd = conn.CreateCommand();
+        tablaCmd.CommandText = "SELECT COUNT(1) FROM sys.tables WHERE Name = @tabla";
+        var pTabla = tablaCmd.CreateParameter();
+        pTabla.ParameterName = "@tabla";
+        pTabla.Value = tabla;
+        tablaCmd.Parameters.Add(pTabla);
+        bool tablaExiste = Convert.ToInt32(await tablaCmd.ExecuteScalarAsync()) > 0;
+        if (!tablaExiste) continue;
 
-        if (existe == 0)
-        {
-            // DDL nunca se ejecutó → borrar el registro fantasma para que Migrate() lo re-aplique
-            using var delCmd = conn.CreateCommand();
-            delCmd.CommandText =
-                $"DELETE FROM [__EFMigrationsHistory] WHERE [MigrationId] = '{migrationId}'";
-            await delCmd.ExecuteNonQueryAsync();
-            logger.LogWarning(
-                "DB-Fix: migración '{Id}' tenía DDL sin aplicar — registro eliminado de historia para re-aplicación.",
-                migrationId);
-        }
+        using var colCmd = conn.CreateCommand();
+        colCmd.CommandText =
+            "SELECT COUNT(1) FROM sys.columns WHERE Name = @columna AND Object_ID = Object_ID(@tabla)";
+        var pColumna = colCmd.CreateParameter();
+        pColumna.ParameterName = "@columna";
+        pColumna.Value = columna;
+        colCmd.Parameters.Add(pColumna);
+        var pTabla2 = colCmd.CreateParameter();
+        pTabla2.ParameterName = "@tabla";
+        pTabla2.Value = tabla;
+        colCmd.Parameters.Add(pTabla2);
+        bool columnaExiste = Convert.ToInt32(await colCmd.ExecuteScalarAsync()) > 0;
+        if (columnaExiste) continue;
+
+        using var ddlCmd = conn.CreateCommand();
+        ddlCmd.CommandText = ddl;
+        await ddlCmd.ExecuteNonQueryAsync();
+        logger.LogWarning(
+            "DB-Fix: columna '{Columna}' de '{Tabla}' faltaba — agregada directamente (DDL idempotente, sin tocar __EFMigrationsHistory).",
+            columna, tabla);
     }
 }
 

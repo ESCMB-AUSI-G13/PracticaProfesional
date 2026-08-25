@@ -1,11 +1,15 @@
 using System;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using PracticaProfesional.Infrastructure.Persistence;
 
 #nullable disable
 
 namespace PracticaProfesional.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(AppDbContext))]
+    [Migration("20260526000001_RedisenoEncuestas")]
     public partial class RedisenoEncuestas : Migration
     {
         /// <inheritdoc />

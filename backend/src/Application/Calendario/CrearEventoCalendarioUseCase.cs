@@ -19,7 +19,9 @@ public class CrearEventoCalendarioUseCase(ICalendarioAcademicoRepository calenda
             dto.Comision ?? string.Empty,
             dto.FechaInicio,
             dto.FechaFin,
-            dto.TipoEvento);
+            dto.TipoEvento,
+            dto.MateriaId,
+            dto.CursoId);
 
         await calendarioRepository.AgregarAsync(evento, cancellationToken);
 
@@ -29,6 +31,8 @@ public class CrearEventoCalendarioUseCase(ICalendarioAcademicoRepository calenda
             evento.Comision,
             evento.FechaInicio,
             evento.FechaFin,
-            evento.TipoEvento.ToString());
+            evento.TipoEvento.ToString(),
+            evento.MateriaId,
+            evento.CursoId);
     }
 }

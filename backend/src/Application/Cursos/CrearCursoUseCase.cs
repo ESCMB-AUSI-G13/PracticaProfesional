@@ -15,8 +15,8 @@ public class CrearCursoUseCase(
         if (await cursoRepository.ExistePorAnioYComisionAsync(dto.Anio, dto.AnioLectivo, dto.Comision, dto.CarreraId, cancellationToken))
             throw new BusinessException($"Ya existe un curso para el año {dto.Anio}, {dto.AnioLectivo}° año, comisión '{dto.Comision.ToUpperInvariant()}' y carrera {dto.CarreraId}.");
 
-        var preceptor = await preceptorRepository.ObtenerPorUsuarioIdAsync(dto.PreceptorId, cancellationToken)
-            ?? throw new BusinessException($"No se encontró el preceptor con Id {dto.PreceptorId}.");
+        var preceptor = await preceptorRepository.ObtenerPorUsuarioIdAsync(dto.PreceptorUsuarioId, cancellationToken)
+            ?? throw new BusinessException($"No se encontró el preceptor con Usuario Id {dto.PreceptorUsuarioId}.");
 
         var curso = Curso.Crear(dto.Anio, dto.AnioLectivo, dto.Comision, dto.Cupo, preceptor.Id, dto.CarreraId);
         await cursoRepository.AgregarAsync(curso, cancellationToken);

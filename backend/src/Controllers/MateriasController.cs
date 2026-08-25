@@ -50,7 +50,7 @@ public class MateriasController(
     [HttpPut("{id:int}")]
     [Authorize(Roles = "Direccion")]
     [ProducesResponseType(typeof(MateriaDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)] // "no encontrada" es BusinessException (400), no 404 — ver CHECKLIST.md Tier 7 #35
     public async Task<IActionResult> Modificar(int id, [FromBody] ModificarMateriaDto dto, CancellationToken cancellationToken)
     {
         var resultado = await modificarMateria.EjecutarAsync(id, dto, cancellationToken);
@@ -60,7 +60,7 @@ public class MateriasController(
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "Direccion")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)] // "no encontrada" es BusinessException (400), no 404 — ver CHECKLIST.md Tier 7 #35
     public async Task<IActionResult> Eliminar(int id, CancellationToken cancellationToken)
     {
         await eliminarMateria.EjecutarAsync(id, cancellationToken);

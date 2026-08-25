@@ -1,10 +1,14 @@
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
+using PracticaProfesional.Infrastructure.Persistence;
 
 #nullable disable
 
 namespace PracticaProfesional.Migrations
 {
     /// <inheritdoc />
+    [DbContext(typeof(AppDbContext))]
+    [Migration("20260529000002_EnsureFechaDeEgresoEstudiante")]
     public partial class EnsureFechaDeEgresoEstudiante : Migration
     {
         /// <inheritdoc />

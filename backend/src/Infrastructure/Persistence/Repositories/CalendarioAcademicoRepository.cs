@@ -8,12 +8,18 @@ namespace PracticaProfesional.Infrastructure.Persistence.Repositories;
 public class CalendarioAcademicoRepository(AppDbContext context) : ICalendarioAcademicoRepository
 {
     public async Task<bool> EstaEnPeriodoAsync(
-        TipoEvento tipo, DateTime fecha, CancellationToken cancellationToken = default)
+        TipoEvento tipo, DateTime fecha,
+        int? materiaId = null, int? cursoId = null,
+        CancellationToken cancellationToken = default)
         => await context.CalendarioAcademico
             .AnyAsync(e =>
                 e.TipoEvento == tipo &&
                 e.FechaInicio <= fecha.Date &&
-                e.FechaFin >= fecha.Date,
+                e.FechaFin >= fecha.Date &&
+                // Sin MateriaId/CursoId = período global (aplica a todo). Si el evento tiene
+                // alguno seteado, tiene que coincidir con lo que se está validando.
+                (e.MateriaId == null || e.MateriaId == materiaId) &&
+                (e.CursoId == null || e.CursoId == cursoId),
             cancellationToken);
 
     public async Task<IEnumerable<CalendarioAcademico>> ListarAsync(

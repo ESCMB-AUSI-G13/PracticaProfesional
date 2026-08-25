@@ -16,7 +16,8 @@ public class CerrarCursoUseCase(
     IInscripcionMateriaRepository inscripcionMateriaRepository,
     IAsistenciaRepository asistenciaRepository,
     IHistorialAcademicoRepository historialRepository,
-    IAuditoriaService auditoria)
+    IAuditoriaService auditoria,
+    IUnitOfWork unitOfWork)
 {
     // Mismo umbral que ActualizarEstadoAcademicoUseCase.AusenciaMaxRegularidad.
     // Si se cambia acá, cambiar también allá.
@@ -27,40 +28,48 @@ public class CerrarCursoUseCase(
         var curso = await cursoRepository.ObtenerPorIdAsync(id, cancellationToken)
             ?? throw new BusinessException($"No se encontró el curso con Id {id}.");
 
-        curso.Cerrar();
-        await cursoRepository.GuardarCambiosAsync(cancellationToken);
-
-        var inscripciones = await inscripcionMateriaRepository.ListarActivasPorCursoAsync(id, cancellationToken);
-
-        var historiales = new List<HistorialAcademico>();
-        foreach (var inscripcion in inscripciones)
+        // Cierre + liquidación de cada inscripción + alta de historial deben confirmarse
+        // juntos: antes, 3 SaveChanges independientes podían dejar el curso marcado Cerrado
+        // con alumnos sin liquidar en HistorialAcademico si algo fallaba a mitad de camino
+        // (ver CHECKLIST.md, Tier 2 #7). curso.Cerrar() también ahora rechaza cerrar un curso
+        // ya cerrado (antes no validaba idempotencia).
+        await unitOfWork.EjecutarEnTransaccionAsync(async () =>
         {
-            var (total, ausentesInjust, _) = await asistenciaRepository.ObtenerEstadisticasAsync(
-                inscripcion.EstudianteId, inscripcion.MateriaId, inscripcion.CursoId, cancellationToken);
+            curso.Cerrar();
+            await cursoRepository.GuardarCambiosAsync(cancellationToken);
 
-            var condicion = total > 0 && (decimal)ausentesInjust / total > AusenciaMaxRegularidad
-                ? CondicionEstudiante.Libre
-                : CondicionEstudiante.Regular;
+            var inscripciones = await inscripcionMateriaRepository.ListarActivasPorCursoAsync(id, cancellationToken);
 
-            if (condicion == CondicionEstudiante.Libre)
-                inscripcion.MarcarDesaprobada();
-            else
-                inscripcion.MarcarAprobada();
+            var historiales = new List<HistorialAcademico>();
+            foreach (var inscripcion in inscripciones)
+            {
+                var (total, ausentesInjust, _) = await asistenciaRepository.ObtenerEstadisticasAsync(
+                    inscripcion.EstudianteId, inscripcion.MateriaId, inscripcion.CursoId, cancellationToken);
 
-            historiales.Add(HistorialAcademico.Crear(
-                inscripcion.EstudianteId, inscripcion.MateriaId, inscripcion.CursoId,
-                curso.Anio, curso.Comision,
-                estadoFinal: condicion.ToString(), notaFinal: null, condicion));
-        }
+                var condicion = total > 0 && (decimal)ausentesInjust / total > AusenciaMaxRegularidad
+                    ? CondicionEstudiante.Libre
+                    : CondicionEstudiante.Regular;
 
-        await inscripcionMateriaRepository.GuardarCambiosAsync(cancellationToken);
+                if (condicion == CondicionEstudiante.Libre)
+                    inscripcion.MarcarDesaprobada();
+                else
+                    inscripcion.MarcarAprobada();
 
-        if (historiales.Count > 0)
-            await historialRepository.AgregarRangoAsync(historiales, cancellationToken);
+                historiales.Add(HistorialAcademico.Crear(
+                    inscripcion.EstudianteId, inscripcion.MateriaId, inscripcion.CursoId,
+                    curso.Anio, curso.Comision,
+                    estadoFinal: condicion.ToString(), notaFinal: null, condicion));
+            }
 
-        await auditoria.RegistrarAsync("Curso", curso.Id.ToString(), "CERRAR",
-            valorAnterior: new { Estado = "Activo" },
-            valorNuevo: new { Estado = "Cerrado", AlumnosLiquidados = historiales.Count },
-            cancellationToken: cancellationToken);
+            await inscripcionMateriaRepository.GuardarCambiosAsync(cancellationToken);
+
+            if (historiales.Count > 0)
+                await historialRepository.AgregarRangoAsync(historiales, cancellationToken);
+
+            await auditoria.RegistrarAsync("Curso", curso.Id.ToString(), "CERRAR",
+                valorAnterior: new { Estado = "Activo" },
+                valorNuevo: new { Estado = "Cerrado", AlumnosLiquidados = historiales.Count },
+                cancellationToken: cancellationToken);
+        }, cancellationToken: cancellationToken);
     }
 }

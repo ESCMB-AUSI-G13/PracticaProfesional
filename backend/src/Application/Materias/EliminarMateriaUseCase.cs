@@ -8,6 +8,7 @@ public class EliminarMateriaUseCase(
     IInscripcionMateriaRepository inscripcionRepository,
     IExamenRepository examenRepository,
     IHistorialAcademicoRepository historialRepository,
+    IEspacioCurricularRepository espacioCurricularRepository,
     IAuditoriaService auditoria)
 {
     public async Task EjecutarAsync(int id, CancellationToken cancellationToken = default)
@@ -25,6 +26,12 @@ public class EliminarMateriaUseCase(
 
         if (await historialRepository.ExistePorMateriaIdAsync(id, cancellationToken))
             razones.Add("tiene historial académico");
+
+        // Sin este chequeo, borrar una materia con una cátedra (EspacioCurricular) asignada
+        // rompía en el DELETE por violación de FK (FK_EspaciosCurriculares_Materias_MateriaId
+        // es DeleteBehavior.Restrict) — ver CHECKLIST.md, Tier 4 #14.
+        if (await espacioCurricularRepository.ExistePorMateriaIdAsync(id, cancellationToken))
+            razones.Add("tiene cátedras asignadas");
 
         if (razones.Count > 0)
             throw new BusinessException(

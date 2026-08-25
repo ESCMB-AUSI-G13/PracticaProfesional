@@ -13,8 +13,15 @@ public class AuditoriaController(
     RegistrarCambioRolUseCase registrarCambioRol,
     ListarAuditoriaLogsUseCase listarLogs) : ControllerBase
 {
+    /// <summary>
+    /// Antes era Direccion-only, pero el frontend (AuthService.VISTAS_PERMITIDAS) también deja
+    /// que un Docente active la vista "Estudiante" — esa llamada fallaba con 403 en silencio
+    /// (sin manejo de error en el .subscribe()), así que ningún cambio de vista de Docente
+    /// quedaba auditado. Ampliado a los mismos roles que hoy tienen vistas habilitadas en el
+    /// frontend (ver CHECKLIST.md, Tier 5 #18).
+    /// </summary>
     [HttpPost("cambio-rol")]
-    [Authorize(Roles = "Direccion")]
+    [Authorize(Roles = "Direccion,Docente")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> RegistrarCambioRol(

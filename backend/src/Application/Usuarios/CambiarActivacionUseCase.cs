@@ -1,5 +1,6 @@
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Domain.Enums;
+using PracticaProfesional.Domain.Exceptions;
 
 namespace PracticaProfesional.Application.Usuarios;
 
@@ -17,8 +18,26 @@ public class CambiarActivacionUseCase(
         var usuario = await usuarioRepository.ObtenerPorIdAsync(usuarioId, ct)
             ?? throw new KeyNotFoundException($"{entidad} no encontrado.");
 
+        // Mensaje explícito con el rol esperado en vez de "El usuario no es un {entidad}" — con
+        // entidad="Usuario" (endpoint /api/usuarios, rolEsperado=Direccion) ese texto daba
+        // literalmente "El usuario no es un usuario.", que no dice nada accionable sobre qué
+        // endpoint corresponde usar en su lugar (ver CHECKLIST.md, Tier 7 #39).
         if (rolEsperado.HasValue && usuario.Rol != rolEsperado.Value)
-            throw new InvalidOperationException($"El usuario no es un {entidad.ToLower()}.");
+            throw new InvalidOperationException(
+                $"El usuario no tiene el rol esperado ({rolEsperado}); su rol real es {usuario.Rol}.");
+
+        // Evita que el sistema quede sin ningún usuario de Dirección activo (lockout total: sin
+        // nadie que pueda reactivar cuentas ni administrar el sistema). No es solo un chequeo de
+        // "no autodesactivarse" — aplica igual si Dirección A desactiva a Dirección B siendo la
+        // última cuenta activa de ese rol.
+        if (!activar && usuario.Rol == Rol.Direccion)
+        {
+            var direccionesActivas = (await usuarioRepository.ListarAsync(Rol.Direccion, ct))
+                .Count(u => u.Activo && u.Id != usuarioId);
+            if (direccionesActivas == 0)
+                throw new BusinessException(
+                    "No se puede desactivar: es el único usuario de Dirección activo. Debe haber al menos uno.", 409);
+        }
 
         if (activar) usuario.Reactivar();
         else         usuario.Desactivar();

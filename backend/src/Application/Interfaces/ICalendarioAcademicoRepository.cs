@@ -5,7 +5,16 @@ namespace PracticaProfesional.Application.Interfaces;
 
 public interface ICalendarioAcademicoRepository
 {
-    Task<bool> EstaEnPeriodoAsync(TipoEvento tipo, DateTime fecha, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Un evento sin MateriaId/CursoId es un período global (aplica a todo). Si se pasan
+    /// materiaId/cursoId, también matchean eventos específicos de esa materia/curso — antes no
+    /// existía forma de acotar un período, así que cualquier evento abierto habilitaba
+    /// inscripción para todo el sistema (ver CHECKLIST.md, Tier 5 #19).
+    /// </summary>
+    Task<bool> EstaEnPeriodoAsync(
+        TipoEvento tipo, DateTime fecha,
+        int? materiaId = null, int? cursoId = null,
+        CancellationToken cancellationToken = default);
     Task<IEnumerable<CalendarioAcademico>> ListarAsync(int? anio = null, CancellationToken cancellationToken = default);
     Task<CalendarioAcademico?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default);
     Task AgregarAsync(CalendarioAcademico evento, CancellationToken cancellationToken = default);

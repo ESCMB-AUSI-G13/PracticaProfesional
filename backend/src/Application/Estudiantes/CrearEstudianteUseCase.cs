@@ -10,7 +10,8 @@ public class CrearEstudianteUseCase(
     IUsuarioRepository usuarioRepository,
     IEstudianteRepository estudianteRepository,
     ICarreraRepository carreraRepository,
-    IAuditoriaService auditoria)
+    IAuditoriaService auditoria,
+    IUnitOfWork unitOfWork)
 {
     public async Task<EstudianteDto> EjecutarAsync(CrearEstudianteDto dto, CancellationToken cancellationToken = default)
     {
@@ -23,22 +24,28 @@ public class CrearEstudianteUseCase(
         var carrera = await carreraRepository.ObtenerPorIdAsync(dto.CarreraId, cancellationToken)
             ?? throw new BusinessException($"No se encontró la carrera con Id {dto.CarreraId}.");
 
-        if (string.IsNullOrWhiteSpace(dto.Password) || dto.Password.Length < 6)
-            throw new ArgumentException("La clave debe tener al menos 6 caracteres.");
+        Usuario.ValidarFortalezaPassword(dto.Password);
 
         var legajo = await usuarioRepository.GenerarProximoLegajoAsync(cancellationToken);
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(dto.Password);
         var usuario = Usuario.Crear(dto.DNI, legajo, dto.Email, dto.Nombre, dto.Apellido, passwordHash, Rol.Estudiante);
+        Estudiante estudiante = null!;
 
-        await usuarioRepository.AgregarAsync(usuario, cancellationToken);
+        // Usuario + Estudiante + auditoría deben confirmarse juntos: si el alta de Estudiante
+        // falla después de crear el Usuario, sin transacción quedaba un Usuario huérfano con
+        // Rol=Estudiante que bloqueaba ese DNI/Email para siempre (ver CHECKLIST.md, Tier 2 #3).
+        await unitOfWork.EjecutarEnTransaccionAsync(async () =>
+        {
+            await usuarioRepository.AgregarAsync(usuario, cancellationToken);
 
-        var estudiante = Estudiante.Crear(usuario.Id, dto.Anio, dto.CarreraId, dto.FechaDeIngreso);
-        await estudianteRepository.AgregarAsync(estudiante, cancellationToken);
+            estudiante = Estudiante.Crear(usuario.Id, dto.Anio, dto.CarreraId, dto.FechaDeIngreso);
+            await estudianteRepository.AgregarAsync(estudiante, cancellationToken);
 
-        await auditoria.RegistrarAsync("Estudiante", estudiante.Id.ToString(), "CREAR",
-            valorAnterior: null,
-            valorNuevo: new { usuario.DNI, usuario.Legajo, usuario.Email, usuario.Nombre, usuario.Apellido, estudiante.Anio, CarreraId = dto.CarreraId, CarreraNombre = carrera.Nombre, Condicion = estudiante.Condicion.ToString(), estudiante.FechaDeIngreso },
-            cancellationToken);
+            await auditoria.RegistrarAsync("Estudiante", estudiante.Id.ToString(), "CREAR",
+                valorAnterior: null,
+                valorNuevo: new { usuario.DNI, usuario.Legajo, usuario.Email, usuario.Nombre, usuario.Apellido, estudiante.Anio, CarreraId = dto.CarreraId, CarreraNombre = carrera.Nombre, Condicion = estudiante.Condicion.ToString(), estudiante.FechaDeIngreso },
+                cancellationToken);
+        }, cancellationToken: cancellationToken);
 
         return ToDto(estudiante, usuario, carrera.Nombre);
     }

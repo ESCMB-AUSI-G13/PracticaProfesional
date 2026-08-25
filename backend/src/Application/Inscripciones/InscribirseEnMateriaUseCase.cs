@@ -1,3 +1,4 @@
+using System.Data;
 using PracticaProfesional.Application.Inscripciones.DTOs;
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Domain.Entities;
@@ -17,7 +18,8 @@ public class InscribirseEnMateriaUseCase(
     IHistorialAcademicoRepository historialRepository,
     ICalendarioAcademicoRepository calendarioRepository,
     IEspacioCurricularRepository espacioCurricularRepository,
-    IAuditoriaService auditoria)
+    IAuditoriaService auditoria,
+    IUnitOfWork unitOfWork)
 {
     public async Task<InscripcionMateriaResultDto> EjecutarAsync(
         InscribirseEnMateriaDto dto,
@@ -34,8 +36,10 @@ public class InscribirseEnMateriaUseCase(
         if (estudiante.Condicion == CondicionEstudiante.Desertor)
             throw new BusinessException("El estudiante está en condición de desertor. Debe re-inscribirse primero.");
 
-        // 3. Validar período de inscripción (CU-47)
-        if (!await calendarioRepository.EstaEnPeriodoAsync(TipoEvento.InscripcionMateria, DateTime.Today, cancellationToken))
+        // 3. Validar período de inscripción (CU-47) — acotado a esta materia/curso si el
+        // evento de calendario lo especifica (ver CHECKLIST.md, Tier 5 #19).
+        if (!await calendarioRepository.EstaEnPeriodoAsync(
+                TipoEvento.InscripcionMateria, DateTime.Today, dto.MateriaId, dto.CursoId, cancellationToken))
             throw new BusinessException("Inscripción fuera del período habilitado según el Calendario Académico.");
 
         // 4. Verificar que no existe ya una inscripción activa para esa materia
@@ -55,30 +59,40 @@ public class InscribirseEnMateriaUseCase(
         if (curso.Estado != EstadoCurso.Activo)
             throw new BusinessException($"No se puede inscribir: el curso se encuentra en estado '{curso.Estado}'.");
 
-        // 5d. Validar cupo disponible
-        var activasEnCurso = await inscripcionMateriaRepository
-            .ListarActivasPorCursoYMateriaAsync(dto.CursoId, dto.MateriaId, cancellationToken);
-        if (activasEnCurso.Count() >= curso.Cupo)
-            throw new BusinessException("No hay cupo disponible en este curso.", 409);
+        // 5d-7. Validar cupo + crear inscripción + auditar, todo dentro de una transacción
+        // Serializable: el conteo de "activas en curso" y el insert deben verse como una sola
+        // operación atómica, o dos inscripciones concurrentes pueden leer el mismo conteo antes
+        // de que ninguna haga commit y ambas pasar un cupo ya lleno (race condition confirmada
+        // en vivo — ver CHECKLIST.md, Tier 2 #5).
+        InscripcionMateria inscripcion = null!;
+        await unitOfWork.EjecutarEnTransaccionAsync(async () =>
+        {
+            var activasEnCurso = await inscripcionMateriaRepository
+                .ListarActivasPorCursoYMateriaAsync(dto.CursoId, dto.MateriaId, cancellationToken);
+            if (activasEnCurso.Count() >= curso.Cupo)
+                throw new BusinessException("No hay cupo disponible en este curso.", 409);
 
-        // 6. Crear la inscripción
-        var inscripcion = InscripcionMateria.Crear(dto.EstudianteId, dto.MateriaId, dto.CursoId);
-        await inscripcionMateriaRepository.AgregarAsync(inscripcion, cancellationToken);
+            inscripcion = InscripcionMateria.Crear(dto.EstudianteId, dto.MateriaId, dto.CursoId);
+            await inscripcionMateriaRepository.AgregarAsync(inscripcion, cancellationToken);
 
-        // 7. Auditoría (CU-06)
-        await auditoria.RegistrarAsync(
-            "InscripcionMateria",
-            inscripcion.Id.ToString(),
-            "CREAR",
-            valorAnterior: null,
-            valorNuevo: new { inscripcion.EstudianteId, inscripcion.MateriaId, inscripcion.CursoId, Estado = inscripcion.Estado.ToString() },
-            cancellationToken);
+            await auditoria.RegistrarAsync(
+                "InscripcionMateria",
+                inscripcion.Id.ToString(),
+                "CREAR",
+                valorAnterior: null,
+                valorNuevo: new { inscripcion.EstudianteId, inscripcion.MateriaId, inscripcion.CursoId, Estado = inscripcion.Estado.ToString() },
+                cancellationToken);
+        }, IsolationLevel.Serializable, cancellationToken);
 
+        // inscripcion.Materia nunca viene cargada (InscripcionMateria.Crear no trae la
+        // navegación) — antes esto dejaba materiaNombre siempre vacío en la respuesta. El
+        // espacio curricular ya resuelto en el paso 5b sí tiene la navegación (ver CHECKLIST.md,
+        // Tier 7 #36).
         return new InscripcionMateriaResultDto(
             inscripcion.Id,
             inscripcion.EstudianteId,
             inscripcion.MateriaId,
-            inscripcion.Materia?.Nombre ?? string.Empty,
+            espacios.First().Materia?.Nombre ?? string.Empty,
             inscripcion.CursoId,
             inscripcion.Estado.ToString(),
             inscripcion.FechaInscripcion);

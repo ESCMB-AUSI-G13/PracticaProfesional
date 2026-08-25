@@ -1,5 +1,6 @@
 using PracticaProfesional.Application.Interfaces;
 using PracticaProfesional.Application.Usuarios.DTOs;
+using PracticaProfesional.Domain.Entities;
 
 namespace PracticaProfesional.Application.Usuarios;
 
@@ -9,8 +10,7 @@ public class CambiarClaveUseCase(
 {
     public async Task EjecutarAsync(int id, CambiarClaveDto dto, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(dto.NuevaClave) || dto.NuevaClave.Length < 6)
-            throw new ArgumentException("La clave debe tener al menos 6 caracteres.");
+        Usuario.ValidarFortalezaPassword(dto.NuevaClave);
 
         var usuario = await usuarioRepository.ObtenerPorIdAsync(id, cancellationToken)
             ?? throw new KeyNotFoundException($"Usuario {id} no encontrado.");

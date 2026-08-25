@@ -8,10 +8,18 @@ public class DarDeBajaInscripcionMateriaUseCase(
     IInscripcionMateriaRepository repository,
     IAuditoriaService auditoria)
 {
-    public async Task EjecutarAsync(int id, CancellationToken cancellationToken = default)
+    /// <param name="usuarioIdSolicitante">Usuario autenticado que pide la baja.</param>
+    /// <param name="esStaff">true si es Direccion o Preceptor (pueden dar de baja cualquier
+    /// inscripción); si es false (Estudiante), solo puede dar de baja la propia — ver
+    /// CHECKLIST.md, Tier 5 #21.</param>
+    public async Task EjecutarAsync(
+        int id, int usuarioIdSolicitante, bool esStaff, CancellationToken cancellationToken = default)
     {
         var inscripcion = await repository.ObtenerPorIdAsync(id, cancellationToken)
             ?? throw new BusinessException($"No se encontró la inscripción con Id {id}.");
+
+        if (!esStaff && inscripcion.Estudiante.UsuarioId != usuarioIdSolicitante)
+            throw new BusinessException("No podés dar de baja la inscripción de otro estudiante.", 403);
 
         if (inscripcion.Estado != EstadoInscripcion.Activa)
             throw new BusinessException("Solo se puede dar de baja una inscripción activa.");

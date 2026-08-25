@@ -48,17 +48,22 @@ public class CursosController(
     [HttpPut("{id:int}")]
     [Authorize(Roles = "Direccion")]
     [ProducesResponseType(typeof(CursoDto), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)] // "no encontrado" es BusinessException (400), no 404 — ver CHECKLIST.md Tier 7 #35
     public async Task<IActionResult> Modificar(int id, [FromBody] ModificarCursoDto dto, CancellationToken cancellationToken)
     {
         var resultado = await modificarCurso.EjecutarAsync(id, dto, cancellationToken);
         return Ok(resultado);
     }
 
+    /// <summary>
+    /// Ampliado a Preceptor: CLAUDE.md (CU-22/CU-33) exige explícitamente "control de períodos
+    /// de inscripción y cierre de actas para Preceptores" — antes era Direccion-only (ver
+    /// CHECKLIST.md, Tier 5 #20).
+    /// </summary>
     [HttpPatch("{id:int}/cerrar")]
-    [Authorize(Roles = "Direccion")]
+    [Authorize(Roles = "Direccion,Preceptor")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)] // "no encontrado" es BusinessException (400), no 404 — ver CHECKLIST.md Tier 7 #35
     public async Task<IActionResult> Cerrar(int id, CancellationToken cancellationToken)
     {
         await cerrarCurso.EjecutarAsync(id, cancellationToken);
@@ -68,7 +73,7 @@ public class CursosController(
     [HttpPatch("{id:int}/reactivar")]
     [Authorize(Roles = "Direccion")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)] // "no encontrado" es BusinessException (400), no 404 — ver CHECKLIST.md Tier 7 #35
     public async Task<IActionResult> Reactivar(int id, CancellationToken cancellationToken)
     {
         await reactivarCurso.EjecutarAsync(id, cancellationToken);

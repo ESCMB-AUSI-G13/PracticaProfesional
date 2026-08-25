@@ -71,7 +71,7 @@ export class EditarCursoComponent implements OnInit {
     this.cursosService.modificar(this.id, {
       comision: this.comision(),
       cupo: this.cupo(),
-      preceptorId: this.preceptorUsuarioId()!
+      preceptorUsuarioId: this.preceptorUsuarioId()!
     }).subscribe({
       next: () => this.router.navigate(['/cursos']),
       error: (e) => { this.error.set(e.error?.mensaje ?? 'Error al guardar.'); this.guardando.set(false); }

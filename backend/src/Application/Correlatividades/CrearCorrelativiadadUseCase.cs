@@ -25,7 +25,8 @@ public record CorrelativiadadDto(
 /// </summary>
 public class CrearCorrelativiadadUseCase(
     ICorrelativiadadRepository correlativiadadRepository,
-    IMateriaRepository materiaRepository)
+    IMateriaRepository materiaRepository,
+    IAuditoriaService auditoria)
 {
     public async Task<CorrelativiadadDto> EjecutarAsync(
         CrearCorrelativiadadDto dto,
@@ -50,6 +51,14 @@ public class CrearCorrelativiadadUseCase(
 
         await correlativiadadRepository.AgregarAsync(correlatividad, cancellationToken);
 
+        // A diferencia de Materias/Cursos/EspaciosCurriculares, Correlatividades no generaba
+        // ningún registro de auditoría — un cambio acá afecta directamente si un alumno puede
+        // inscribirse, y no quedaba rastro de quién lo modificó (ver CHECKLIST.md, Tier 5 #25).
+        await auditoria.RegistrarAsync("Correlatividad", correlatividad.Id.ToString(), "CREAR",
+            valorAnterior: null,
+            valorNuevo: new { correlatividad.MateriaDestinoId, correlatividad.MateriaRequisitoId, correlatividad.TipoRequerimiento, CondicionAcademica = correlatividad.CondicionAcademica.ToString() },
+            cancellationToken: cancellationToken);
+
         var nombreRequisito = (await materiaRepository.ObtenerPorIdAsync(dto.MateriaRequisitoId, cancellationToken))!.Nombre;
         return new CorrelativiadadDto(
             correlatividad.Id,
@@ -69,6 +78,14 @@ public class CrearCorrelativiadadUseCase(
         // Nuevo arco a agregar: requisitoId → destinoId
         // Hay ciclo si ya existe un camino destinoId → ... → requisitoId en el grafo actual.
         var todas = await correlativiadadRepository.ObtenerTodasPorTipoAsync(tipo, cancellationToken);
+
+        // Duplicado exacto (mismo destino+requisito+tipo, sea cual sea la condición académica):
+        // choca con el índice único de la BD, pero se valida acá antes para dar un 409 claro en
+        // vez de depender del catch-all del middleware para DbUpdateException (ver CHECKLIST.md,
+        // Tier 4 #13).
+        if (todas.Any(c => c.MateriaDestinoId == destinoId && c.MateriaRequisitoId == requisitoId))
+            throw new BusinessException(
+                "Ya existe una correlatividad de este tipo entre esas dos materias.", 409);
 
         // Adyacencia: desde cada MateriaRequisitoId, a qué MateriaDestinoId apunta
         var grafo = todas

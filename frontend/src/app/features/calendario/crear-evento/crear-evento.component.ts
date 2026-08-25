@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CalendarioService, TIPOS_EVENTO } from '../calendario.service';
+import { MateriasService, Materia } from '../../materias/materias.service';
+import { CursosService, Curso } from '../../cursos/cursos.service';
 
 @Component({
   selector: 'app-crear-evento',
@@ -19,6 +21,9 @@ export class CrearEventoComponent implements OnInit {
   error      = signal<string | null>(null);
 
   tiposEvento = TIPOS_EVENTO;
+  // Tipo "Fecha límite carga de notas" — el único donde Materia/Curso determinan a qué docente
+  // avisarle (ver CHECKLIST.md, Tier 6 #27).
+  readonly TIPO_LIMITE_CARGA_NOTAS = 6;
 
   // Campos del formulario
   nombreEvento = signal('');
@@ -26,16 +31,24 @@ export class CrearEventoComponent implements OnInit {
   fechaInicio  = signal('');
   fechaFin     = signal('');
   tipoEvento   = signal<number>(8);
+  materiaId    = signal<number | null>(null);
+  cursoId      = signal<number | null>(null);
 
   carrerasOpciones = ['Todos', 'Trayecto', 'Profesorado'];
+  materias: Materia[] = [];
+  cursos: Curso[] = [];
 
   constructor(
     private calendarioService: CalendarioService,
+    private materiasService: MateriasService,
+    private cursosService: CursosService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
 
   ngOnInit(): void {
+    this.materiasService.listar().subscribe(m => this.materias = m);
+    this.cursosService.listar().subscribe(c => this.cursos = c);
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.esEdicion = true;
@@ -55,6 +68,8 @@ export class CrearEventoComponent implements OnInit {
             FechaLimiteCargaNotas: 6, Feriado: 7, Otro: 8
           };
           this.tipoEvento.set(tipoMap[e.tipoEvento] ?? 8);
+          this.materiaId.set(e.materiaId ?? null);
+          this.cursoId.set(e.cursoId ?? null);
           this.cargando.set(false);
         },
         error: () => { this.error.set('Error al cargar el evento.'); this.cargando.set(false); }
@@ -75,7 +90,9 @@ export class CrearEventoComponent implements OnInit {
       comision:     this.comision(),
       fechaInicio:  this.fechaInicio(),
       fechaFin:     this.fechaFin(),
-      tipoEvento:   this.tipoEvento()
+      tipoEvento:   this.tipoEvento(),
+      materiaId:    this.tipoEvento() === this.TIPO_LIMITE_CARGA_NOTAS ? this.materiaId() : null,
+      cursoId:      this.tipoEvento() === this.TIPO_LIMITE_CARGA_NOTAS ? this.cursoId() : null
     };
 
     const op = this.esEdicion

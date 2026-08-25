@@ -1,4 +1,5 @@
 using PracticaProfesional.Application.Interfaces;
+using PracticaProfesional.Domain.Entities;
 using PracticaProfesional.Domain.Exceptions;
 
 namespace PracticaProfesional.Application.Auth;
@@ -15,6 +16,11 @@ public class RestablecerPasswordUseCase(IUsuarioRepository usuarioRepository)
 
         if (request.NuevaPassword != request.ConfirmarPassword)
             throw new BusinessException("Las contraseñas no coinciden.");
+
+        // A diferencia de CambiarClaveUseCase y las altas, este flujo no validaba para nada la
+        // fortaleza de la nueva contraseña — se podía fijar una de 1 carácter (ver CHECKLIST.md,
+        // Tier 7 #37).
+        Usuario.ValidarFortalezaPassword(request.NuevaPassword);
 
         var usuario = await usuarioRepository.ObtenerPorTokenResetAsync(token, cancellationToken);
 

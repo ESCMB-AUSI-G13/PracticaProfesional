@@ -20,13 +20,15 @@ export interface CrearCursoRequest {
   anioLectivo: number;
   comision:    string;
   cupo:        number;
-  preceptorId: number;
+  // Es el UsuarioId del preceptor, no Preceptor.id — nombre alineado con el backend
+  // (ver CHECKLIST.md, Tier 7 #32).
+  preceptorUsuarioId: number;
 }
 
 export interface ModificarCursoRequest {
   comision:    string;
   cupo:        number;
-  preceptorId: number;
+  preceptorUsuarioId: number;
 }
 
 @Injectable({ providedIn: 'root' })

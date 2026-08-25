@@ -10,6 +10,8 @@ export interface EventoCalendario {
   fechaInicio:  string;
   fechaFin:     string;
   tipoEvento:   string;
+  materiaId?:   number | null;
+  cursoId?:     number | null;
 }
 
 export interface CrearEventoRequest {
@@ -18,6 +20,11 @@ export interface CrearEventoRequest {
   fechaInicio:  string;
   fechaFin:     string;
   tipoEvento:   number;
+  // Sin estos dos, un evento "Fecha límite carga de notas" no tiene forma de identificar a qué
+  // docente avisarle — la alerta le llegaba solo a Preceptores/Dirección, nunca al docente
+  // responsable de cargar la nota (ver CHECKLIST.md, Tier 6 #27).
+  materiaId?:   number | null;
+  cursoId?:     number | null;
 }
 
 export const TIPOS_EVENTO: { valor: number; etiqueta: string }[] = [

@@ -46,6 +46,32 @@
         </div>
       </div>
 
+      @if (tipoEvento() === TIPO_LIMITE_CARGA_NOTAS) {
+        <div class="fila-2">
+          <div class="campo">
+            <label>Materia</label>
+            <select [ngModel]="materiaId()" (ngModelChange)="materiaId.set($event ? +$event : null)" name="materia">
+              <option [value]="null">— Sin especificar —</option>
+              @for (m of materias; track m.id) {
+                <option [value]="m.id">{{ m.codigo }} — {{ m.nombre }}</option>
+              }
+            </select>
+          </div>
+          <div class="campo">
+            <label>Curso</label>
+            <select [ngModel]="cursoId()" (ngModelChange)="cursoId.set($event ? +$event : null)" name="curso">
+              <option [value]="null">— Sin especificar —</option>
+              @for (c of cursos; track c.id) {
+                <option [value]="c.id">{{ c.comision }} ({{ c.anioLectivo }}° año)</option>
+              }
+            </select>
+          </div>
+        </div>
+        <p class="ayuda">Si especificás Materia y Curso, el aviso de vencimiento le llega
+          directamente al docente de esa cátedra. Si lo dejás sin especificar, es un recordatorio
+          general que solo reciben Preceptores y Dirección.</p>
+      }
+
       <div class="acciones">
         <button type="submit" class="btn btn-primary" [disabled]="guardando()">
           {{ guardando() ? 'Guardando...' : (esEdicion ? 'Guardar cambios' : 'Crear evento') }}

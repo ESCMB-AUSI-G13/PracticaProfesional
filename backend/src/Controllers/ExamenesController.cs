@@ -16,7 +16,7 @@ public class ExamenesController(
     ListarExamenesUseCase listarExamenes,
     EliminarExamenUseCase eliminarExamen,
     ListarFinalesDisponiblesUseCase listarFinales,
-    InscribirseEnExamenUseCase inscribirseEnExamen,
+    InscribirseEnExamenAutogestUseCase inscribirseEnExamenAutogest,
     ObtenerComprobanteInscripcionExamenUseCase comprobanteExamenUseCase) : ControllerBase
 {
     /// <summary>GET api/examenes — Dirección ve todos los exámenes; Docente solo los de sus materias.</summary>
@@ -61,9 +61,14 @@ public class ExamenesController(
         return CreatedAtAction(nameof(Listar), new { id = resultado.Id }, resultado);
     }
 
-    /// <summary>POST api/examenes/{examenId}/inscripciones — estudiante se inscribe a un final (CU-33).</summary>
+    /// <summary>
+    /// POST api/examenes/{examenId}/inscripciones — el estudiante autenticado se autoinscribe a
+    /// un final (CU-33). Para que Dirección inscriba a un estudiante puntual, usar
+    /// POST api/inscripciones/examenes (recibe EstudianteId explícito — este endpoint no lo
+    /// tenía y por eso era inutilizable para Dirección, ver CHECKLIST.md Tier 4 #12).
+    /// </summary>
     [HttpPost("{examenId:int}/inscripciones")]
-    [Authorize(Roles = "Estudiante,Direccion")]
+    [Authorize(Roles = "Estudiante")]
     [ProducesResponseType(typeof(InscripcionExamenResultDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> InscribirseEnFinal(
@@ -71,8 +76,7 @@ public class ExamenesController(
         CancellationToken cancellationToken)
     {
         var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var dto = new InscribirseEnExamenDto(usuarioId, examenId);
-        var resultado = await inscribirseEnExamen.EjecutarAsync(dto, cancellationToken);
+        var resultado = await inscribirseEnExamenAutogest.EjecutarAsync(usuarioId, examenId, cancellationToken);
         return CreatedAtAction(nameof(Listar), new { id = resultado.Id }, resultado);
     }
 
