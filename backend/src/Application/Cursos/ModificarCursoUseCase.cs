@@ -20,6 +20,12 @@ public class ModificarCursoUseCase(
         var preceptor = await preceptorRepository.ObtenerPorUsuarioIdAsync(dto.PreceptorUsuarioId, cancellationToken)
             ?? throw new BusinessException($"No se encontró el preceptor con Usuario Id {dto.PreceptorUsuarioId}.");
 
+        // Reasignar a OTRO preceptor inactivo se bloquea; mantener el que ya tenía el curso se
+        // permite aunque haya sido desactivado después (el frontend lo deja seleccionado a
+        // propósito para no bloquear ediciones de cupo/comisión — ver editar-curso.component.ts).
+        if (!preceptor.Usuario.Activo && preceptor.Id != curso.PreceptorId)
+            throw new BusinessException("El preceptor seleccionado no está activo.", 409);
+
         var anterior = new { curso.Comision, curso.Cupo, curso.PreceptorId };
         curso.Modificar(dto.Comision, dto.Cupo, preceptor.Id);
         await cursoRepository.GuardarCambiosAsync(cancellationToken);

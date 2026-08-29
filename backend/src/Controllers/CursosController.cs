@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PracticaProfesional.Application.Cursos;
 using PracticaProfesional.Application.Cursos.DTOs;
+using System.Security.Claims;
 
 namespace PracticaProfesional.Controllers;
 
@@ -30,7 +31,9 @@ public class CursosController(
     [ProducesResponseType(typeof(IEnumerable<CursoDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> ListarPorMateria(int materiaId, CancellationToken cancellationToken)
     {
-        var resultado = await listarCursosPorMateria.EjecutarAsync(materiaId, cancellationToken);
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var esDireccion = User.IsInRole("Direccion");
+        var resultado = await listarCursosPorMateria.EjecutarAsync(materiaId, usuarioId, esDireccion, cancellationToken);
         return Ok(resultado);
     }
 

@@ -18,6 +18,9 @@ public class CrearCursoUseCase(
         var preceptor = await preceptorRepository.ObtenerPorUsuarioIdAsync(dto.PreceptorUsuarioId, cancellationToken)
             ?? throw new BusinessException($"No se encontró el preceptor con Usuario Id {dto.PreceptorUsuarioId}.");
 
+        if (!preceptor.Usuario.Activo)
+            throw new BusinessException("El preceptor seleccionado no está activo.", 409);
+
         var curso = Curso.Crear(dto.Anio, dto.AnioLectivo, dto.Comision, dto.Cupo, preceptor.Id, dto.CarreraId);
         await cursoRepository.AgregarAsync(curso, cancellationToken);
 
