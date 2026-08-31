@@ -33,7 +33,8 @@ public class CursosController(
     public async Task<IActionResult> ListarPorMateria(int materiaId, CancellationToken cancellationToken)
     {
         var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var resultado = await listarCursosPorMateria.EjecutarAsync(materiaId, usuarioId, User.IsInRole("Direccion"), cancellationToken);
+        var esDireccion = User.IsInRole("Direccion");
+        var resultado = await listarCursosPorMateria.EjecutarAsync(materiaId, usuarioId, esDireccion, cancellationToken);
         return Ok(resultado);
     }
 
