@@ -7,6 +7,12 @@ public interface ICorrelativiadadRepository
     /// <summary>Retorna las correlatividades que el estudiante debe cumplir para CURSAR la materia destino.</summary>
     Task<IEnumerable<Correlatividad>> ObtenerParaCursarAsync(int materiaDestinoId, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Igual que <see cref="ObtenerParaCursarAsync"/> pero para varias materias destino en un solo
+    /// viaje a la base — evita N+1 al listar disponibilidad de un plan completo.
+    /// </summary>
+    Task<IEnumerable<Correlatividad>> ObtenerParaCursarPorMateriasAsync(IEnumerable<int> materiaDestinoIds, CancellationToken cancellationToken = default);
+
     /// <summary>Retorna las correlatividades que el estudiante debe cumplir para RENDIR el examen final.</summary>
     Task<IEnumerable<Correlatividad>> ObtenerParaRendirAsync(int materiaDestinoId, CancellationToken cancellationToken = default);
 

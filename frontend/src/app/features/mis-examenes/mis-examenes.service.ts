@@ -13,6 +13,7 @@ export interface ExamenFinalDisponible {
   cupo:          number;
   tipoExamen:    string;
   yaInscripto:   boolean;
+  inscripcionId: number | null;
 }
 
 export interface InscripcionExamenResult {
@@ -57,5 +58,9 @@ export class MisExamenesService {
 
   obtenerComprobante(inscripcionId: number): Observable<ComprobanteInscripcionExamen> {
     return this.http.get<ComprobanteInscripcionExamen>(`${this.apiUrl}/inscripciones/${inscripcionId}/comprobante`);
+  }
+
+  darDeBaja(inscripcionId: number): Observable<void> {
+    return this.http.delete<void>(`${environment.apiUrl}/inscripciones/examenes/${inscripcionId}`);
   }
 }

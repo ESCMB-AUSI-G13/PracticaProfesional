@@ -9,5 +9,6 @@ public record ExamenFinalDisponibleDto(
     string Horario,
     int    Cupo,
     string TipoExamen,
-    bool   YaInscripto
+    bool   YaInscripto,
+    int?   InscripcionId
 );

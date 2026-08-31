@@ -16,7 +16,8 @@ public class InscripcionesController(
     ListarMisInscripcionesEstudianteUseCase misInscripcionesUseCase,
     InscribirseEnMateriaAutogestUseCase autogestUseCase,
     DarDeBajaInscripcionMateriaUseCase darDeBajaUseCase,
-    InscribirseEnExamenUseCase inscribirseEnExamenUseCase) : ControllerBase
+    InscribirseEnExamenUseCase inscribirseEnExamenUseCase,
+    DarDeBajaInscripcionExamenUseCase darDeBajaExamenUseCase) : ControllerBase
 {
     // ── Dirección ─────────────────────────────────────────────────────────────
 
@@ -90,6 +91,25 @@ public class InscripcionesController(
     {
         var resultado = await inscribirseEnExamenUseCase.EjecutarAsync(dto, cancellationToken);
         return CreatedAtAction(nameof(Listar), new { id = resultado.Id }, resultado);
+    }
+
+    /// <summary>
+    /// DELETE api/inscripciones/examenes/{id} — mismo criterio que la baja de materias: un
+    /// Estudiante solo puede dar de baja su propia inscripción (chequeo de propiedad en el
+    /// UseCase); Dirección y Preceptor pueden dar de baja cualquiera.
+    /// </summary>
+    [HttpDelete("examenes/{id:int}")]
+    [Authorize(Roles = "Direccion,Preceptor,Estudiante")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> DarDeBajaInscripcionExamen(int id, CancellationToken cancellationToken)
+    {
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var esStaff = User.IsInRole("Direccion") || User.IsInRole("Preceptor");
+        await darDeBajaExamenUseCase.EjecutarAsync(id, usuarioId, esStaff, cancellationToken);
+        return NoContent();
     }
 
     // ── Estudiante (autogestionada) ───────────────────────────────────────────

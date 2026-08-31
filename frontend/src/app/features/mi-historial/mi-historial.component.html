@@ -1,0 +1,78 @@
+<div class="page">
+  <header class="page-header">
+    <h1>Historial Académico</h1>
+  </header>
+
+  @if (error()) { <p class="estado error">{{ error() }}</p> }
+
+  @if (cargando()) {
+    <app-cargando />
+  } @else if (materias().length === 0) {
+    <p class="estado">Todavía no tenés materias cursadas en tu historial.</p>
+  } @else {
+    <div class="filtros">
+      <input
+        type="text"
+        class="filtro-texto"
+        placeholder="Buscar por materia o código..."
+        [ngModel]="filtroTexto()"
+        (ngModelChange)="filtroTexto.set($event)" />
+
+      <select
+        class="filtro-select"
+        [ngModel]="filtroAnio()"
+        (ngModelChange)="filtroAnio.set($event)">
+        <option [ngValue]="null">Todos los años</option>
+        @for (a of aniosDisponibles(); track a) {
+          <option [ngValue]="a">{{ a }}</option>
+        }
+      </select>
+
+      <select
+        class="filtro-select"
+        [ngModel]="filtroEstado()"
+        (ngModelChange)="filtroEstado.set($event)">
+        <option value="todos">Todas las condiciones</option>
+        <option value="aprobado">Aprobado</option>
+        <option value="desaprobado">Desaprobado</option>
+      </select>
+    </div>
+
+    @if (materiasFiltradas().length === 0) {
+      <p class="estado">Ninguna materia coincide con el filtro.</p>
+    } @else {
+      @for (m of materiasFiltradas(); track m.materiaId) {
+        <section class="materia-card">
+          <h2 class="materia-titulo">{{ m.materiaNombre.toUpperCase() }} ({{ m.materiaCodigo }})</h2>
+
+          <ul class="renglones">
+            @for (p of m.parciales; track $index) {
+              <li>
+                Parcial - {{ notaConPalabra(p.nota) }}
+                <span class="estado-inline" [class.ok]="p.estado === 'Aprobada'" [class.mal]="p.estado === 'Desaprobada'">{{ p.estado }}</span>
+                - {{ p.fechaExamen | date:'dd/MM/yyyy' }}
+              </li>
+            }
+            @if (m.condicion) {
+              <li>Regularidad - {{ m.condicion }}{{ m.anio ? ' - ' + m.anio : '' }}</li>
+            }
+            @if (m.notaFinal !== null || m.estadoFinal) {
+              <li class="nota-final">
+                Final - {{ notaConPalabra(m.notaFinal) }}
+                <span class="estado-inline" [class.ok]="m.estadoFinal === 'Aprobada'" [class.mal]="m.estadoFinal === 'Desaprobada'">{{ m.estadoFinal }}</span>
+              </li>
+            }
+            @if (m.parciales.length === 0 && !m.condicion && m.notaFinal === null && !m.estadoFinal) {
+              <li class="sin-notas">Todavía no tenés notas cargadas en esta materia.</li>
+            }
+          </ul>
+        </section>
+      }
+    }
+
+    <div class="promedio-card">
+      <span class="promedio-label">Promedio general</span>
+      <span class="promedio-valor">{{ promedioGeneral() ?? '—' }}</span>
+    </div>
+  }
+</div>

@@ -270,6 +270,14 @@ export const routes: Routes = [
           import('./features/mis-examenes/mis-examenes.component').then(m => m.MisExamenesComponent)
       },
 
+      // Mi Historial Académico — solo Estudiante (CU-43)
+      {
+        path: 'mi-historial',
+        canActivate: [roleGuard('Estudiante')],
+        loadComponent: () =>
+          import('./features/mi-historial/mi-historial.component').then(m => m.MiHistorialComponent)
+      },
+
       // Tablero Ejecutivo — solo Dirección (RR-01)
       {
         path: 'reportes/tablero-ejecutivo',

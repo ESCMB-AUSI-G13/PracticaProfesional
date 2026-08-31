@@ -2,11 +2,12 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { EncuestasService, EncuestaDto } from '../encuestas.service';
 import { ModalEncuestaComponent } from '../modal-encuesta/modal-encuesta.component';
+import { CargandoComponent } from '../../../shared/cargando/cargando.component';
 
 @Component({
   selector: 'app-mis-encuestas-estudiante',
   standalone: true,
-  imports: [CommonModule, ModalEncuestaComponent],
+  imports: [CommonModule, ModalEncuestaComponent, CargandoComponent],
   templateUrl: './mis-encuestas-estudiante.component.html',
   styleUrl: './mis-encuestas-estudiante.component.scss'
 })

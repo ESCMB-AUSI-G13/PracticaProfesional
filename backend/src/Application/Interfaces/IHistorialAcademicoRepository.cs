@@ -13,6 +13,19 @@ public interface IHistorialAcademicoRepository
 
     Task<bool> EstaAprobadoAsync(int estudianteId, int materiaId, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Trae todo el historial del estudiante en un solo viaje a la base, para evaluar
+    /// EstaRegularizado/EstaAprobado en memoria contra varias materias sin repetir consultas
+    /// (evita N+1 al listar disponibilidad de un plan completo).
+    /// </summary>
+    Task<IEnumerable<HistorialAcademico>> ObtenerPorEstudianteAsync(int estudianteId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Igual que <see cref="ObtenerPorEstudianteAsync"/> pero con la navegación a Materia
+    /// cargada — para vistas que necesitan mostrar código/nombre (CU-43, "mi historial").
+    /// </summary>
+    Task<IEnumerable<HistorialAcademico>> ObtenerConMateriaPorEstudianteAsync(int estudianteId, CancellationToken cancellationToken = default);
+
     Task<decimal?> ObtenerNotaFinalEnCursoAsync(
         int estudianteId,
         int materiaId,

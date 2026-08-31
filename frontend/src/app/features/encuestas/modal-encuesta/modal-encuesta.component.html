@@ -10,7 +10,13 @@
       <span class="badge-anonima">Anónima</span>
     </div>
 
-    <div class="modal-body">
+    <div class="modal-body" [class.modal-body-disabled]="enviando()">
+      @if (enviando()) {
+        <div class="modal-body-overlay">
+          <span class="spinner"></span>
+          <p>Enviando tu respuesta...</p>
+        </div>
+      }
       @for (pregunta of encuesta.preguntas; track pregunta.id; let i = $index) {
         <div class="pregunta" [class.obligatoria]="pregunta.esObligatoria">
           <p class="pregunta-texto">
@@ -60,7 +66,7 @@
           class="btn-enviar"
           (click)="enviar()"
           [disabled]="!puedeEnviar() || enviando()">
-          {{ enviando() ? 'Enviando...' : 'Enviar y continuar' }}
+          @if (enviando()) { <span class="spinner-btn"></span> Enviando... } @else { Enviar y continuar }
         </button>
       </div>
     </div>

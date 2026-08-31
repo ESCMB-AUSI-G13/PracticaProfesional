@@ -2,7 +2,7 @@
   <app-modal-encuesta
     [encuesta]="encuesta"
     (completada)="onEncuestaCompletada()"
-    (cerrar)="encuestaPendiente.set(null)">
+    (cerrar)="cerrarEncuestaPendiente()">
   </app-modal-encuesta>
 }
 
@@ -17,7 +17,10 @@
   @if (error()) { <p class="estado error">{{ error() }}</p> }
 
   @if (mostrarForm()) {
-    <div class="form-card">
+    <div class="form-card" [class.form-disabled]="guardando()">
+      @if (guardando()) {
+        <div class="form-overlay"><app-cargando mensaje="Procesando inscripción..." /></div>
+      }
       <h2 class="form-title">Inscribirse a una materia</h2>
       <p class="info">Las correlatividades se validan automáticamente. Necesitás estar regularizado en las materias previas requeridas.</p>
 
@@ -64,7 +67,7 @@
   }
 
   @if (cargando()) {
-    <p class="estado">Cargando...</p>
+    <app-cargando />
   } @else if (inscripciones().length === 0 && !mostrarForm()) {
     <p class="estado">No tenés inscripciones activas. Usá el botón de arriba para inscribirte.</p>
   } @else if (inscripciones().length > 0) {
@@ -77,6 +80,7 @@
           <th>Estado</th>
           <th>Fecha</th>
           <th>Comprobante</th>
+          <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
@@ -89,11 +93,28 @@
             <td>{{ i.fechaInscripcion | date:'dd/MM/yyyy' }}</td>
             <td>
               <button
-                class="btn btn-sm"
+                class="btn-comprobante"
                 (click)="verComprobante(i.id)"
-                [disabled]="cargandoComprobante()">
-                {{ cargandoComprobante() ? '...' : 'Ver' }}
+                [disabled]="cargandoComprobante()"
+                title="Ver comprobante de inscripción">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="#e74c3c">
+                  <path d="M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6H6z" opacity="0.15"/>
+                  <path d="M14 2v5a1 1 0 0 0 1 1h5" fill="none" stroke="#e74c3c" stroke-width="1.5"/>
+                  <path d="M6 2a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6H6z" fill="none" stroke="#e74c3c" stroke-width="1.5" stroke-linejoin="round"/>
+                  <text x="12" y="17" text-anchor="middle" font-size="7" font-weight="700" fill="#e74c3c">PDF</text>
+                </svg>
+                {{ cargandoComprobante() ? 'Cargando...' : 'Ver' }}
               </button>
+            </td>
+            <td>
+              @if (i.estado.toLowerCase() === 'activa') {
+                <button
+                  class="btn-baja"
+                  (click)="darDeBaja(i)"
+                  [disabled]="dandoDeBajaId() !== null">
+                  {{ dandoDeBajaId() === i.id ? 'Dando de baja...' : 'Dar de baja' }}
+                </button>
+              }
             </td>
           </tr>
         }

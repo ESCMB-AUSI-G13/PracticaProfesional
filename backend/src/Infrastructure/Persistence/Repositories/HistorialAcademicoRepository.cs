@@ -45,6 +45,24 @@ public class HistorialAcademicoRepository(AppDbContext context) : IHistorialAcad
                 h.NotaFinal >= 4,
             cancellationToken);
 
+    public async Task<IEnumerable<HistorialAcademico>> ObtenerPorEstudianteAsync(
+        int estudianteId,
+        CancellationToken cancellationToken = default)
+        => await context.HistorialAcademico
+            .AsNoTracking()
+            .Where(h => h.EstudianteId == estudianteId)
+            .ToListAsync(cancellationToken);
+
+    public async Task<IEnumerable<HistorialAcademico>> ObtenerConMateriaPorEstudianteAsync(
+        int estudianteId,
+        CancellationToken cancellationToken = default)
+        => await context.HistorialAcademico
+            .AsNoTracking()
+            .Include(h => h.Materia)
+            .Where(h => h.EstudianteId == estudianteId)
+            .OrderByDescending(h => h.Anio)
+            .ToListAsync(cancellationToken);
+
     public async Task<decimal?> ObtenerNotaFinalEnCursoAsync(
         int estudianteId,
         int materiaId,

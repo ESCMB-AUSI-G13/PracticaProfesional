@@ -99,13 +99,21 @@ public class InscribirseEnExamenUseCase(
     private async Task ValidarCorrelativiadadesParaRendirAsync(
         int estudianteId, int materiaId, CancellationToken cancellationToken)
     {
-        var correlatividades = await correlativiadadRepository.ObtenerParaRendirAsync(materiaId, cancellationToken);
+        var correlatividades = (await correlativiadadRepository.ObtenerParaRendirAsync(materiaId, cancellationToken)).ToList();
+
+        // Mismo fix que InscribirseEnMateriaUseCase: un solo viaje a la base para todo el
+        // historial en vez de una consulta EstaAprobado por cada correlatividad (N+1).
+        var historial = correlatividades.Count > 0
+            ? (await historialRepository.ObtenerPorEstudianteAsync(estudianteId, cancellationToken)).ToList()
+            : [];
+
         var incumplidos = new List<string>();
 
         foreach (var corr in correlatividades)
         {
             var nombre = corr.MateriaRequisito?.Nombre ?? $"Materia Id {corr.MateriaRequisitoId}";
-            var cumple = await historialRepository.EstaAprobadoAsync(estudianteId, corr.MateriaRequisitoId, cancellationToken);
+            var cumple = historial.Any(h => h.MateriaId == corr.MateriaRequisitoId &&
+                h.NotaFinal.HasValue && h.NotaFinal >= 4);
             if (!cumple) incumplidos.Add($"'{nombre}' (aprobada)");
         }
 

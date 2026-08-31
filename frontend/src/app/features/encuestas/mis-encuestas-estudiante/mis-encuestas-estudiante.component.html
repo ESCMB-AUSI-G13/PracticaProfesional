@@ -12,7 +12,7 @@
   </header>
 
   @if (cargando()) {
-    <p class="estado">Cargando...</p>
+    <app-cargando />
   } @else if (error()) {
     <p class="estado error">{{ error() }}</p>
   } @else {

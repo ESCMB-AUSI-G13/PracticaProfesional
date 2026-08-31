@@ -105,7 +105,14 @@ public class InscribirseEnMateriaUseCase(
         int materiaId,
         CancellationToken cancellationToken)
     {
-        var correlatividades = await correlativiadadRepository.ObtenerParaCursarAsync(materiaId, cancellationToken);
+        var correlatividades = (await correlativiadadRepository.ObtenerParaCursarAsync(materiaId, cancellationToken)).ToList();
+
+        // Un solo viaje a la base para todo el historial del estudiante en vez de una consulta
+        // EstaRegularizado/EstaAprobado por cada correlatividad (N+1) — con varias correlativas
+        // (régimen Res. 0013) esto era la parte más lenta de inscribirse.
+        var historial = correlatividades.Count > 0
+            ? (await historialRepository.ObtenerPorEstudianteAsync(estudianteId, cancellationToken)).ToList()
+            : [];
 
         var requisitosIncumplidos = new List<string>();
 
@@ -118,11 +125,13 @@ public class InscribirseEnMateriaUseCase(
             {
                 // Para cursar: el requisito es tener la materia regularizada
                 CondicionAcademica.Regularizado =>
-                    await historialRepository.EstaRegularizadoAsync(estudianteId, correlatividad.MateriaRequisitoId, cancellationToken),
+                    historial.Any(h => h.MateriaId == correlatividad.MateriaRequisitoId &&
+                        (h.Condicion == CondicionEstudiante.Regular || h.Condicion == CondicionEstudiante.Promocional)),
 
                 // Para cursar con requisito aprobado: debe haberla aprobado (caso menos común)
                 CondicionAcademica.Aprobado =>
-                    await historialRepository.EstaAprobadoAsync(estudianteId, correlatividad.MateriaRequisitoId, cancellationToken),
+                    historial.Any(h => h.MateriaId == correlatividad.MateriaRequisitoId &&
+                        h.NotaFinal.HasValue && h.NotaFinal >= 4),
 
                 _ => false
             };

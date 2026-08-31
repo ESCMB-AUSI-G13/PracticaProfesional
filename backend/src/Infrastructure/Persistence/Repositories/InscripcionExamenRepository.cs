@@ -42,9 +42,13 @@ public class InscripcionExamenRepository(AppDbContext context) : IInscripcionExa
         await context.SaveChangesAsync(cancellationToken);
     }
 
+    // Una inscripción dada de Baja no debe bloquear una reinscripción al mismo examen — sin
+    // este filtro, dar de baja dejaba al estudiante sin forma de volver a anotarse (ver bug
+    // reportado: "solo desapareció el botón de dar de baja", nunca volvía a aparecer Inscribirse).
     public async Task<bool> ExisteAsync(int estudianteId, int examenId, CancellationToken cancellationToken = default)
         => await context.InscripcionesExamen
-            .AnyAsync(i => i.EstudianteId == estudianteId && i.ExamenId == examenId, cancellationToken);
+            .AnyAsync(i => i.EstudianteId == estudianteId && i.ExamenId == examenId
+                && i.Estado != Domain.Enums.EstadoInscripcion.Baja, cancellationToken);
 
     public async Task<IEnumerable<InscripcionExamen>> ListarPorEstudianteAsync(int estudianteId, CancellationToken cancellationToken = default)
         => await context.InscripcionesExamen

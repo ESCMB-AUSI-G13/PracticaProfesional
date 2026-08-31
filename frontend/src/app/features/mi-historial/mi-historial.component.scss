@@ -1,0 +1,62 @@
+.page { padding: 2rem; font-family: sans-serif; max-width: 800px; margin: 0 auto; }
+.page-header { margin-bottom: 1.5rem; h1 { margin: 0; font-size: 1.5rem; } }
+.estado { padding: 1rem; color: #555; &.error { color: #c0392b; } }
+
+.filtros {
+  display: flex; flex-wrap: wrap; gap: 0.6rem;
+  margin-bottom: 1.5rem;
+}
+.filtro-texto {
+  flex: 1; min-width: 200px;
+  padding: 0.5rem 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.88rem;
+}
+.filtro-select {
+  padding: 0.5rem 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.88rem;
+  background: #fff;
+}
+
+.materia-card {
+  background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px;
+  padding: 1rem 1.25rem; margin-bottom: 1rem;
+}
+
+.materia-titulo {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #333;
+  margin: 0 0 0.5rem;
+}
+
+.renglones {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  li {
+    font-size: 0.85rem;
+    color: #444;
+    line-height: 1.7;
+  }
+
+  .nota-final { font-weight: 600; color: #2c3e50; }
+  .sin-notas { color: #999; font-style: italic; }
+}
+
+.estado-inline {
+  font-weight: 600;
+  &.ok  { color: #27ae60; }
+  &.mal { color: #c0392b; }
+}
+
+.promedio-card {
+  display: flex; align-items: center; justify-content: space-between;
+  background: #eaf4fb; border: 1px solid #bcdff5; border-radius: 6px;
+  padding: 1rem 1.25rem; margin-top: 1.5rem;
+}
+.promedio-label { font-size: 0.9rem; font-weight: 600; color: #2c3e50; }
+.promedio-valor { font-size: 1.3rem; font-weight: 700; color: #2980b9; }
+
+@media (max-width: 768px) {
+  .page { padding: 1rem; }
+  .filtros { flex-direction: column; }
+}

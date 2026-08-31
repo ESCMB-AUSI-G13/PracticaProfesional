@@ -1,7 +1,10 @@
 .page { padding: 2rem; font-family: sans-serif; max-width: 1000px; margin: 0 auto; }
 .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; h1 { margin: 0; font-size: 1.5rem; } }
 .info { background: #eaf4fb; border-left: 4px solid #3498db; padding: 0.75rem 1rem; border-radius: 4px; color: #2c3e50; font-size: 0.9rem; margin-bottom: 1.25rem; }
-.form-card { background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1.5rem; margin-bottom: 1.5rem; }
+.form-card { position: relative; background: #f9f9f9; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1.5rem; margin-bottom: 1.5rem;
+  &.form-disabled { pointer-events: none; opacity: 0.6; }
+}
+.form-overlay { position: absolute; inset: 0; z-index: 1; display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,0.85); border-radius: 6px; pointer-events: auto; }
 .form-title { margin: 0 0 1rem; font-size: 1.1rem; color: #2c3e50; }
 .form-row { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem;
   label { font-size: 0.85rem; font-weight: 600; color: #555; }
@@ -17,8 +20,22 @@ code { background: #f0f0f0; padding: 0.1rem 0.4rem; border-radius: 3px; font-siz
 .estado { padding: 1rem; color: #555; &.error { color: #c0392b; } }
 .btn { padding: 0.45rem 1rem; border: none; border-radius: 4px; cursor: pointer; font-size: 0.9rem;
   &.btn-primary { background: #3498db; color: white; }
-  &.btn-sm { padding: 0.3rem 0.7rem; font-size: 0.82rem; background: #f0f0f0; color: #333; }
   &:hover:not(:disabled) { opacity: 0.9; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+.btn-comprobante {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.3rem 0.7rem; font-size: 0.82rem; font-weight: 600;
+  background: #fff; color: #c0392b;
+  border: 1px solid #f0c4bd; border-radius: 4px; cursor: pointer;
+  &:hover:not(:disabled) { background: #fdecea; border-color: #e74c3c; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
+.btn-baja {
+  padding: 0.3rem 0.7rem; font-size: 0.82rem; font-weight: 600;
+  background: #fff; color: #7f8c8d;
+  border: 1px solid #d5dbdb; border-radius: 4px; cursor: pointer; white-space: nowrap;
+  &:hover:not(:disabled) { background: #fdecea; color: #c0392b; border-color: #e74c3c; }
   &:disabled { opacity: 0.6; cursor: not-allowed; }
 }
 

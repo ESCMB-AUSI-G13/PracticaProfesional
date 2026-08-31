@@ -45,6 +45,8 @@ public class InscripcionMateriaRepository(AppDbContext context) : IInscripcionMa
             .AsNoTracking()
             .Include(i => i.Materia)
             .Include(i => i.Curso)
+            .Include(i => i.Estudiante).ThenInclude(e => e.Usuario)
+            .Include(i => i.Estudiante).ThenInclude(e => e.Carrera)
             .Where(i => i.EstudianteId == estudianteId && i.Estado == EstadoInscripcion.Activa)
             .ToListAsync(cancellationToken);
 

@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PracticaProfesional.Application.Cursos;
 using PracticaProfesional.Application.Cursos.DTOs;
+using System.Security.Claims;
 
 namespace PracticaProfesional.Controllers;
 
@@ -28,9 +29,11 @@ public class CursosController(
     [HttpGet("por-materia/{materiaId:int}")]
     [Authorize(Roles = "Direccion,Estudiante")]
     [ProducesResponseType(typeof(IEnumerable<CursoDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> ListarPorMateria(int materiaId, CancellationToken cancellationToken)
     {
-        var resultado = await listarCursosPorMateria.EjecutarAsync(materiaId, cancellationToken);
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var resultado = await listarCursosPorMateria.EjecutarAsync(materiaId, usuarioId, User.IsInRole("Direccion"), cancellationToken);
         return Ok(resultado);
     }
 

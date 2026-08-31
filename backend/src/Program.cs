@@ -131,6 +131,7 @@ builder.Services.AddScoped<ObtenerHistorialNotasUseCase>();
 
 // Estado Académico
 builder.Services.AddScoped<ActualizarEstadoAcademicoUseCase>();
+builder.Services.AddScoped<PracticaProfesional.Application.MiHistorial.ObtenerMiHistorialUseCase>();
 
 // Asistencias
 builder.Services.AddScoped<ObtenerEspaciosPorDocenteUseCase>();
@@ -188,6 +189,7 @@ builder.Services.AddScoped<EliminarExamenUseCase>();
 builder.Services.AddScoped<ListarFinalesDisponiblesUseCase>();
 builder.Services.AddScoped<InscribirseEnExamenUseCase>();
 builder.Services.AddScoped<InscribirseEnExamenAutogestUseCase>();
+builder.Services.AddScoped<DarDeBajaInscripcionExamenUseCase>();
 
 // Reportes Rendimiento Consolidado (RR-05, RR-06, RR-07)
 builder.Services.AddScoped<IRendimientoConsolidadoRepository, RendimientoConsolidadoRepository>();

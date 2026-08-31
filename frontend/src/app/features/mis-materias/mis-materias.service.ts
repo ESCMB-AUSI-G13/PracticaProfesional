@@ -38,4 +38,8 @@ export class MisMateriasService {
   obtenerComprobante(id: number): Observable<ComprobanteInscripcionMateria> {
     return this.http.get<ComprobanteInscripcionMateria>(`${this.apiUrl}/materias/${id}/comprobante`);
   }
+
+  darDeBaja(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/materias/${id}`);
+  }
 }

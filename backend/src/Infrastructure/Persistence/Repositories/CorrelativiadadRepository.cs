@@ -15,6 +15,15 @@ public class CorrelativiadadRepository(AppDbContext context) : ICorrelativiadadR
             .Where(c => c.MateriaDestinoId == materiaDestinoId && c.TipoRequerimiento == "Cursar")
             .ToListAsync(cancellationToken);
 
+    public async Task<IEnumerable<Correlatividad>> ObtenerParaCursarPorMateriasAsync(
+        IEnumerable<int> materiaDestinoIds,
+        CancellationToken cancellationToken = default)
+        => await context.Correlatividades
+            .AsNoTracking()
+            .Include(c => c.MateriaRequisito)
+            .Where(c => materiaDestinoIds.Contains(c.MateriaDestinoId) && c.TipoRequerimiento == "Cursar")
+            .ToListAsync(cancellationToken);
+
     public async Task<IEnumerable<Correlatividad>> ObtenerParaRendirAsync(
         int materiaDestinoId,
         CancellationToken cancellationToken = default)
