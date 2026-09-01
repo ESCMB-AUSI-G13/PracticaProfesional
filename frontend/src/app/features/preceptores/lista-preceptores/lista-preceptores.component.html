@@ -8,6 +8,13 @@
     </div>
   </header>
 
+  @if (accionError()) {
+    <div class="banner-error">
+      <span>{{ accionError() }}</span>
+      <button type="button" class="banner-cerrar" (click)="accionError.set(null)">✕</button>
+    </div>
+  }
+
   @if (!cargando() && !error() && hayPreceptoresEnBD()) {
     <div class="filtros">
       <div class="filtro-busqueda">

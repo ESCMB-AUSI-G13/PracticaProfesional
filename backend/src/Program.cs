@@ -363,8 +363,12 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers()
     .AddJsonOptions(o =>
+    {
         o.JsonSerializerOptions.Converters.Add(
-            new System.Text.Json.Serialization.JsonStringEnumConverter()));
+            new System.Text.Json.Serialization.JsonStringEnumConverter());
+        o.JsonSerializerOptions.Converters.Add(new PracticaProfesional.Infrastructure.Serialization.UtcDateTimeConverter());
+        o.JsonSerializerOptions.Converters.Add(new PracticaProfesional.Infrastructure.Serialization.UtcNullableDateTimeConverter());
+    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

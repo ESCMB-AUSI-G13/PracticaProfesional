@@ -18,6 +18,7 @@ export class ListaUsuariosComponent implements OnInit, OnDestroy {
   private todosLosUsuarios = signal<Usuario[]>([]);
   cargando        = signal(true);
   error           = signal<string | null>(null);
+  accionError     = signal<string | null>(null);
   sesionesActivas = signal<Set<number>>(new Set());
   busqueda        = signal('');
 
@@ -85,17 +86,19 @@ export class ListaUsuariosComponent implements OnInit, OnDestroy {
 
   desactivar(id: number): void {
     if (!confirm('¿Desactivar este usuario?')) return;
+    this.accionError.set(null);
     this.usuariosService.desactivar(id).subscribe({
       next: () => this.cargarUsuarios(),
-      error: () => this.error.set('Error al desactivar el usuario.')
+      error: err => this.accionError.set(err?.error?.detail ?? err?.error?.title ?? 'Error al desactivar el usuario.')
     });
   }
 
   reactivar(id: number): void {
     if (!confirm('¿Reactivar este usuario?')) return;
+    this.accionError.set(null);
     this.usuariosService.reactivar(id).subscribe({
       next: () => this.cargarUsuarios(),
-      error: () => this.error.set('Error al reactivar el usuario.')
+      error: err => this.accionError.set(err?.error?.detail ?? err?.error?.title ?? 'Error al reactivar el usuario.')
     });
   }
 

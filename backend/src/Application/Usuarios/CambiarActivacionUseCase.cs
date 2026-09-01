@@ -13,10 +13,19 @@ public class CambiarActivacionUseCase(
         bool activar,
         Rol? rolEsperado,
         string entidad,
-        CancellationToken ct = default)
+        CancellationToken ct = default,
+        int? usuarioIdSolicitante = null)
     {
         var usuario = await usuarioRepository.ObtenerPorIdAsync(usuarioId, ct)
             ?? throw new KeyNotFoundException($"{entidad} no encontrado.");
+
+        // No tiene un caso de uso real: si querés dejar de ser Dirección, que te desactive otro
+        // usuario de Dirección. Antes se permitía si quedaba otra cuenta Dirección activa, pero
+        // eso corta tu propia sesión al instante con un error confuso en el frontend en vez de
+        // un mensaje claro — ver validación manual de la Tarea 4 del Acta de Pruebas.
+        if (!activar && usuarioIdSolicitante.HasValue && usuarioIdSolicitante.Value == usuarioId)
+            throw new BusinessException(
+                "No podés desactivar tu propia cuenta. Pedile a otro usuario de Dirección que lo haga.", 409);
 
         // Mensaje explícito con el rol esperado en vez de "El usuario no es un {entidad}" — con
         // entidad="Usuario" (endpoint /api/usuarios, rolEsperado=Direccion) ese texto daba

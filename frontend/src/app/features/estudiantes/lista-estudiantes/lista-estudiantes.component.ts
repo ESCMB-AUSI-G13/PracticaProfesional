@@ -15,6 +15,7 @@ export class ListaEstudiantesComponent implements OnInit {
   private _todos = signal<Estudiante[]>([]);
   cargando = signal(true);
   error = signal<string | null>(null);
+  accionError = signal<string | null>(null);
 
   filtroBusqueda = signal('');
   filtroCarreraId = signal<number | null>(null);
@@ -102,17 +103,19 @@ export class ListaEstudiantesComponent implements OnInit {
 
   desactivar(usuarioId: number): void {
     if (!confirm('¿Desactivar este estudiante?')) return;
+    this.accionError.set(null);
     this.estudiantesService.desactivar(usuarioId).subscribe({
       next: () => this.cargarEstudiantes(),
-      error: () => this.error.set('Error al desactivar el estudiante.')
+      error: err => this.accionError.set(err?.error?.detail ?? err?.error?.title ?? 'Error al desactivar el estudiante.')
     });
   }
 
   reactivar(usuarioId: number): void {
     if (!confirm('¿Reactivar este estudiante?')) return;
+    this.accionError.set(null);
     this.estudiantesService.reactivar(usuarioId).subscribe({
       next: () => this.cargarEstudiantes(),
-      error: () => this.error.set('Error al reactivar el estudiante.')
+      error: err => this.accionError.set(err?.error?.detail ?? err?.error?.title ?? 'Error al reactivar el estudiante.')
     });
   }
 

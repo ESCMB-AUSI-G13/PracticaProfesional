@@ -14,6 +14,7 @@ export class ListaDocentesComponent implements OnInit {
   private todosLosDocentes = signal<Docente[]>([]);
   cargando = signal(true);
   error = signal<string | null>(null);
+  accionError = signal<string | null>(null);
   busqueda = signal('');
 
   docentes = computed(() => {
@@ -62,17 +63,19 @@ export class ListaDocentesComponent implements OnInit {
 
   desactivar(usuarioId: number): void {
     if (!confirm('¿Desactivar este docente?')) return;
+    this.accionError.set(null);
     this.docentesService.desactivar(usuarioId).subscribe({
       next: () => this.cargarDocentes(),
-      error: () => this.error.set('Error al desactivar el docente.')
+      error: err => this.accionError.set(err?.error?.detail ?? err?.error?.title ?? 'Error al desactivar el docente.')
     });
   }
 
   reactivar(usuarioId: number): void {
     if (!confirm('¿Reactivar este docente?')) return;
+    this.accionError.set(null);
     this.docentesService.reactivar(usuarioId).subscribe({
       next: () => this.cargarDocentes(),
-      error: () => this.error.set('Error al reactivar el docente.')
+      error: err => this.accionError.set(err?.error?.detail ?? err?.error?.title ?? 'Error al reactivar el docente.')
     });
   }
 

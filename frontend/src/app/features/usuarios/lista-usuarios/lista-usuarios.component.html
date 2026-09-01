@@ -13,6 +13,13 @@
     usá sus pantallas dedicadas.
   </p>
 
+  @if (accionError()) {
+    <div class="banner-error">
+      <span>{{ accionError() }}</span>
+      <button type="button" class="banner-cerrar" (click)="accionError.set(null)">✕</button>
+    </div>
+  }
+
   <div class="filtros">
     <div class="filtro-busqueda">
       <input

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PracticaProfesional.Application.Usuarios;
 using PracticaProfesional.Application.Usuarios.DTOs;
 using PracticaProfesional.Domain.Enums;
+using System.Security.Claims;
 
 namespace PracticaProfesional.Controllers;
 
@@ -49,7 +50,8 @@ public class UsuariosController(
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Desactivar(int id, CancellationToken cancellationToken)
     {
-        await cambiarActivacion.EjecutarAsync(id, activar: false, rolEsperado: Rol.Direccion, "Usuario", cancellationToken);
+        var usuarioIdSolicitante = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        await cambiarActivacion.EjecutarAsync(id, activar: false, rolEsperado: Rol.Direccion, "Usuario", cancellationToken, usuarioIdSolicitante);
         return NoContent();
     }
 

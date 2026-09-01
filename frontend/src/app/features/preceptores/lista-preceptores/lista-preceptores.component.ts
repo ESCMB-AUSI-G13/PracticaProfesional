@@ -14,6 +14,7 @@ export class ListaPreceptoresComponent implements OnInit {
   private todosLosPreceptores = signal<Preceptor[]>([]);
   cargando = signal(true);
   error = signal<string | null>(null);
+  accionError = signal<string | null>(null);
   busqueda = signal('');
 
   preceptores = computed(() => {
@@ -62,17 +63,19 @@ export class ListaPreceptoresComponent implements OnInit {
 
   desactivar(usuarioId: number): void {
     if (!confirm('¿Desactivar este preceptor?')) return;
+    this.accionError.set(null);
     this.preceptoresService.desactivar(usuarioId).subscribe({
       next: () => this.cargarPreceptores(),
-      error: () => this.error.set('Error al desactivar el preceptor.')
+      error: err => this.accionError.set(err?.error?.detail ?? err?.error?.title ?? 'Error al desactivar el preceptor.')
     });
   }
 
   reactivar(usuarioId: number): void {
     if (!confirm('¿Reactivar este preceptor?')) return;
+    this.accionError.set(null);
     this.preceptoresService.reactivar(usuarioId).subscribe({
       next: () => this.cargarPreceptores(),
-      error: () => this.error.set('Error al reactivar el preceptor.')
+      error: err => this.accionError.set(err?.error?.detail ?? err?.error?.title ?? 'Error al reactivar el preceptor.')
     });
   }
 

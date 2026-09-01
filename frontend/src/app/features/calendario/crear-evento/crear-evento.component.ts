@@ -5,6 +5,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CalendarioService, TIPOS_EVENTO } from '../calendario.service';
 import { MateriasService, Materia } from '../../materias/materias.service';
 import { CursosService, Curso } from '../../cursos/cursos.service';
+import { CarrerasService, Carrera } from '../../carreras/carreras.service';
 
 @Component({
   selector: 'app-crear-evento',
@@ -21,9 +22,13 @@ export class CrearEventoComponent implements OnInit {
   error      = signal<string | null>(null);
 
   tiposEvento = TIPOS_EVENTO;
-  // Tipo "Fecha límite carga de notas" — el único donde Materia/Curso determinan a qué docente
-  // avisarle (ver CHECKLIST.md, Tier 6 #27).
   readonly TIPO_LIMITE_CARGA_NOTAS = 6;
+  // Tipos donde Materia/Curso tienen sentido: en InscripcionMateria/InscripcionExamen acotan el
+  // período a esa cátedra puntual (CalendarioAcademicoRepository.EstaEnPeriodoAsync ya lo valida
+  // así); en FechaLimiteCargaNotas determinan a qué docente avisarle (CHECKLIST.md, Tier 6 #27).
+  // Antes el formulario solo los mostraba para FechaLimiteCargaNotas, así que no había forma de
+  // crear un período de inscripción acotado a una materia/curso aunque el backend lo soportaba.
+  readonly TIPOS_CON_MATERIA_CURSO = [4, 5, 6];
 
   // Campos del formulario
   nombreEvento = signal('');
@@ -35,6 +40,7 @@ export class CrearEventoComponent implements OnInit {
   cursoId      = signal<number | null>(null);
 
   carrerasOpciones = ['Todos', 'Trayecto', 'Profesorado'];
+  carreras: Carrera[] = [];
   materias: Materia[] = [];
   cursos: Curso[] = [];
 
@@ -42,6 +48,7 @@ export class CrearEventoComponent implements OnInit {
     private calendarioService: CalendarioService,
     private materiasService: MateriasService,
     private cursosService: CursosService,
+    private carrerasService: CarrerasService,
     private route: ActivatedRoute,
     private router: Router
   ) {}
@@ -49,6 +56,7 @@ export class CrearEventoComponent implements OnInit {
   ngOnInit(): void {
     this.materiasService.listar().subscribe(m => this.materias = m);
     this.cursosService.listar().subscribe(c => this.cursos = c);
+    this.carrerasService.listar().subscribe(c => this.carreras = c);
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.esEdicion = true;
@@ -91,8 +99,8 @@ export class CrearEventoComponent implements OnInit {
       fechaInicio:  this.fechaInicio(),
       fechaFin:     this.fechaFin(),
       tipoEvento:   this.tipoEvento(),
-      materiaId:    this.tipoEvento() === this.TIPO_LIMITE_CARGA_NOTAS ? this.materiaId() : null,
-      cursoId:      this.tipoEvento() === this.TIPO_LIMITE_CARGA_NOTAS ? this.cursoId() : null
+      materiaId:    this.mostrarMateriaCurso() ? this.materiaId() : null,
+      cursoId:      this.mostrarMateriaCurso() ? this.cursoId() : null
     };
 
     const op = this.esEdicion
@@ -103,6 +111,39 @@ export class CrearEventoComponent implements OnInit {
       next: () => this.router.navigate(['/calendario']),
       error: (e) => { this.error.set(e.error?.mensaje ?? 'Error al guardar.'); this.guardando.set(false); }
     });
+  }
+
+  mostrarMateriaCurso(): boolean {
+    return this.TIPOS_CON_MATERIA_CURSO.includes(this.tipoEvento());
+  }
+
+  // "Comision" es un texto libre (no una FK real a Carrera — se guarda tal cual en el evento),
+  // así que para filtrar Materia/Curso por carrera hace falta emparejarlo contra el nombre real
+  // de la carrera. Antes esta pantalla ni siquiera intentaba ese cruce: el combo de Materia
+  // mostraba las de todas las carreras sin importar qué "Carrera" estuviera elegida.
+  private carreraSeleccionadaId(): number | null {
+    const etiqueta = this.comision();
+    if (etiqueta === 'Todos') return null;
+    return this.carreras.find(c => c.nombre.toLowerCase().includes(etiqueta.toLowerCase()))?.id ?? null;
+  }
+
+  materiasFiltradas(): Materia[] {
+    const carreraId = this.carreraSeleccionadaId();
+    return carreraId === null ? this.materias : this.materias.filter(m => m.carreraId === carreraId);
+  }
+
+  cursosFiltrados(): Curso[] {
+    const carreraId = this.carreraSeleccionadaId();
+    return carreraId === null ? this.cursos : this.cursos.filter(c => c.carreraId === carreraId);
+  }
+
+  onCarreraChange(valor: string): void {
+    this.comision.set(valor);
+    // La materia/curso ya elegidas pueden no pertenecer a la nueva carrera — se resetean para
+    // no terminar guardando una combinación inconsistente (ej. Carrera=Profesorado con una
+    // Materia que en realidad es de Trayecto).
+    this.materiaId.set(null);
+    this.cursoId.set(null);
   }
 
   cancelar(): void { this.router.navigate(['/calendario']); }
