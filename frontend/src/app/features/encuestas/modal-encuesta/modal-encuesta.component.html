@@ -66,7 +66,8 @@
           class="btn-enviar"
           (click)="enviar()"
           [disabled]="!puedeEnviar() || enviando()">
-          @if (enviando()) { <span class="spinner-btn"></span> Enviando... } @else { Enviar y continuar }
+          @if (enviando()) { <span class="spinner-btn"></span> }
+          {{ enviando() ? 'Enviando...' : 'Enviar y continuar' }}
         </button>
       </div>
     </div>

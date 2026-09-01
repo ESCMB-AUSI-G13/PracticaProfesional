@@ -67,11 +67,8 @@
         class="btn-submit"
         [disabled]="form.invalid || cargando()"
       >
-        @if (cargando()) {
-          <span class="spinner"></span> Ingresando...
-        } @else {
-          Ingresar
-        }
+        @if (cargando()) { <span class="spinner"></span> }
+        {{ cargando() ? 'Ingresando...' : 'Ingresar' }}
       </button>
 
     </form>
