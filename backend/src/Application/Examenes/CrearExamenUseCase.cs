@@ -11,6 +11,8 @@ public class CrearExamenUseCase(
     IMateriaRepository materiaRepository,
     IInscripcionMateriaRepository inscripcionMateriaRepository,
     IInscripcionExamenRepository inscripcionExamenRepository,
+    IDocenteRepository docenteRepository,
+    IEspacioCurricularRepository espacioCurricularRepository,
     IAuditoriaService auditoria)
 {
     private static readonly HashSet<TipoExamen> _tiposAutoInscripcion =
@@ -19,10 +21,19 @@ public class CrearExamenUseCase(
         TipoExamen.Recuperatorio
     ];
 
-    public async Task<ExamenDto> EjecutarAsync(CrearExamenDto dto, CancellationToken cancellationToken = default)
+    public async Task<ExamenDto> EjecutarAsync(CrearExamenDto dto, int? docenteUsuarioId = null, CancellationToken cancellationToken = default)
     {
         var materia = await materiaRepository.ObtenerPorIdAsync(dto.MateriaId, cancellationToken)
             ?? throw new BusinessException($"No se encontró la materia con Id {dto.MateriaId}.");
+
+        if (docenteUsuarioId.HasValue)
+        {
+            var docente = await docenteRepository.ObtenerPorUsuarioIdAsync(docenteUsuarioId.Value, cancellationToken)
+                ?? throw new BusinessException("No se encontró el docente.");
+            var espacios = await espacioCurricularRepository.ListarPorDocenteIdAsync(docente.Id, cancellationToken);
+            if (!espacios.Any(e => e.MateriaId == dto.MateriaId))
+                throw new BusinessException("No tenés permiso para crear exámenes de esta materia.", 403);
+        }
 
         if (!Enum.TryParse<TipoExamen>(dto.TipoExamen, ignoreCase: true, out var tipo))
             throw new BusinessException($"Tipo de examen '{dto.TipoExamen}' no válido.");

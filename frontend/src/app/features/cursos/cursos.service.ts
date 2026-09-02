@@ -23,6 +23,7 @@ export interface CrearCursoRequest {
   // Es el UsuarioId del preceptor, no Preceptor.id — nombre alineado con el backend
   // (ver CHECKLIST.md, Tier 7 #32).
   preceptorUsuarioId: number;
+  carreraId:   number;
 }
 
 export interface ModificarCursoRequest {

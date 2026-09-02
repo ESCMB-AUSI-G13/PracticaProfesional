@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ExamenesService, Examen, CrearExamenRequest, TIPOS_EXAMEN } from '../examenes.service';
 import { MateriasService, Materia } from '../../materias/materias.service';
+import { EspaciosCurricularesService } from '../../espacios-curriculares/espacios-curriculares.service';
+import { AuthService } from '../../auth/services/auth.service';
 
 @Component({
   selector: 'app-lista-examenes',
@@ -56,14 +58,28 @@ export class ListaExamenesComponent implements OnInit {
   constructor(
     private service: ExamenesService,
     private materiasService: MateriasService,
+    private espaciosService: EspaciosCurricularesService,
+    private authService: AuthService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
-    this.materiasService.listar().subscribe({
-      next: m => this.materias.set(m),
-      error: () => {}
-    });
+    const esDocente = this.authService.rolVista() === 'Docente';
+    if (esDocente) {
+      this.espaciosService.listarMisEspacios().subscribe({
+        next: espacios => {
+          const unicas = new Map<number, Materia>();
+          espacios.forEach(e => unicas.set(e.materiaId, { id: e.materiaId, nombre: e.materiaNombre, codigo: e.materiaCodigo, anio: e.materiaAnio, carreraId: e.carreraId, carreraNombre: e.carreraNombre }));
+          this.materias.set([...unicas.values()]);
+        },
+        error: () => {}
+      });
+    } else {
+      this.materiasService.listar().subscribe({
+        next: m => this.materias.set(m),
+        error: () => {}
+      });
+    }
     this.service.listar().subscribe({
       next: e => { this._todos.set(e); this.cargando.set(false); },
       error: () => { this.error.set('Error al cargar exámenes.'); this.cargando.set(false); }
@@ -90,7 +106,7 @@ export class ListaExamenesComponent implements OnInit {
         this.limpiarForm();
         this.guardando.set(false);
       },
-      error: (e) => { this.error.set(e.error?.mensaje ?? 'Error al crear el examen.'); this.guardando.set(false); }
+      error: (e) => { this.error.set(e.error?.detail ?? e.error?.mensaje ?? 'Error al crear el examen.'); this.guardando.set(false); }
     });
   }
 

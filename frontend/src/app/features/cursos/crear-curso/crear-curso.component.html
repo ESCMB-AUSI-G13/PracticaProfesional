@@ -39,6 +39,15 @@
         }
       </select>
     </div>
+    <div class="campo">
+      <label>Carrera *</label>
+      <select [ngModel]="carreraId()" (ngModelChange)="carreraId.set($event ? +$event : null)" name="carreraId">
+        <option [value]="null">-- Seleccionar carrera --</option>
+        @for (c of carreras(); track c.id) {
+          <option [value]="c.id">{{ c.nombre }}</option>
+        }
+      </select>
+    </div>
 
     <div class="acciones">
       <button type="submit" class="btn btn-primary" [disabled]="guardando()">

@@ -58,7 +58,9 @@
       "Bash(dotnet test *)",
       "Bash(rm \"d:/Documents/3A/PRACTICA PROFESIONAL/PracticaProfesional/frontend/src/app/services/todo.service.ts\")",
       "Bash(dotnet clean *)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(ng serve *)",
+      "Bash(Get-ChildItem -Path \"d:\\\\Git Facultad\\\\PracticaProfesional\" -Directory)"
     ],
     "additionalDirectories": [
       "d:\\Documents\\3A\\PRACTICA PROFESIONAL\\PracticaProfesional\\frontend\\src\\app\\services"

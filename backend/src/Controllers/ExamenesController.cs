@@ -52,12 +52,15 @@ public class ExamenesController(
     }
 
     [HttpPost]
-    [Authorize(Roles = "Direccion")]
+    [Authorize(Roles = "Direccion,Docente")]
     [ProducesResponseType(typeof(ExamenDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> Crear([FromBody] CrearExamenDto dto, CancellationToken cancellationToken)
     {
-        var resultado = await crearExamen.EjecutarAsync(dto, cancellationToken);
+        int? docenteUsuarioId = User.IsInRole("Docente")
+            ? int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value)
+            : null;
+        var resultado = await crearExamen.EjecutarAsync(dto, docenteUsuarioId, cancellationToken);
         return CreatedAtAction(nameof(Listar), new { id = resultado.Id }, resultado);
     }
 

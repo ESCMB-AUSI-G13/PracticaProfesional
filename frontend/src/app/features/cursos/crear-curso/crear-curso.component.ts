@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { CursosService } from '../cursos.service';
 import { PreceptoresService, Preceptor } from '../../preceptores/preceptores.service';
+import { CarrerasService, Carrera } from '../../carreras/carreras.service';
 
 @Component({
   selector: 'app-crear-curso',
@@ -18,14 +19,17 @@ export class CrearCursoComponent implements OnInit {
   comision     = signal('');
   cupo         = signal<number>(30);
   preceptorId  = signal<number | null>(null);
+  carreraId    = signal<number | null>(null);
 
   preceptores = signal<Preceptor[]>([]);
+  carreras    = signal<Carrera[]>([]);
   guardando   = signal(false);
   error       = signal<string | null>(null);
 
   constructor(
     private cursosService: CursosService,
     private preceptoresService: PreceptoresService,
+    private carrerasService: CarrerasService,
     private router: Router
   ) {}
 
@@ -34,10 +38,14 @@ export class CrearCursoComponent implements OnInit {
       next: data => this.preceptores.set(data.filter(p => p.activo)),
       error: () => this.error.set('Error al cargar preceptores.')
     });
+    this.carrerasService.listar().subscribe({
+      next: data => this.carreras.set(data),
+      error: () => this.error.set('Error al cargar carreras.')
+    });
   }
 
   guardar(): void {
-    if (!this.comision() || !this.preceptorId() || this.cupo() <= 0) {
+    if (!this.comision() || !this.preceptorId() || this.cupo() <= 0 || !this.carreraId()) {
       this.error.set('Todos los campos son obligatorios y el cupo debe ser mayor a 0.');
       return;
     }
@@ -48,10 +56,11 @@ export class CrearCursoComponent implements OnInit {
       anioLectivo: this.anioLectivo(),
       comision: this.comision(),
       cupo: this.cupo(),
-      preceptorUsuarioId: this.preceptorId()!
+      preceptorUsuarioId: this.preceptorId()!,
+      carreraId: this.carreraId()!
     }).subscribe({
       next: () => this.router.navigate(['/cursos']),
-      error: (e) => { this.error.set(e.error?.mensaje ?? 'Error al crear el curso.'); this.guardando.set(false); }
+      error: (e) => { this.error.set(e.error?.detail ?? e.error?.mensaje ?? 'Error al crear el curso.'); this.guardando.set(false); }
     });
   }
 
