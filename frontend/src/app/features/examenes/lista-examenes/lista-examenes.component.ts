@@ -64,7 +64,11 @@ export class ListaExamenesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const esDocente = this.authService.rolVista() === 'Docente';
+    // Rol REAL, no el de vista: mis-espacios exige rol Docente en el JWT, así que con rolVista()
+    // un usuario Dirección viendo "como Docente" pedía ese endpoint y recibía un 403 silencioso,
+    // quedándose sin materias para crear el examen. Misma convención que roleGuard: el modo vista
+    // solo afecta la UI, no los permisos de API.
+    const esDocente = this.authService.rol() === 'Docente';
     if (esDocente) {
       this.espaciosService.listarMisEspacios().subscribe({
         next: espacios => {
