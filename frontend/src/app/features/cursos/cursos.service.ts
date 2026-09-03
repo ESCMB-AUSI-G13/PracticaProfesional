@@ -46,6 +46,11 @@ export class CursosService {
     return this.http.get<Curso[]>(`${this.apiUrl}/por-materia/${materiaId}`);
   }
 
+  /** Cursos a cargo del preceptor autenticado (CU-33). */
+  listarMisCursos(): Observable<Curso[]> {
+    return this.http.get<Curso[]>(`${this.apiUrl}/mis-cursos`);
+  }
+
   crear(dto: CrearCursoRequest): Observable<Curso> {
     return this.http.post<Curso>(this.apiUrl, dto);
   }

@@ -1,19 +1,29 @@
-﻿<div class="page">
+<div class="page">
   <header class="page-header">
     <div class="header-left">
-      <h1>Gestión de Cursos</h1>
-    </div>
-    <div class="header-actions">
-      <button class="btn btn-primary" (click)="irACrear()">+ Nuevo curso</button>
+      <h1>Mis Cursos</h1>
     </div>
   </header>
+
+  <p class="hint">
+    Cursos que tenés a cargo. Al cerrar el acta se liquida la cursada de cada alumno inscripto:
+    queda <strong>Regular</strong> si su asistencia alcanza, o <strong>Libre</strong> si superó el
+    25 % de ausencias injustificadas.
+  </p>
+
+  @if (accionError()) {
+    <div class="banner-error">
+      <span>{{ accionError() }}</span>
+      <button type="button" class="banner-cerrar" (click)="accionError.set(null)">✕</button>
+    </div>
+  }
 
   @if (cargando()) {
     <p class="estado">Cargando...</p>
   } @else if (error()) {
     <p class="estado error">{{ error() }}</p>
   } @else if (cursos().length === 0) {
-    <p class="estado">No hay cursos registrados.</p>
+    <p class="estado">No tenés cursos asignados.</p>
   } @else {
     <table class="tabla">
       <thead>
@@ -23,7 +33,6 @@
           <th>Comisión</th>
           <th>Cupo</th>
           <th>Estado</th>
-          <th>Preceptor</th>
           <th>Acciones</th>
         </tr>
       </thead>
@@ -37,13 +46,16 @@
             <td>
               <span [class]="'badge estado-' + c.estado.toLowerCase()">{{ c.estado }}</span>
             </td>
-            <td>{{ c.preceptorNombre }}</td>
             <td class="acciones">
-              <button class="btn btn-secondary btn-sm" (click)="irAEditar(c.id)">Editar</button>
               @if (c.estado === 'Activo') {
-                <button class="btn btn-danger btn-sm" (click)="cerrar(c)">Cerrar acta</button>
+                <button
+                  class="btn btn-danger btn-sm"
+                  [disabled]="cerrandoId() !== null"
+                  (click)="cerrar(c)">
+                  {{ cerrandoId() === c.id ? 'Cerrando...' : 'Cerrar acta' }}
+                </button>
               } @else {
-                <button class="btn btn-success btn-sm" (click)="reactivar(c)">Reabrir curso</button>
+                <span class="sin-accion">—</span>
               }
             </td>
           </tr>

@@ -32,6 +32,20 @@ public class EspacioCurricularRepository(AppDbContext db) : IEspacioCurricularRe
                 ec.CursoId, ec.Curso.Anio, ec.Curso.AnioLectivo, ec.Curso.Comision))
             .ToListAsync(cancellationToken);
 
+    /// <summary>Cátedras dictadas en los cursos que el preceptor tiene a cargo (CU-33).</summary>
+    public async Task<IEnumerable<EspacioCurricularDto>> ListarPorPreceptorIdAsync(int preceptorId, CancellationToken cancellationToken = default)
+        => await db.EspaciosCurriculares
+            .AsNoTracking()
+            .Where(ec => ec.Curso.PreceptorId == preceptorId)
+            .OrderBy(ec => ec.Curso.AnioLectivo).ThenBy(ec => ec.Curso.Comision).ThenBy(ec => ec.Materia.Nombre)
+            .Select(ec => new EspacioCurricularDto(
+                ec.Id,
+                ec.MateriaId, ec.Materia.Nombre, ec.Materia.Codigo, ec.Materia.Anio,
+                ec.Materia.CarreraId, ec.Materia.Carrera.Nombre,
+                ec.DocenteId, ec.Docente.Usuario.Nombre + " " + ec.Docente.Usuario.Apellido,
+                ec.CursoId, ec.Curso.Anio, ec.Curso.AnioLectivo, ec.Curso.Comision))
+            .ToListAsync(cancellationToken);
+
     public async Task<EspacioCurricular?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default)
         => await db.EspaciosCurriculares
             .Include(ec => ec.Materia)

@@ -152,7 +152,7 @@ public class PreguntarAsistenteUseCase(
                         MateriaId = materiaId,
                         FechaDesde = ParsearFecha(fechaDesde),
                         FechaHasta = ParsearFecha(fechaHasta)
-                    }, espaciosDocente: null, cancellationToken: ct)),
+                    }, espaciosPermitidos: null, cancellationToken: ct)),
             name: "inasistencias_resumen",
             description: "Totales agregados de asistencia (presentes, ausentes, ausentes justificados) en un rango de fechas. Nunca incluye datos individuales de alumnos."),
 

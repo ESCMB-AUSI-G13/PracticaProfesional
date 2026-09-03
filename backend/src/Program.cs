@@ -170,6 +170,7 @@ builder.Services.AddScoped<ICursoRepository, CursoRepository>();
 builder.Services.AddScoped<CrearCursoUseCase>();
 builder.Services.AddScoped<ListarCursosUseCase>();
 builder.Services.AddScoped<ListarCursosPorMateriaUseCase>();
+builder.Services.AddScoped<ListarCursosPreceptorUseCase>();
 builder.Services.AddScoped<ModificarCursoUseCase>();
 builder.Services.AddScoped<CerrarCursoUseCase>();
 builder.Services.AddScoped<ReactivarCursoUseCase>();
@@ -179,6 +180,7 @@ builder.Services.AddScoped<IEspacioCurricularRepository, EspacioCurricularReposi
 builder.Services.AddScoped<CrearEspacioCurricularUseCase>();
 builder.Services.AddScoped<ListarEspaciosCurricularesUseCase>();
 builder.Services.AddScoped<ListarEspaciosDocenteUseCase>();
+builder.Services.AddScoped<ListarEspaciosPreceptorUseCase>();
 builder.Services.AddScoped<EliminarEspacioCurricularUseCase>();
 
 // Exámenes

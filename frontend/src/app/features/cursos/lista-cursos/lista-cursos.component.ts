@@ -28,14 +28,36 @@ export class ListaCursosComponent implements OnInit {
     });
   }
 
-  cerrar(id: number): void {
-    if (!confirm('¿Cerrar este curso?')) return;
-    this.cursosService.cerrar(id).subscribe({ next: () => this.cargar(), error: () => this.error.set('Error al cerrar.') });
+  cerrar(curso: Curso): void {
+    // Misma advertencia que en la pantalla del preceptor (mis-cursos): cerrar el acta liquida la
+    // cursada de cada alumno y eso no lo deshace "Reactivar" — reactivar solo vuelve el curso a
+    // Activo, el historial y el estado de las inscripciones quedan como los dejó el cierre.
+    const mensaje =
+      `¿Cerrar el acta de la comisión ${curso.comision} (${curso.anioLectivo}° año, ${curso.anio})?\n\n` +
+      'Se va a liquidar la cursada de todos los alumnos inscriptos: cada uno queda Regular o ' +
+      'Libre según su asistencia. Esta acción no se puede deshacer.';
+    if (!confirm(mensaje)) return;
+
+    this.cursosService.cerrar(curso.id).subscribe({
+      next: () => this.cargar(),
+      error: err => this.error.set(err?.error?.detail ?? err?.error?.title ?? 'Error al cerrar el acta.')
+    });
   }
 
-  reactivar(id: number): void {
-    if (!confirm('¿Reactivar este curso?')) return;
-    this.cursosService.reactivar(id).subscribe({ next: () => this.cargar(), error: () => this.error.set('Error al reactivar.') });
+  // "Reabrir curso", no "Reactivar": esta acción solo devuelve el curso al estado Activo (vuelve
+  // a aceptar inscripciones). NO revierte la liquidación del acta — el HistorialAcademico y el
+  // estado de las inscripciones que generó el cierre quedan como están. Ver ReactivarCursoUseCase.
+  reactivar(curso: Curso): void {
+    const mensaje =
+      `¿Reabrir la comisión ${curso.comision} (${curso.anioLectivo}° año, ${curso.anio})?\n\n` +
+      'El curso vuelve a aceptar inscripciones. La liquidación del acta ya realizada ' +
+      '(Regular/Libre de cada alumno) no se revierte.';
+    if (!confirm(mensaje)) return;
+
+    this.cursosService.reactivar(curso.id).subscribe({
+      next: () => this.cargar(),
+      error: err => this.error.set(err?.error?.detail ?? err?.error?.title ?? 'Error al reabrir el curso.')
+    });
   }
 
   irACrear(): void          { this.router.navigate(['/cursos/nuevo']); }

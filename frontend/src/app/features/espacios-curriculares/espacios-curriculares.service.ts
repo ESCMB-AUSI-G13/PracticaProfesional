@@ -39,6 +39,11 @@ export class EspaciosCurricularesService {
     return this.http.get<EspacioCurricular[]>(`${this.apiUrl}/mis-espacios`);
   }
 
+  /** Cátedras dictadas en los cursos que el preceptor autenticado tiene a cargo (CU-33). */
+  listarDeMisCursos(): Observable<EspacioCurricular[]> {
+    return this.http.get<EspacioCurricular[]>(`${this.apiUrl}/de-mis-cursos`);
+  }
+
   crear(dto: CrearEspacioCurricularRequest): Observable<EspacioCurricular> {
     return this.http.post<EspacioCurricular>(this.apiUrl, dto);
   }

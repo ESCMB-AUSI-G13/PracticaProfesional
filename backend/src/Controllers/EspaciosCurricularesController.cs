@@ -8,12 +8,13 @@ namespace PracticaProfesional.Controllers;
 
 [ApiController]
 [Route("api/espacios-curriculares")]
-[Authorize(Roles = "Direccion,Docente")]
+[Authorize(Roles = "Direccion,Docente,Preceptor")]
 public class EspaciosCurricularesController(
     CrearEspacioCurricularUseCase crearUseCase,
     ListarEspaciosCurricularesUseCase listarUseCase,
     EliminarEspacioCurricularUseCase eliminarUseCase,
-    ListarEspaciosDocenteUseCase listarEspaciosDocente) : ControllerBase
+    ListarEspaciosDocenteUseCase listarEspaciosDocente,
+    ListarEspaciosPreceptorUseCase listarEspaciosPreceptor) : ControllerBase
 {
     [HttpGet]
     [Authorize(Roles = "Direccion")]
@@ -40,6 +41,20 @@ public class EspaciosCurricularesController(
     {
         var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var resultado = await listarEspaciosDocente.EjecutarAsync(usuarioId, cancellationToken);
+        return Ok(resultado);
+    }
+
+    /// <summary>
+    /// GET api/espacios-curriculares/de-mis-cursos — cátedras dictadas en los cursos que el
+    /// preceptor autenticado tiene a cargo (para rectificar asistencias, CU-33).
+    /// </summary>
+    [HttpGet("de-mis-cursos")]
+    [Authorize(Roles = "Preceptor")]
+    [ProducesResponseType(typeof(IEnumerable<EspacioCurricularDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> DeMisCursos(CancellationToken cancellationToken)
+    {
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var resultado = await listarEspaciosPreceptor.EjecutarAsync(usuarioId, cancellationToken);
         return Ok(resultado);
     }
 

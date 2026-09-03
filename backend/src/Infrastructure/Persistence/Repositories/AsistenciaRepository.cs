@@ -47,7 +47,7 @@ public class AsistenciaRepository(AppDbContext context) : IAsistenciaRepository
         bool soloAusencias,
         string? comision = null,
         int? anioLectivo = null,
-        IReadOnlyList<(int MateriaId, int CursoId)>? espaciosDocente = null,
+        IReadOnlyList<(int MateriaId, int CursoId)>? espaciosPermitidos = null,
         CancellationToken cancellationToken = default)
     {
         var query = context.Asistencias
@@ -75,10 +75,13 @@ public class AsistenciaRepository(AppDbContext context) : IAsistenciaRepository
         if (anioLectivo.HasValue)
             query = query.Where(a => a.Curso.AnioLectivo == anioLectivo.Value);
 
-        if (espaciosDocente is { Count: > 0 })
+        // null = sin restricción (Dirección). Lista vacía = el llamante no tiene nada asignado, así
+        // que no ve nada: antes la condición era `Count > 0`, con lo cual una lista vacía salteaba
+        // el filtro entero y le devolvía los registros de todo el instituto.
+        if (espaciosPermitidos is not null)
         {
-            var materiaIds = espaciosDocente.Select(e => e.MateriaId).Distinct().ToList();
-            var cursoIds   = espaciosDocente.Select(e => e.CursoId).Distinct().ToList();
+            var materiaIds = espaciosPermitidos.Select(e => e.MateriaId).Distinct().ToList();
+            var cursoIds   = espaciosPermitidos.Select(e => e.CursoId).Distinct().ToList();
             query = query.Where(a => materiaIds.Contains(a.MateriaId) && cursoIds.Contains(a.CursoId));
         }
 

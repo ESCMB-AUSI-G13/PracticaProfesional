@@ -20,6 +20,7 @@ public class ReportesOperativosController(
     ReporteInasistenciasUseCase reporteInasistencias,
     ControlIndividualPorLegajoUseCase controlPorLegajo,
     IDocenteRepository docenteRepository,
+    IPreceptorRepository preceptorRepository,
     IEspacioCurricularRepository espacioCurricularRepository,
     PdfReporteService pdfService) : ControllerBase
 {
@@ -34,21 +35,44 @@ public class ReportesOperativosController(
         [FromBody] FiltroInasistenciasDto filtro,
         CancellationToken cancellationToken)
     {
-        IReadOnlyList<(int MateriaId, int CursoId)>? espaciosDocente = null;
+        var espaciosPermitidos = await ObtenerEspaciosPermitidosAsync(cancellationToken);
+        var resultado = await reporteInasistencias.EjecutarAsync(filtro, espaciosPermitidos, cancellationToken);
+        return Ok(resultado);
+    }
+
+    /// <summary>
+    /// Acota el reporte a lo que el llamante tiene a cargo. Dirección ve todo (null); el Docente,
+    /// solo sus cátedras; el Preceptor, solo las cátedras dictadas en los cursos que tiene a cargo
+    /// — antes el Preceptor no se acotaba y recibía los registros de todo el instituto.
+    /// Devolver una lista vacía (y no null) es importante: significa "no tiene nada asignado, no
+    /// ve nada", que es distinto de "sin restricción".
+    /// </summary>
+    private async Task<IReadOnlyList<(int MateriaId, int CursoId)>?> ObtenerEspaciosPermitidosAsync(
+        CancellationToken cancellationToken)
+    {
+        if (User.IsInRole("Direccion")) return null;
+
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
         if (User.IsInRole("Docente"))
         {
-            var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var docente   = await docenteRepository.ObtenerPorUsuarioIdAsync(usuarioId, cancellationToken);
-            if (docente is not null)
-            {
-                var espacios = await espacioCurricularRepository.ListarPorDocenteIdAsync(docente.Id, cancellationToken);
-                espaciosDocente = espacios.Select(e => (e.MateriaId, e.CursoId)).ToList();
-            }
+            var docente = await docenteRepository.ObtenerPorUsuarioIdAsync(usuarioId, cancellationToken);
+            if (docente is null) return [];
+
+            var espacios = await espacioCurricularRepository.ListarPorDocenteIdAsync(docente.Id, cancellationToken);
+            return espacios.Select(e => (e.MateriaId, e.CursoId)).ToList();
         }
 
-        var resultado = await reporteInasistencias.EjecutarAsync(filtro, espaciosDocente, cancellationToken);
-        return Ok(resultado);
+        if (User.IsInRole("Preceptor"))
+        {
+            var preceptor = await preceptorRepository.ObtenerPorUsuarioIdAsync(usuarioId, cancellationToken);
+            if (preceptor is null) return [];
+
+            var espacios = await espacioCurricularRepository.ListarPorPreceptorIdAsync(preceptor.Id, cancellationToken);
+            return espacios.Select(e => (e.MateriaId, e.CursoId)).ToList();
+        }
+
+        return [];
     }
 
     /// <summary>
@@ -89,20 +113,8 @@ public class ReportesOperativosController(
         [FromBody] FiltroInasistenciasDto filtro,
         CancellationToken cancellationToken)
     {
-        IReadOnlyList<(int MateriaId, int CursoId)>? espaciosDocente = null;
-
-        if (User.IsInRole("Docente"))
-        {
-            var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-            var docente   = await docenteRepository.ObtenerPorUsuarioIdAsync(usuarioId, cancellationToken);
-            if (docente is not null)
-            {
-                var espacios = await espacioCurricularRepository.ListarPorDocenteIdAsync(docente.Id, cancellationToken);
-                espaciosDocente = espacios.Select(e => (e.MateriaId, e.CursoId)).ToList();
-            }
-        }
-
-        var data = await reporteInasistencias.EjecutarAsync(filtro, espaciosDocente, cancellationToken);
+        var espaciosPermitidos = await ObtenerEspaciosPermitidosAsync(cancellationToken);
+        var data = await reporteInasistencias.EjecutarAsync(filtro, espaciosPermitidos, cancellationToken);
         var pdf  = pdfService.GenerarInasistencias(data);
         return File(pdf, "application/pdf", "reporte-inasistencias.pdf");
     }

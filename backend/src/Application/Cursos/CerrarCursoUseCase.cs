@@ -16,6 +16,7 @@ public class CerrarCursoUseCase(
     IInscripcionMateriaRepository inscripcionMateriaRepository,
     IAsistenciaRepository asistenciaRepository,
     IHistorialAcademicoRepository historialRepository,
+    IPreceptorRepository preceptorRepository,
     IAuditoriaService auditoria,
     IUnitOfWork unitOfWork)
 {
@@ -23,10 +24,24 @@ public class CerrarCursoUseCase(
     // Si se cambia acá, cambiar también allá.
     private const decimal AusenciaMaxRegularidad = 0.25m;
 
-    public async Task EjecutarAsync(int id, CancellationToken cancellationToken = default)
+    /// <param name="esDireccion">true si el solicitante es Dirección (puede cerrar cualquier
+    /// curso). Si es false (Preceptor), solo puede cerrar los cursos que tiene a cargo: el
+    /// endpoint ya aceptaba el rol Preceptor pero nunca validaba de quién era el curso, así que
+    /// cualquier preceptor podía liquidar la cursada de un curso ajeno.</param>
+    public async Task EjecutarAsync(
+        int id, int usuarioIdSolicitante, bool esDireccion, CancellationToken cancellationToken = default)
     {
         var curso = await cursoRepository.ObtenerPorIdAsync(id, cancellationToken)
             ?? throw new BusinessException($"No se encontró el curso con Id {id}.");
+
+        if (!esDireccion)
+        {
+            var preceptor = await preceptorRepository.ObtenerPorUsuarioIdAsync(usuarioIdSolicitante, cancellationToken)
+                ?? throw new BusinessException($"No se encontró el perfil de preceptor para el usuario {usuarioIdSolicitante}.");
+
+            if (curso.PreceptorId != preceptor.Id)
+                throw new BusinessException("No podés cerrar el acta de un curso que no tenés a cargo.", 403);
+        }
 
         // Cierre + liquidación de cada inscripción + alta de historial deben confirmarse
         // juntos: antes, 3 SaveChanges independientes podían dejar el curso marcado Cerrado

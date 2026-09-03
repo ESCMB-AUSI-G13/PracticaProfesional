@@ -13,6 +13,7 @@ public class CursosController(
     CrearCursoUseCase crearCurso,
     ListarCursosUseCase listarCursos,
     ListarCursosPorMateriaUseCase listarCursosPorMateria,
+    ListarCursosPreceptorUseCase listarCursosPreceptor,
     ModificarCursoUseCase modificarCurso,
     CerrarCursoUseCase cerrarCurso,
     ReactivarCursoUseCase reactivarCurso) : ControllerBase
@@ -35,6 +36,17 @@ public class CursosController(
         var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var esDireccion = User.IsInRole("Direccion");
         var resultado = await listarCursosPorMateria.EjecutarAsync(materiaId, usuarioId, esDireccion, cancellationToken);
+        return Ok(resultado);
+    }
+
+    /// <summary>GET api/cursos/mis-cursos — cursos a cargo del preceptor autenticado (CU-33).</summary>
+    [HttpGet("mis-cursos")]
+    [Authorize(Roles = "Preceptor")]
+    [ProducesResponseType(typeof(IEnumerable<CursoDto>), StatusCodes.Status200OK)]
+    public async Task<IActionResult> MisCursos(CancellationToken cancellationToken)
+    {
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var resultado = await listarCursosPreceptor.EjecutarAsync(usuarioId, cancellationToken);
         return Ok(resultado);
     }
 
@@ -70,7 +82,9 @@ public class CursosController(
     [ProducesResponseType(StatusCodes.Status400BadRequest)] // "no encontrado" es BusinessException (400), no 404 — ver CHECKLIST.md Tier 7 #35
     public async Task<IActionResult> Cerrar(int id, CancellationToken cancellationToken)
     {
-        await cerrarCurso.EjecutarAsync(id, cancellationToken);
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var esDireccion = User.IsInRole("Direccion");
+        await cerrarCurso.EjecutarAsync(id, usuarioId, esDireccion, cancellationToken);
         return NoContent();
     }
 

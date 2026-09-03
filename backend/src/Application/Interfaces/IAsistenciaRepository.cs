@@ -37,7 +37,7 @@ public interface IAsistenciaRepository
         bool soloAusencias,
         string? comision = null,
         int? anioLectivo = null,
-        IReadOnlyList<(int MateriaId, int CursoId)>? espaciosDocente = null,
+        IReadOnlyList<(int MateriaId, int CursoId)>? espaciosPermitidos = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

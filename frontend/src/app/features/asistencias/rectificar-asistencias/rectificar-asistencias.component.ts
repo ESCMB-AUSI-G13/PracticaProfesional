@@ -74,9 +74,16 @@ export class RectificarAsistenciasComponent implements OnInit {
         }
       });
     } else {
-      this.espaciosService.listar().subscribe({
+      // Preceptor: sus cátedras son las dictadas en los cursos que tiene a cargo. Antes esta rama
+      // llamaba a espaciosService.listar() (GET /espacios-curriculares, Dirección-only), así que
+      // le devolvía 403 — y como esta pantalla solo la abren Docente y Preceptor, esa rama nunca
+      // podía funcionar para nadie.
+      this.espaciosService.listarDeMisCursos().subscribe({
         next: data => { this.espacios.set(data); this.cargandoEspacios.set(false); },
-        error: () => { this.error.set('No se pudieron cargar los espacios.'); this.cargandoEspacios.set(false); }
+        error: (err) => {
+          this.error.set(err?.error?.detail ?? 'No se pudieron cargar las cátedras de tus cursos.');
+          this.cargandoEspacios.set(false);
+        }
       });
     }
   }

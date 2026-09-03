@@ -66,6 +66,12 @@ const NAV: NavItem[] = [
     roles: ['Docente']
   },
   {
+    label: 'Mis Cursos',
+    ruta: '/mis-cursos',
+    icon: 'entidades',
+    roles: ['Preceptor']
+  },
+  {
     label: 'Asistencias',
     icon: 'asistencias',
     roles: ['Docente', 'Preceptor'],

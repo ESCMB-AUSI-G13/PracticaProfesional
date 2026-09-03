@@ -15,7 +15,7 @@ public class ReporteInasistenciasUseCase(IAsistenciaRepository asistenciaReposit
 {
     public async Task<ReporteInasistenciasDto> EjecutarAsync(
         FiltroInasistenciasDto filtro,
-        IReadOnlyList<(int MateriaId, int CursoId)>? espaciosDocente = null,
+        IReadOnlyList<(int MateriaId, int CursoId)>? espaciosPermitidos = null,
         CancellationToken cancellationToken = default)
     {
         var registros = await asistenciaRepository.ObtenerConDetalleAsync(
@@ -26,7 +26,7 @@ public class ReporteInasistenciasUseCase(IAsistenciaRepository asistenciaReposit
             filtro.SoloAusencias,
             filtro.Comision,
             filtro.AnioLectivo,
-            espaciosDocente,
+            espaciosPermitidos,
             cancellationToken);
 
         var items = registros.Select(a => new RegistroInasistenciaDto

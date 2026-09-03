@@ -43,6 +43,24 @@ public class CursoRepository(AppDbContext context) : ICursoRepository
             c.PreceptorId, c.PreceptorNombre, c.CarreraId));
     }
 
+    public async Task<IEnumerable<CursoDto>> ListarPorPreceptorIdAsync(int preceptorId, CancellationToken cancellationToken = default)
+    {
+        var raw = await context.Cursos
+            .AsNoTracking()
+            .Where(c => c.PreceptorId == preceptorId)
+            .OrderByDescending(c => c.Anio).ThenBy(c => c.Comision)
+            .Select(c => new {
+                c.Id, c.Anio, c.AnioLectivo, c.Comision, c.Cupo, c.Estado,
+                c.PreceptorId, c.CarreraId,
+                PreceptorNombre = c.Preceptor.Usuario.Nombre + " " + c.Preceptor.Usuario.Apellido
+            })
+            .ToListAsync(cancellationToken);
+
+        return raw.Select(c => new CursoDto(
+            c.Id, c.Anio, c.AnioLectivo, c.Comision, c.Cupo, c.Estado.ToString(),
+            c.PreceptorId, c.PreceptorNombre, c.CarreraId));
+    }
+
     public async Task<Curso?> ObtenerPorIdAsync(int id, CancellationToken cancellationToken = default)
         => await context.Cursos
             .Include(c => c.Preceptor).ThenInclude(p => p.Usuario)

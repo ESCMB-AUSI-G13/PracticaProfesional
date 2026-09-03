@@ -141,8 +141,20 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    if (this.authService.rol() === 'Docente') {
-      this.espaciosService.listarMisEspacios().subscribe({
+    const rol = this.authService.rol();
+
+    // Docente y Preceptor arman los combos a partir de sus propias cátedras (las que el backend
+    // les deja consultar en el reporte); Dirección los arma del listado completo. Antes el
+    // Preceptor caía en la rama de Dirección, cuyos endpoints son Direccion-only: recibía 403 en
+    // las dos llamadas y, como el forkJoin no tenía handler de error, los filtros quedaban vacíos
+    // sin ningún aviso.
+    const espacios$ =
+      rol === 'Docente'   ? this.espaciosService.listarMisEspacios()
+    : rol === 'Preceptor' ? this.espaciosService.listarDeMisCursos()
+    : null;
+
+    if (espacios$) {
+      espacios$.subscribe({
         next: espacios => {
           const uniqueMaterias: Materia[] = [
             ...new Map(espacios.map(e => [e.materiaId, {
@@ -159,7 +171,9 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
           ];
           this.materias.set(uniqueMaterias);
           this.cursos.set(uniqueCursos);
-        }
+        },
+        error: err => this.error.set(
+          err?.error?.detail ?? err?.error?.title ?? 'No se pudieron cargar los filtros del reporte.')
       });
     } else {
       forkJoin({
@@ -169,7 +183,9 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
         next: ({ cursos, materias }) => {
           this.cursos.set(cursos);
           this.materias.set(materias);
-        }
+        },
+        error: err => this.error.set(
+          err?.error?.detail ?? err?.error?.title ?? 'No se pudieron cargar los filtros del reporte.')
       });
     }
   }

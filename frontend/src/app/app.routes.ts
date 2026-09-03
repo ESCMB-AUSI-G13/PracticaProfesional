@@ -212,6 +212,13 @@ export const routes: Routes = [
 
       // Cursos — solo Dirección
       {
+        // Mis Cursos — Preceptor: ver los cursos a cargo y cerrar sus actas (CU-33)
+        path: 'mis-cursos',
+        canActivate: [roleGuard('Preceptor')],
+        loadComponent: () =>
+          import('./features/cursos/mis-cursos/mis-cursos.component').then(m => m.MisCursosComponent)
+      },
+      {
         path: 'cursos',
         canActivate: [roleGuard('Direccion')],
         loadComponent: () =>
