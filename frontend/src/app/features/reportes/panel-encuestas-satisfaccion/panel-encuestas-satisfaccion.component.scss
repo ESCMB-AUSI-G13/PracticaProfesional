@@ -17,7 +17,7 @@
 .filtro-grupo {
   display: flex; flex-direction: column; gap: 0.3rem; flex: 1; min-width: 240px;
   label { font-size: 0.8rem; color: #666; font-weight: 600; }
-  select { padding: 0.45rem 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.88rem; }
+  select { padding: 0.45rem 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.88rem; &:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 2px rgba(52,152,219,.15); } }
 }
 .filtros-acciones { display: flex; gap: 0.6rem; }
 

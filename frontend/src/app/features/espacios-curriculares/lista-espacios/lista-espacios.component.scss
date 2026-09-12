@@ -6,10 +6,10 @@
 
 .form-inline { background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; padding: 1.25rem; margin-bottom: 1.5rem; h2 { margin: 0 0 1rem; font-size: 1rem; color: #444; } }
 .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
-.campo { display: flex; flex-direction: column; gap: 0.3rem; label { font-size: 0.85rem; font-weight: 600; color: #555; } select { padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; } }
+.campo { display: flex; flex-direction: column; gap: 0.3rem; label { font-size: 0.85rem; font-weight: 600; color: #555; } select { padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; &:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 2px rgba(52,152,219,.15); } } }
 
 .filtros { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 0.75rem; margin-bottom: 1.25rem; padding: 1rem; background: #f8f9fa; border: 1px solid #e0e0e0; border-radius: 6px; }
-.filtro-campo { display: flex; flex-direction: column; gap: 0.25rem; min-width: 140px; label { font-size: 0.8rem; font-weight: 600; color: #555; } select, input { padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.875rem; } }
+.filtro-campo { display: flex; flex-direction: column; gap: 0.25rem; min-width: 140px; label { font-size: 0.8rem; font-weight: 600; color: #555; } select, input { padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.875rem; &:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 2px rgba(52,152,219,.15); } } }
 .filtro-nombre { min-width: 200px; }
 .resultado-count { margin-left: auto; font-size: 0.82rem; color: #777; white-space: nowrap; align-self: center; }
 

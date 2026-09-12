@@ -19,6 +19,7 @@
   label { font-size: 0.85rem; font-weight: 600; color: #555; }
   input[type="number"], input[type="text"], input[type="date"] {
     padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem;
+    &:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 2px rgba(52,152,219,.15); }
   }
 }
 .campo-motivo { flex: 2; input { width: 100%; } }

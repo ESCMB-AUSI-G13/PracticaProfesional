@@ -30,7 +30,7 @@
   input, select {
     padding: 0.45rem 0.7rem; border: 1px solid #ccc; border-radius: 6px;
     font-size: 0.9rem;
-    &:focus { outline: none; border-color: #3498db; }
+    &:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 2px rgba(52,152,219,.15); }
   }
 }
 

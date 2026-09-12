@@ -2,7 +2,7 @@
 .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
 .header-left h1 { margin: 0; font-size: 1.5rem; }
 .header-actions { display: flex; gap: 0.75rem; align-items: center;
-  select { padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
+  select { padding: 0.4rem 0.6rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; &:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 2px rgba(52,152,219,.15); } }
 }
 .estado { padding: 1rem; color: #555; &.error { color: #c0392b; } }
 .tabla { width: 100%; border-collapse: collapse; font-size: 0.88rem;
