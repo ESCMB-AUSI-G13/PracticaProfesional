@@ -13,6 +13,8 @@ export interface FiltroInasistencias {
   fechaHasta?:   string;
   comision?:     string;
   soloAusencias: boolean;
+  pagina?:       number;
+  tamanoPagina?: number;
 }
 
 export interface RegistroInasistencia {
@@ -26,13 +28,48 @@ export interface RegistroInasistencia {
   motivo?:       string;
 }
 
+export interface ConteoMateriaComision {
+  materia:  string;
+  comision: string;
+  cantidad: number;
+}
+
 export interface ReporteInasistencias {
   generadoEn:               string;
   totalRegistros:            number;
   totalAusentes:             number;
   totalAusentesJustificados: number;
   totalPresentes:            number;
+  pagina:                    number;
+  tamanoPagina:              number;
+  totalPaginas:              number;
   registros:                 RegistroInasistencia[];
+  /** Agregado por materia/comisión sobre TODO el filtro (no solo la página) — para el gráfico. */
+  porMateriaComision:        ConteoMateriaComision[];
+}
+
+// ── Historial académico (staff) ──────────────────────────────────────────────
+
+export interface Parcial {
+  fechaExamen: string;
+  nota:        number | null;
+  estado:      string;
+}
+
+export interface HistorialMateria {
+  materiaId:     number;
+  materiaCodigo: string;
+  materiaNombre: string;
+  parciales:     Parcial[];
+  notaFinal:     number | null;
+  estadoFinal:   string | null;
+  condicion:     string | null;
+  anio:          number | null;
+}
+
+export interface HistorialAcademico {
+  materias:        HistorialMateria[];
+  promedioGeneral: number | null;
 }
 
 // ── Modelos RR-09 ────────────────────────────────────────────────────────────
@@ -293,6 +330,12 @@ export class ReportesService {
   /** RR-08: Reporte detallado de inasistencias con filtros. */
   obtenerInasistencias(filtro: FiltroInasistencias): Observable<ReporteInasistencias> {
     return this.http.post<ReporteInasistencias>(`${this.apiUrl}/inasistencias`, filtro);
+  }
+
+  /** Historial académico de un alumno puntual, para Preceptor/Dirección (CU-43). */
+  obtenerHistorialPorLegajo(legajo: string): Observable<HistorialAcademico> {
+    return this.http.get<HistorialAcademico>(
+      `${environment.apiUrl}/historial-academico/legajo/${encodeURIComponent(legajo)}`);
   }
 
   /** RR-09: Control individual de asistencia por legajo. */

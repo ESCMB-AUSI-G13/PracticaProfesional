@@ -18,12 +18,18 @@ public class CursosController(
     CerrarCursoUseCase cerrarCurso,
     ReactivarCursoUseCase reactivarCurso) : ControllerBase
 {
+    /// <summary>
+    /// GET api/cursos — Dirección ve todos los cursos; un Estudiante solo ve los de su propia
+    /// carrera (antes no filtraba nada, devolvía todos los cursos de todas las carreras).
+    /// </summary>
     [HttpGet]
     [Authorize(Roles = "Direccion,Estudiante")]
     [ProducesResponseType(typeof(IEnumerable<CursoDto>), StatusCodes.Status200OK)]
     public async Task<IActionResult> Listar(CancellationToken cancellationToken)
     {
-        var resultado = await listarCursos.EjecutarAsync(cancellationToken);
+        var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var esDireccion = User.IsInRole("Direccion");
+        var resultado = await listarCursos.EjecutarAsync(usuarioId, esDireccion, cancellationToken);
         return Ok(resultado);
     }
 

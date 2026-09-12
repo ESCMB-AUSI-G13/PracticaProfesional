@@ -39,6 +39,10 @@
   display: flex; align-items: center; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap;
   .buscador-tabla { padding: 0.4rem 0.75rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; width: 260px; }
   .tabla-conteo { font-size: 0.82rem; color: #888; margin-left: auto; }
+  .tamano-pagina {
+    display: flex; align-items: center; gap: 0.4rem; font-size: 0.82rem; color: #555;
+    select { padding: 0.3rem 0.5rem; border: 1px solid #ccc; border-radius: 4px; font-size: 0.85rem; }
+  }
 }
 
 .tabla-wrapper { overflow-x: auto; }

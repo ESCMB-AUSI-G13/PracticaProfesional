@@ -172,5 +172,47 @@
       </div>
       <p class="generado-en">Reporte generado: {{ r.generadoEn | date:'dd/MM/yyyy HH:mm' }}</p>
     }
+
+    <!-- Historial académico -->
+    <h2 class="seccion-titulo">Historial académico</h2>
+    @if (cargandoHistorial()) {
+      <p class="estado">Cargando historial académico...</p>
+    } @else if (errorHistorial()) {
+      <p class="estado error">{{ errorHistorial() }}</p>
+    } @else if (historial()) {
+      @if (historial(); as h) {
+        @if (h.materias.length === 0) {
+          <p class="estado">Sin materias cursadas registradas todavía.</p>
+        } @else {
+          @if (h.promedioGeneral !== null) {
+            <p class="generado-en">Promedio general: <strong>{{ h.promedioGeneral }}</strong></p>
+          }
+          <div class="tabla-wrapper">
+            <table class="tabla">
+              <thead>
+                <tr>
+                  <th>Materia</th>
+                  <th>Año</th>
+                  <th>Condición</th>
+                  <th>Nota final</th>
+                  <th>Estado final</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (m of h.materias; track m.materiaId) {
+                  <tr>
+                    <td>{{ m.materiaCodigo }} — {{ m.materiaNombre }}</td>
+                    <td class="centrado">{{ m.anio ?? '—' }}</td>
+                    <td>{{ m.condicion ?? '—' }}</td>
+                    <td class="centrado">{{ m.notaFinal ?? '—' }}</td>
+                    <td>{{ m.estadoFinal ?? '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      }
+    }
   }
 </div>

@@ -21,4 +21,17 @@ public class HistorialAcademicoController(
         var usuarioId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         return Ok(await obtenerMiHistorialUseCase.EjecutarAsync(usuarioId, cancellationToken));
     }
+
+    /// <summary>
+    /// GET api/historial-academico/legajo/{legajo} — Preceptor/Dirección consultan el historial
+    /// de un alumno puntual (mismo criterio de acceso que RR-09, control-legajo: búsqueda directa
+    /// por legajo, sin restringir por curso a cargo). Antes de esto, el cierre de acta escribía
+    /// la condición del alumno en HistorialAcademico pero nadie del staff podía verla.
+    /// </summary>
+    [HttpGet("legajo/{legajo}")]
+    [Authorize(Roles = "Direccion,Preceptor")]
+    [ProducesResponseType(typeof(MiHistorialDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> PorLegajo(string legajo, CancellationToken cancellationToken)
+        => Ok(await obtenerMiHistorialUseCase.EjecutarPorLegajoAsync(legajo, cancellationToken));
 }

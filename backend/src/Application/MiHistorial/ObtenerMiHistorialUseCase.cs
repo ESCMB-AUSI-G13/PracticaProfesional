@@ -20,7 +20,26 @@ public class ObtenerMiHistorialUseCase(
         var estudiante = await estudianteRepository.ObtenerPorUsuarioIdAsync(usuarioId, cancellationToken)
             ?? throw new BusinessException($"No se encontró el perfil de estudiante para el usuario {usuarioId}.");
 
-        var historial = await historialRepository.ObtenerConMateriaPorEstudianteAsync(estudiante.Id, cancellationToken);
+        return await ConstruirAsync(estudiante.Id, cancellationToken);
+    }
+
+    /// <summary>
+    /// Mismo historial que <see cref="EjecutarAsync"/>, pero para que Preceptor/Dirección puedan
+    /// consultar el de un alumno puntual por legajo — antes el cierre de acta escribía la
+    /// condición de cada estudiante en HistorialAcademico pero nadie más que el propio alumno
+    /// tenía forma de verla.
+    /// </summary>
+    public async Task<MiHistorialDto> EjecutarPorLegajoAsync(string legajo, CancellationToken cancellationToken = default)
+    {
+        var estudiante = await estudianteRepository.ObtenerPorLegajoAsync(legajo, cancellationToken)
+            ?? throw new BusinessException($"No se encontró ningún estudiante con legajo '{legajo}'.");
+
+        return await ConstruirAsync(estudiante.Id, cancellationToken);
+    }
+
+    private async Task<MiHistorialDto> ConstruirAsync(int estudianteId, CancellationToken cancellationToken)
+    {
+        var historial = await historialRepository.ObtenerConMateriaPorEstudianteAsync(estudianteId, cancellationToken);
 
         // Última cursada por materia (una materia puede tener más de un registro si se
         // recursó tras quedar Libre).
@@ -29,7 +48,7 @@ public class ObtenerMiHistorialUseCase(
             .Select(g => g.OrderByDescending(h => h.Anio).First())
             .ToDictionary(h => h.MateriaId);
 
-        var misExamenes = await inscripcionExamenRepository.ListarPorEstudianteAsync(estudiante.Id, cancellationToken);
+        var misExamenes = await inscripcionExamenRepository.ListarPorEstudianteAsync(estudianteId, cancellationToken);
         var parcialesPorMateria = misExamenes
             .Where(i => i.Examen.TipoExamen == TipoExamen.Parcial && i.Estado != EstadoInscripcion.Baja)
             .GroupBy(i => i.Examen.MateriaId)
