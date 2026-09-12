@@ -152,8 +152,16 @@
           (ngModelChange)="onBusquedaChange($event)"
         />
         <span class="tabla-conteo">
-          {{ registrosFiltrados().length }} de {{ reporte()!.registros.length }} registros
+          {{ registrosFiltrados().length }} en esta página · {{ reporte()!.totalRegistros }} en total
         </span>
+        <label class="tamano-pagina">
+          Mostrar
+          <select [ngModel]="tamanoPagina()" (ngModelChange)="onTamanoPaginaChange($event)">
+            @for (t of tamanosPaginaDisponibles; track t) {
+              <option [ngValue]="t">{{ t }}</option>
+            }
+          </select>
+        </label>
       </div>
 
       <div class="tabla-wrapper">
@@ -193,7 +201,7 @@
             @if (registrosFiltrados().length === 0) {
               <tr><td colspan="7" class="sin-resultados">No hay coincidencias para "{{ busquedaNombre() }}"</td></tr>
             } @else {
-              @for (r of registrosPaginados(); track r.estudianteId + r.fecha + r.materia) {
+              @for (r of registrosFiltrados(); track r.estudianteId + r.fecha + r.materia) {
                 <tr>
                   <td>{{ r.legajo }}</td>
                   <td>{{ r.nombreCompleto }}</td>

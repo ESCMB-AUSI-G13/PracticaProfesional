@@ -13,21 +13,32 @@ namespace PracticaProfesional.Application.Reportes;
 /// </summary>
 public class ReporteInasistenciasUseCase(IAsistenciaRepository asistenciaRepository)
 {
+    /// <param name="incluirTodosLosRegistros">
+    /// true para exportar a PDF: ignora la paginación del filtro y trae todos los registros que
+    /// matchean (el PDF tiene que reflejar el filtro completo, no una sola página).
+    /// </param>
     public async Task<ReporteInasistenciasDto> EjecutarAsync(
         FiltroInasistenciasDto filtro,
         IReadOnlyList<(int MateriaId, int CursoId)>? espaciosPermitidos = null,
+        bool incluirTodosLosRegistros = false,
         CancellationToken cancellationToken = default)
     {
-        var registros = await asistenciaRepository.ObtenerConDetalleAsync(
-            filtro.CursoId,
-            filtro.MateriaId,
-            filtro.FechaDesde,
-            filtro.FechaHasta,
-            filtro.SoloAusencias,
-            filtro.Comision,
-            filtro.AnioLectivo,
-            espaciosPermitidos,
-            cancellationToken);
+        int? pagina       = incluirTodosLosRegistros ? null : filtro.Pagina;
+        int? tamanoPagina = incluirTodosLosRegistros ? null : filtro.TamanoPagina;
+
+        var (registros, totalRegistros, totalAusentes, totalAusentesJust, totalPresentes, porMateriaComision) =
+            await asistenciaRepository.ObtenerConDetalleAsync(
+                filtro.CursoId,
+                filtro.MateriaId,
+                filtro.FechaDesde,
+                filtro.FechaHasta,
+                filtro.SoloAusencias,
+                filtro.Comision,
+                filtro.AnioLectivo,
+                espaciosPermitidos,
+                pagina,
+                tamanoPagina,
+                cancellationToken);
 
         var items = registros.Select(a => new RegistroInasistenciaDto
         {
@@ -44,11 +55,17 @@ public class ReporteInasistenciasUseCase(IAsistenciaRepository asistenciaReposit
         return new ReporteInasistenciasDto
         {
             GeneradoEn                = DateTime.UtcNow,
-            TotalRegistros            = items.Count,
-            TotalAusentes             = items.Count(r => r.TipoAsistencia == EstadoAsistencia.Ausente.ToString()),
-            TotalAusentesJustificados = items.Count(r => r.TipoAsistencia == EstadoAsistencia.AusenteJustificado.ToString()),
-            TotalPresentes            = items.Count(r => r.TipoAsistencia == EstadoAsistencia.Presente.ToString()),
-            Registros                 = items
+            TotalRegistros            = totalRegistros,
+            TotalAusentes             = totalAusentes,
+            TotalAusentesJustificados = totalAusentesJust,
+            TotalPresentes            = totalPresentes,
+            Pagina                    = pagina ?? 1,
+            TamanoPagina              = tamanoPagina ?? totalRegistros,
+            TotalPaginas              = tamanoPagina.HasValue && tamanoPagina.Value > 0
+                ? (int)Math.Ceiling(totalRegistros / (double)tamanoPagina.Value)
+                : (totalRegistros > 0 ? 1 : 0),
+            Registros                 = items,
+            PorMateriaComision        = porMateriaComision
         };
     }
 }

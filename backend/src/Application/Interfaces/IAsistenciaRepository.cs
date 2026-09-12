@@ -1,3 +1,4 @@
+using PracticaProfesional.Application.Reportes.DTOs;
 using PracticaProfesional.Domain.Entities;
 
 namespace PracticaProfesional.Application.Interfaces;
@@ -27,9 +28,11 @@ public interface IAsistenciaRepository
     /// <summary>
     /// RR-08: Devuelve registros de asistencia con navegación cargada (Estudiante→Usuario,
     /// Materia, Curso), aplicando filtros opcionales de curso, materia, rango de fechas
-    /// y si se incluyen sólo ausencias.
+    /// y si se incluyen sólo ausencias. Los totales devueltos son sobre TODO lo que matchea el
+    /// filtro, no solo la página; <paramref name="pagina"/>/<paramref name="tamanoPagina"/> en
+    /// null (usado para exportar a PDF) devuelve todos los registros sin recortar.
     /// </summary>
-    Task<IEnumerable<Asistencia>> ObtenerConDetalleAsync(
+    Task<(IReadOnlyList<Asistencia> Registros, int TotalRegistros, int TotalAusentes, int TotalAusentesJustificados, int TotalPresentes, IReadOnlyList<ConteoMateriaComisionDto> PorMateriaComision)> ObtenerConDetalleAsync(
         int? cursoId,
         int? materiaId,
         DateTime? fechaDesde,
@@ -38,6 +41,8 @@ public interface IAsistenciaRepository
         string? comision = null,
         int? anioLectivo = null,
         IReadOnlyList<(int MateriaId, int CursoId)>? espaciosPermitidos = null,
+        int? pagina = null,
+        int? tamanoPagina = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>

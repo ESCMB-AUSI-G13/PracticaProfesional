@@ -2,7 +2,9 @@ namespace PracticaProfesional.Application.Reportes.DTOs;
 
 /// <summary>
 /// Filtros de entrada para el reporte de inasistencias (RR-08).
-/// Todos los parámetros son opcionales; sin filtros se devuelven todos los registros.
+/// Los filtros de contenido son opcionales; sin ninguno se evalúan todos los registros, pero el
+/// listado que viaja al cliente siempre viene paginado por <see cref="Pagina"/>/<see cref="TamanoPagina"/>
+/// (antes no había límite y una consulta sin filtros devolvía cientos de miles de filas en una sola respuesta).
 /// </summary>
 public class FiltroInasistenciasDto
 {
@@ -29,4 +31,10 @@ public class FiltroInasistenciasDto
     /// Si es <c>false</c>, incluye también las presencias.
     /// </summary>
     public bool SoloAusencias { get; set; } = true;
+
+    /// <summary>Página solicitada (1-based).</summary>
+    public int Pagina { get; set; } = 1;
+
+    /// <summary>Cantidad de registros por página. El frontend ofrece 10/20/50.</summary>
+    public int TamanoPagina { get; set; } = 20;
 }

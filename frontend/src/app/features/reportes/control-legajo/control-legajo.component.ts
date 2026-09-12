@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, signal, computed, ViewChild, ElementRef, Injector, afterNextRender } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ReportesService, ControlLegajo } from '../reportes.service';
+import { ReportesService, ControlLegajo, HistorialAcademico } from '../reportes.service';
 import { EstudiantesService, EstudianteBusqueda } from '../../estudiantes/estudiantes.service';
 import { Chart, registerables } from 'chart.js';
 
@@ -26,6 +26,10 @@ export class ControlLegajoComponent implements OnInit, OnDestroy {
   cargando             = signal(false);
   error                = signal<string | null>(null);
   descargando          = signal(false);
+
+  historial            = signal<HistorialAcademico | null>(null);
+  cargandoHistorial    = signal(false);
+  errorHistorial       = signal<string | null>(null);
 
   sugerencias = computed(() => {
     const q = this.busquedaTexto().trim().toLowerCase();
@@ -88,6 +92,7 @@ export class ControlLegajoComponent implements OnInit, OnDestroy {
     this.cargando.set(true);
     this.error.set(null);
     this.resultado.set(null);
+    this.buscarHistorial(legajo);
 
     this.reportesService.obtenerControlPorLegajo(legajo).subscribe({
       next: data => {
@@ -105,10 +110,29 @@ export class ControlLegajoComponent implements OnInit, OnDestroy {
     });
   }
 
+  private buscarHistorial(legajo: string): void {
+    this.cargandoHistorial.set(true);
+    this.errorHistorial.set(null);
+    this.historial.set(null);
+
+    this.reportesService.obtenerHistorialPorLegajo(legajo).subscribe({
+      next: data => {
+        this.historial.set(data);
+        this.cargandoHistorial.set(false);
+      },
+      error: () => {
+        this.errorHistorial.set('No se pudo cargar el historial académico de este alumno.');
+        this.cargandoHistorial.set(false);
+      }
+    });
+  }
+
   limpiar(): void {
     this.busquedaTexto.set('');
     this.resultado.set(null);
     this.error.set(null);
+    this.historial.set(null);
+    this.errorHistorial.set(null);
     this.chart?.destroy();
     this.chart = null;
   }

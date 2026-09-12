@@ -80,15 +80,19 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
   buscado     = signal(false);
   descargando = signal(false);
 
-  // ── Tabla: búsqueda, orden y paginación ───────────────────────────────────
+  // ── Tabla: búsqueda/orden (dentro de la página actual) y paginación (server-side) ──
   busquedaNombre = signal('');
   sortColumna    = signal<'nombreCompleto' | 'fecha' | 'materia' | 'curso'>('nombreCompleto');
   sortDireccion  = signal<'asc' | 'desc'>('asc');
   paginaActual   = signal(1);
-  readonly tamPagina = 50;
+  tamanoPagina   = signal(20);
+  readonly tamanosPaginaDisponibles = [10, 20, 50];
 
   private searchTimer: ReturnType<typeof setTimeout> | null = null;
 
+  // El backend ya devuelve solo los registros de la página pedida (antes traía TODO sin límite
+  // en una sola respuesta — con Dirección sin filtros llegó a ser 115.582 filas de una). La
+  // búsqueda/orden acá abajo se aplican solo sobre esa página, no sobre el total filtrado.
   registrosFiltrados = computed(() => {
     const r = this.reporte();
     if (!r) return [];
@@ -110,23 +114,13 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
     return lista;
   });
 
-  totalPaginas = computed(() =>
-    Math.max(1, Math.ceil(this.registrosFiltrados().length / this.tamPagina))
-  );
-
-  registrosPaginados = computed(() => {
-    const inicio = (this.paginaActual() - 1) * this.tamPagina;
-    return this.registrosFiltrados().slice(inicio, inicio + this.tamPagina);
-  });
+  totalPaginas = computed(() => this.reporte()?.totalPaginas ?? 1);
 
   chartMateriaHeight = computed(() => {
     const r = this.reporte();
     if (!r) return 180;
-    const materiaCount = new Set(r.registros.map(reg => reg.materia)).size;
-    const comisionCount = new Set(r.registros.map(reg => {
-      const parts = reg.curso.trim().split(/\s+/);
-      return parts[parts.length - 1];
-    })).size;
+    const materiaCount = new Set(r.porMateriaComision.map(c => c.materia)).size;
+    const comisionCount = new Set(r.porMateriaComision.map(c => c.comision)).size;
     return Math.max(180, materiaCount * (comisionCount * 26 + 12) + 60);
   });
 
@@ -195,13 +189,21 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
     this.materiasChart?.destroy();
   }
 
+  /** Búsqueda nueva (botón "Buscar" o cambio de filtros): siempre arranca desde la página 1. */
   buscar(): void {
+    this.paginaActual.set(1);
+    this.ejecutarBusqueda();
+  }
+
+  private ejecutarBusqueda(): void {
     this.cargando.set(true);
     this.error.set(null);
     this.buscado.set(true);
 
     const filtro: FiltroInasistencias = {
       soloAusencias: this.soloAusencias(),
+      pagina:        this.paginaActual(),
+      tamanoPagina:  this.tamanoPagina(),
       ...(this.anioLectivoFiltro() && { anioLectivo: this.anioLectivoFiltro()! }),
       ...(this.materiaId()         && { materiaId:   this.materiaId()!         }),
       ...(this.fechaDesde()        && { fechaDesde:  this.fechaDesde()         }),
@@ -220,6 +222,12 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
         this.cargando.set(false);
       }
     });
+  }
+
+  onTamanoPaginaChange(valor: number): void {
+    this.tamanoPagina.set(valor);
+    this.paginaActual.set(1);
+    if (this.buscado()) this.ejecutarBusqueda();
   }
 
   private renderCharts(): void {
@@ -271,22 +279,19 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
     });
 
     // ── Barras agrupadas: inasistencias por materia comparando comisiones ────
+    // Usa el agregado que manda el backend sobre TODO el filtro (r.porMateriaComision), no
+    // r.registros — desde que el reporte pagina, r.registros es solo la página visible y armar
+    // este gráfico con eso mostraría un recorte arbitrario en vez de la comparación real.
     if (!this.materiasCanvas) return;
-
-    const extraerComision = (curso: string): string => {
-      const parts = curso.trim().split(/\s+/);
-      return parts[parts.length - 1] || curso;
-    };
 
     const comisionesMap = new Map<string, Map<string, number>>(); // materia → comision → count
     const comisionesSet = new Set<string>();
 
-    for (const reg of r.registros) {
-      const com = extraerComision(reg.curso);
-      comisionesSet.add(com);
-      if (!comisionesMap.has(reg.materia)) comisionesMap.set(reg.materia, new Map());
-      const inner = comisionesMap.get(reg.materia)!;
-      inner.set(com, (inner.get(com) ?? 0) + 1);
+    for (const c of r.porMateriaComision) {
+      comisionesSet.add(c.comision);
+      if (!comisionesMap.has(c.materia)) comisionesMap.set(c.materia, new Map());
+      const inner = comisionesMap.get(c.materia)!;
+      inner.set(c.comision, (inner.get(c.comision) ?? 0) + c.cantidad);
     }
 
     const materiasOrdenadas = [...comisionesMap.keys()].sort((a, b) => {
@@ -347,7 +352,6 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
     if (this.searchTimer) clearTimeout(this.searchTimer);
     this.searchTimer = setTimeout(() => {
       this.busquedaNombre.set(valor);
-      this.paginaActual.set(1);
     }, 300);
   }
 
@@ -358,12 +362,14 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
       this.sortColumna.set(col);
       this.sortDireccion.set('asc');
     }
-    this.paginaActual.set(1);
   }
 
+  /** Cambiar de página pide la página nueva al backend (ya no recorta un array local). */
   irPagina(n: number): void {
     const total = this.totalPaginas();
-    if (n >= 1 && n <= total) this.paginaActual.set(n);
+    if (n < 1 || n > total || n === this.paginaActual()) return;
+    this.paginaActual.set(n);
+    this.ejecutarBusqueda();
   }
 
   onCarreraChange(carrera: string): void {
@@ -394,6 +400,7 @@ export class PanelInasistenciasComponent implements OnInit, OnDestroy {
     this.sortColumna.set('nombreCompleto');
     this.sortDireccion.set('asc');
     this.paginaActual.set(1);
+    this.tamanoPagina.set(20);
     this.reporte.set(null);
     this.buscado.set(false);
     this.error.set(null);

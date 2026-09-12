@@ -36,7 +36,7 @@ public class ReportesOperativosController(
         CancellationToken cancellationToken)
     {
         var espaciosPermitidos = await ObtenerEspaciosPermitidosAsync(cancellationToken);
-        var resultado = await reporteInasistencias.EjecutarAsync(filtro, espaciosPermitidos, cancellationToken);
+        var resultado = await reporteInasistencias.EjecutarAsync(filtro, espaciosPermitidos, cancellationToken: cancellationToken);
         return Ok(resultado);
     }
 
@@ -107,14 +107,14 @@ public class ReportesOperativosController(
         return File(pdf, "application/pdf", $"control-legajo-{legajo}.pdf");
     }
 
-    /// <summary>POST api/reportes/inasistencias/pdf</summary>
+    /// <summary>POST api/reportes/inasistencias/pdf — siempre exporta el filtro completo, sin paginar.</summary>
     [HttpPost("inasistencias/pdf")]
     public async Task<IActionResult> ReporteInasistenciasPdf(
         [FromBody] FiltroInasistenciasDto filtro,
         CancellationToken cancellationToken)
     {
         var espaciosPermitidos = await ObtenerEspaciosPermitidosAsync(cancellationToken);
-        var data = await reporteInasistencias.EjecutarAsync(filtro, espaciosPermitidos, cancellationToken);
+        var data = await reporteInasistencias.EjecutarAsync(filtro, espaciosPermitidos, incluirTodosLosRegistros: true, cancellationToken: cancellationToken);
         var pdf  = pdfService.GenerarInasistencias(data);
         return File(pdf, "application/pdf", "reporte-inasistencias.pdf");
     }

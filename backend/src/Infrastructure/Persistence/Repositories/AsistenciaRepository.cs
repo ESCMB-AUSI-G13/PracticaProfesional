@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using PracticaProfesional.Application.Interfaces;
+using PracticaProfesional.Application.Reportes.DTOs;
 using PracticaProfesional.Domain.Entities;
 using PracticaProfesional.Domain.Enums;
 
@@ -39,16 +40,15 @@ public class AsistenciaRepository(AppDbContext context) : IAsistenciaRepository
             .Where(a => a.EstudianteId == estudianteId)
             .MaxAsync(a => (DateTime?)a.Fecha, cancellationToken);
 
-    public async Task<IEnumerable<Asistencia>> ObtenerConDetalleAsync(
+    private IQueryable<Asistencia> ConstruirQueryInasistencias(
         int? cursoId,
         int? materiaId,
         DateTime? fechaDesde,
         DateTime? fechaHasta,
         bool soloAusencias,
-        string? comision = null,
-        int? anioLectivo = null,
-        IReadOnlyList<(int MateriaId, int CursoId)>? espaciosPermitidos = null,
-        CancellationToken cancellationToken = default)
+        string? comision,
+        int? anioLectivo,
+        IReadOnlyList<(int MateriaId, int CursoId)>? espaciosPermitidos)
     {
         var query = context.Asistencias
             .AsNoTracking()
@@ -88,11 +88,64 @@ public class AsistenciaRepository(AppDbContext context) : IAsistenciaRepository
         if (soloAusencias)
             query = query.Where(a => a.Estado != EstadoAsistencia.Presente);
 
-        return await query
+        return query;
+    }
+
+    public async Task<(IReadOnlyList<Asistencia> Registros, int TotalRegistros, int TotalAusentes, int TotalAusentesJustificados, int TotalPresentes, IReadOnlyList<ConteoMateriaComisionDto> PorMateriaComision)> ObtenerConDetalleAsync(
+        int? cursoId,
+        int? materiaId,
+        DateTime? fechaDesde,
+        DateTime? fechaHasta,
+        bool soloAusencias,
+        string? comision = null,
+        int? anioLectivo = null,
+        IReadOnlyList<(int MateriaId, int CursoId)>? espaciosPermitidos = null,
+        int? pagina = null,
+        int? tamanoPagina = null,
+        CancellationToken cancellationToken = default)
+    {
+        var query = ConstruirQueryInasistencias(
+            cursoId, materiaId, fechaDesde, fechaHasta, soloAusencias, comision, anioLectivo, espaciosPermitidos);
+
+        // Totales y agrupación por materia/comisión sobre TODO lo que matchea el filtro,
+        // calculados antes de recortar por página.
+        var conteos = await query
+            .GroupBy(_ => 1)
+            .Select(g => new
+            {
+                Total          = g.Count(),
+                Ausentes       = g.Count(a => a.Estado == EstadoAsistencia.Ausente),
+                AusentesJust   = g.Count(a => a.Estado == EstadoAsistencia.AusenteJustificado),
+                Presentes      = g.Count(a => a.Estado == EstadoAsistencia.Presente)
+            })
+            .FirstOrDefaultAsync(cancellationToken);
+
+        var porMateriaComision = await query
+            .GroupBy(a => new { Materia = a.Materia.Nombre, Comision = a.Curso.Comision })
+            .Select(g => new ConteoMateriaComisionDto
+            {
+                Materia  = g.Key.Materia,
+                Comision = g.Key.Comision,
+                Cantidad = g.Count()
+            })
+            .ToListAsync(cancellationToken);
+
+        var ordenada = query
             .OrderBy(a => a.Fecha)
             .ThenBy(a => a.Estudiante.Usuario.Apellido)
-            .ThenBy(a => a.Estudiante.Usuario.Nombre)
-            .ToListAsync(cancellationToken);
+            .ThenBy(a => a.Estudiante.Usuario.Nombre);
+
+        var registros = pagina.HasValue && tamanoPagina.HasValue
+            ? await ordenada.Skip((pagina.Value - 1) * tamanoPagina.Value).Take(tamanoPagina.Value).ToListAsync(cancellationToken)
+            : await ordenada.ToListAsync(cancellationToken);
+
+        return (
+            registros,
+            conteos?.Total ?? 0,
+            conteos?.Ausentes ?? 0,
+            conteos?.AusentesJust ?? 0,
+            conteos?.Presentes ?? 0,
+            porMateriaComision);
     }
 
     public async Task<IEnumerable<Asistencia>> ObtenerPorEstudianteAsync(
