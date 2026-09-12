@@ -29,7 +29,7 @@
 .tabla-examenes-wrapper { max-height: 320px; overflow-y: auto; margin-top: 0.75rem; }
 .tabla-examenes {
   tr { transition: background 0.15s; }
-  tr:hover { background: #eef6fd; }
+  tr:hover { background: #fafafa; }
   tr.fila-seleccionada { background: #dbeffe !important; outline: 2px solid #3498db; outline-offset: -2px; }
 }
 .celda-accion-examen { text-align: center; width: 120px; }
