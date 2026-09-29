@@ -31,3 +31,6 @@ backend/publish/
 
 # Node / Angular (el frontend tiene su propio .gitignore)
 node_modules/
+
+# macOS
+.DS_Store
