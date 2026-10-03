@@ -10,28 +10,40 @@ La aplicación está desplegada en tres recursos de Azure independientes:
 
 ---
 
-## Requisitos previos
+## CI/CD con GitHub Actions
 
-- Azure CLI instalado: `winget install Microsoft.AzureCLI`
-- Extensiones de VS Code: **Azure App Service** y **Azure Storage**
-- Sesión iniciada en ambas extensiones con la cuenta del instituto
+El deploy es **automático** desde GitHub Actions. Hay dos workflows en `.github/workflows/`:
 
----
+| Workflow | Se dispara cuando... | Qué hace |
+|---|---|---|
+| `deploy-backend.yml` | push a `main` que toca `backend/**` | corre los tests → `dotnet publish` → deploy a App Service |
+| `deploy-frontend.yml` | push a `main` que toca `frontend/**` | `npm ci` → `ng build --configuration production` → sube `dist` al contenedor `$web` |
 
-## Deploy del backend
+Si algún **test falla**, el deploy del backend se cancela y lo último que quedó en producción sigue sirviendo.
 
-En VS Code → panel Azure → App Services → click derecho en `escmb-practicaprof` → **Deploy to Web App** → seleccionar `backend/publish`.
+También se pueden correr a mano: GitHub → pestaña **Actions** → elegir el workflow → **Run workflow**.
 
----
+### Secrets requeridos (GitHub → Settings → Secrets and variables → Actions)
 
-## Deploy del frontend
+| Secret | Valor |
+|---|---|
+| `AZURE_WEBAPP_PUBLISH_PROFILE` | Contenido del publish profile del App Service (Overview → Download publish profile) |
+| `AZURE_STORAGE_ACCOUNT` | Nombre de la Storage Account |
+| `AZURE_STORAGE_KEY` | Access key (key1) de la Storage Account |
 
-1. Buildear:
+> Nota: el publish profile requiere que "SCM Basic Auth Publishing Credentials" esté en **On** en Configuration → General settings del App Service.
+
+### Deploy manual (alternativa)
+
+Si hiciera falta deployar sin pasar por GitHub (ej. sin conexión a internet del runner):
+
+**Backend** — VS Code → panel Azure → App Services → click derecho en `escmb-practicaprof` → **Deploy to Web App** → seleccionar `backend/publish`.
+
+**Frontend**:
 ```bash
 cd frontend && ng build --configuration production
 ```
-
-2. En VS Code → panel Azure → Storage Accounts → `$web` → subir el contenido de `frontend/dist/practica-profesional/browser`.
+En VS Code → Storage Accounts → `$web` → subir el contenido de `frontend/dist/practica-profesional/browser`.
 
 ---
 
