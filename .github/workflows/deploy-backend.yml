@@ -16,6 +16,10 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Tests
+        working-directory: backend/tests
+        run: dotnet test --configuration Release
+
       - name: Publicar backend
         working-directory: backend/src
         run: dotnet publish -c Release -o ../../publish
