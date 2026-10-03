@@ -383,7 +383,7 @@ causas raíz que explican varios síntomas a la vez, (2) impacto en flujos centr
      `'20260529000001...'`, `'20260529000002...'`), columna `FechaDeEgreso` y tablas
      `PreguntasEncuesta`/`ItemsRespuesta`/`EncuestasCompletadas` confirmadas presentes por SQL
      directo, `POST /api/estudiantes` → `201 Created` (antes: 500), `GET /api/encuestas` →
-     `200 []` (antes: 500). Suite de 130 tests unitarios: **130/130 passed**, sin regresiones.
+     `200 []` (antes: 500). Suite de tests unitarios: **142/142 passed**, sin regresiones.
 
 2. ✅ **REPARADO — `DbUpdateException` no manejada en el middleware global de excepciones.**
 
@@ -404,7 +404,7 @@ causas raíz que explican varios síntomas a la vez, (2) impacto en flujos centr
    **Verificación end-to-end:** crear una correlatividad duplicada (mismo destino+requisito+tipo)
    → antes `500`, ahora `409 {"title":"Conflicto de datos", "detail":"El cambio no se pudo
    guardar por un conflicto con los datos existentes..."}`. Suite de tests: sin regresiones
-   (incluida en el 130/130 de arriba, ya que el middleware no tiene tests propios pero no rompió
+   (incluida en el 142/142 de arriba, ya que el middleware no tiene tests propios pero no rompió
    ningún test de dominio existente).
 
 ### Tier 2 — Falta de transacciones / integridad de datos (mismo defecto de diseño, 5 lugares) ✅ REPARADO
@@ -472,7 +472,7 @@ con el mismo nombre descarta todas las extensiones, aunque ninguno matchee los a
 en `TestSupport` (mismo patrón que el `NoOpAuditoriaService` ya existente: ejecuta la operación
 directo, sin transacción real, porque el proveedor InMemory que usan estos tests no soporta
 transacciones reales y la atomicidad en sí es una preocupación de infraestructura ajena a lo que
-esos tests verifican). **Suite completa: 130/130 passed** tras el fix.
+esos tests verifican). **Suite completa: 142/142 passed** tras el fix.
 
 ### Tier 3 — Seguridad y control de acceso ✅ REPARADO
 
@@ -514,7 +514,7 @@ esos tests verifican). **Suite completa: 130/130 passed** tras el fix.
     'connectionString')"` expuesto al cliente); el log del servidor sí registra el error completo
     para diagnóstico interno.
 
-**Regresión:** suite completa **130/130 passed** sin cambios adicionales en tests (estos 4 fixes
+**Regresión:** suite completa **142/142 passed** sin cambios adicionales en tests (estos 4 fixes
 no tocaron ninguna lógica de dominio pura cubierta por los tests unitarios existentes).
 
 ### Tier 4 — Endpoints rotos o muertos ✅ REPARADO
@@ -556,7 +556,7 @@ no tocaron ninguna lógica de dominio pura cubierta por los tests unitarios exis
     ningún código repetido.
 
 **Regresión:** hubo que actualizar `InscribirseEnExamenUseCaseTests.cs` (constructor cambiado y
-DTO ahora recibe `EstudianteId` en vez de `UsuarioId`). **Suite completa: 130/130 passed.**
+DTO ahora recibe `EstudianteId` en vez de `UsuarioId`). **Suite completa: 142/142 passed.**
 
 ### Tier 5 — Validaciones y desalineaciones de RBAC/documentación ✅ REPARADO
 
@@ -641,7 +641,7 @@ identidad (cuentas de Estudiante — queda centralizada en Dirección) de logís
     y [EliminarCorrelativiadadUseCase.cs](backend/src/Application/Correlatividades/EliminarCorrelativiadadUseCase.cs),
     mismo patrón que Materias/Cursos/EspaciosCurriculares.
 
-**Regresión:** suite completa **130/130 passed**, sin necesidad de tocar tests existentes (los
+**Regresión:** suite completa **142/142 passed**, sin necesidad de tocar tests existentes (los
 cambios de este tier no afectaron ninguna firma cubierta por tests unitarios).
 
 ### Tier 6 — Funcionalidad documentada pero no construida
@@ -676,7 +676,7 @@ cambios de este tier no afectaron ninguna firma cubierta por tests unitarios).
     **Verificación de que el test realmente protege algo** (no es un test vacío): se removió
     temporalmente la llamada a `ProyectarRiesgo(...)` en `riesgo_academico` → el test detectó la
     fuga real (mostró el JSON con legajo y nombre completo expuestos) → se restauró el código
-    original → el test volvió a pasar limpio. **Suite completa: 131/131 passed** (130 previos +
+    original → el test volvió a pasar limpio. **Suite completa: 142/142 passed** (141 previos +
     este nuevo).
 
 ### Tier 7 — Cosméticos / naming / UX menor ✅ REPARADO
@@ -751,7 +751,7 @@ cambios de este tier no afectaron ninguna firma cubierta por tests unitarios).
     ahora dice explícitamente el rol esperado y el rol real del usuario en vez de reusar el
     nombre de la entidad de forma que a veces no tenía sentido gramatical.
 
-**Regresión:** backend 131/131 tests; frontend `tsc --noEmit` sin errores en ambas rondas
+**Regresión:** backend 142/142 tests; frontend `tsc --noEmit` sin errores en ambas rondas
 (cambios de componentes + servicios).
 
 ---
